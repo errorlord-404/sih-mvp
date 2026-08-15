@@ -1,11 +1,31 @@
 # ChangeLog
 
 All notable changes to this service. Newest entry on top.
-Format: `### YYYY-MM-DD HH:MM — short title`
+Format: `### YYYY-MM-DD HH:MM - short title`
 
 ---
 
-### 2026-08-15 — GovScheme CRUD surface
+### 2026-08-15 - MSP CRUD surface
+**What changed:**
+- Added the MSP Beanie document and Pydantic schemas for create/update/response shapes
+- Added full CRUD router for `/msp`
+- Added a crop-scoped listing route at `/msp/by-crop/{crop_name}`
+- Registered the MSP model with Beanie startup initialization and mounted the router in FastAPI
+
+**Files touched:**
+- `app/models/msp.py`
+- `app/schemas/msp.py`
+- `app/routers/msp.py`
+- `app/core/database.py`
+- `app/main.py`
+- `Flow.md`
+- `ChangeLog.md`
+
+**Why:** Needed a standard MSP CRUD API that matches the existing reference-data pattern and supports crop-scoped lookup for harness tool wrapping.
+
+**Status:** Ready
+
+### 2026-08-15 - GovScheme CRUD surface
 **What changed:**
 - Added the GovScheme Beanie document and Pydantic schemas for create/update/response shapes
 - Added full CRUD router for `/gov-schemes`
@@ -25,7 +45,7 @@ Format: `### YYYY-MM-DD HH:MM — short title`
 
 **Status:** Ready
 
-### 2026-08-15 — MarketPrice CRUD surface
+### 2026-08-15 - MarketPrice CRUD surface
 **What changed:**
 - Added the MarketPrice Beanie document and Pydantic schemas for create/update/response shapes
 - Added full CRUD router for `/market-prices`
@@ -44,7 +64,7 @@ Format: `### YYYY-MM-DD HH:MM — short title`
 
 **Status:** Ready
 
-### 2026-08-15 — Crop CRUD surface
+### 2026-08-15 - Crop CRUD surface
 **What changed:**
 - Added the Crop Beanie document and Pydantic schemas for create/update/response shapes
 - Added full CRUD router for `/crops`
@@ -62,7 +82,7 @@ Format: `### YYYY-MM-DD HH:MM — short title`
 
 **Status:** Ready
 
-### 2026-08-15 — Farmer CRUD surface
+### 2026-08-15 - Farmer CRUD surface
 **What changed:**
 - Added the Farmer Beanie document and Pydantic schemas for create/update/response shapes
 - Added full CRUD router for `/farmers`
@@ -80,7 +100,7 @@ Format: `### YYYY-MM-DD HH:MM — short title`
 **Status:** Ready
 
 ### Template (copy this for each new entry)
-### 2026-08-15 — Initial scaffold
+### 2026-08-15 - Initial scaffold
 **What changed:**
 - Created FastAPI app skeleton with Beanie + Motor + MongoDB connection
 - Added `Field` model as reference pattern

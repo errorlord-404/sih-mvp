@@ -49,6 +49,12 @@ schema: app/schemas/gov_scheme.py
 model: app/models/gov_scheme.py
 notes: Full CRUD for central government scheme reference records. Includes a state-scoped listing endpoint that returns both state-specific and nationwide schemes.
 
+### MSP
+router: app/routers/msp.py
+schema: app/schemas/msp.py
+model: app/models/msp.py
+notes: Full CRUD for central MSP reference records. Includes a crop-scoped listing endpoint for MSP records tied to a crop.
+
 ### Sensor
 router: app/routers/sensor.py
 schema: app/schemas/sensor.py
