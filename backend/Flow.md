@@ -37,6 +37,12 @@ schema: app/schemas/crop.py
 model: app/models/crop.py
 notes: Full CRUD for central crop reference records, including rotation and soil/water compatibility metadata.
 
+### Fertilizer
+router: app/routers/fertilizer.py
+schema: app/schemas/fertilizer.py
+model: app/models/fertilizer.py
+notes: Full CRUD for central fertilizer reference records, including crop compatibility, dosage, and price range metadata.
+
 ### MarketPrice
 router: app/routers/market_price.py
 schema: app/schemas/market_price.py
