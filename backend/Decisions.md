@@ -4,7 +4,7 @@ Records WHY a non-obvious choice was made. Not every change needs an entry -
 only ones where a reasonable person might ask "why did you do it this way?"
 
 ---
-
+ 
 ## GovScheme eligibility interface scope
 **Date:** 2026-08-15
 **Context:** PRD section 22 requires `check_scheme_eligibility()` to accept a farmer state and optionally other criteria, but the current filtering rule is state-only plus nationwide schemes.

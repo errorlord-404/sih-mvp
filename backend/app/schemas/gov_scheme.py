@@ -4,7 +4,7 @@ from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class GovSchemeCreate(BaseModel):
+class GovSchemeCreate(BaseModel): 
     name: str
     description: str
     eligibility_criteria: List[str] = Field(default_factory=list)

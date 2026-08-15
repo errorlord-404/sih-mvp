@@ -5,7 +5,7 @@ Format: `### YYYY-MM-DD HH:MM - short title`
 
 ---
 
-### 2026-08-15 - GovScheme eligibility mutator
+### 2026-08-15 - GovScheme eligibility mutator 
 **What changed:**
 - Added a reusable `check_scheme_eligibility()` mutator contract for government scheme eligibility checks
 - Added request/response schemas for scheme eligibility evaluation

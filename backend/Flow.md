@@ -4,7 +4,7 @@ Describes how requests move through this service, so a bug can be traced to
 "before" or "after" a given point. Update whenever you add a new module or
 change how existing ones connect.
 
----
+--- 
 
 ## High-level request flow
 Client request

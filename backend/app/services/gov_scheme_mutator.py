@@ -5,7 +5,7 @@ from app.models.gov_scheme import GovScheme
 
 
 class GovSchemeMutator(ABC):
-    @abstractmethod
+    @abstractmethod 
     async def check_scheme_eligibility(
         self,
         farmer_state: str,
