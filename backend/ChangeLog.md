@@ -5,6 +5,22 @@ Format: `### YYYY-MM-DD HH:MM - short title`
 
 ---
 
+### 2026-08-15 - MarketPrice mandi comparison endpoint
+**What changed:**
+- Added a computed compare endpoint at `/market-prices/compare/{crop_name}`
+- Added comparison response schemas for per-mandi net realisation breakdowns
+- Implemented deterministic transport tiers and sorted results by net realisation descending
+
+**Files touched:**
+- `app/schemas/market_price.py`
+- `app/routers/market_price.py`
+- `Flow.md`
+- `ChangeLog.md`
+
+**Why:** Needed a computed endpoint that evaluates multiple mandis for a crop and returns a transparent net-realisation breakdown for the farmer.
+
+**Status:** Ready
+
 ### 2026-08-15 - Fertilizer CRUD surface
 **What changed:**
 - Added the Fertilizer Beanie document and Pydantic schemas for create/update/response shapes

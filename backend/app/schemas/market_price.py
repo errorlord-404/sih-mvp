@@ -26,3 +26,27 @@ class MarketPriceResponse(MarketPriceCreate):
     id: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class MandiComparisonResponse(BaseModel):
+    market_price_id: str
+    crop_name: str
+    mandi_name: str
+    state: str
+    district: str
+    price_per_quintal: float
+    transport_cost: float
+    loading_cost: float
+    unloading_cost: float
+    market_fees: float
+    storage_cost: float
+    expected_spoilage: float
+    sale_revenue: float
+    net_realisation: float
+
+
+class CompareMandisResponse(BaseModel):
+    crop_name: str
+    farmer_district: str
+    farmer_state: str
+    results: list[MandiComparisonResponse]

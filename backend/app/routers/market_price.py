@@ -2,12 +2,32 @@ from typing import List
 
 from bson.errors import InvalidId
 from beanie import PydanticObjectId
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Query, status
 
 from app.models.market_price import MarketPrice
-from app.schemas.market_price import MarketPriceCreate, MarketPriceResponse, MarketPriceUpdate
+from app.schemas.market_price import (
+    CompareMandisResponse,
+    MandiComparisonResponse,
+    MarketPriceCreate,
+    MarketPriceResponse,
+    MarketPriceUpdate,
+)
 
 router = APIRouter(prefix="/market-prices", tags=["market-prices"])
+
+TRANSPORT_WITHIN_DISTRICT = 50.0
+TRANSPORT_WITHIN_STATE = 150.0
+TRANSPORT_OTHER_STATE = 300.0
+LOADING_COST = 200.0
+MARKET_FEE_RATE = 0.02
+
+
+def _transport_cost(mandi_state: str, mandi_district: str, farmer_state: str, farmer_district: str) -> float:
+    if mandi_state.strip().lower() == farmer_state.strip().lower() and mandi_district.strip().lower() == farmer_district.strip().lower():
+        return TRANSPORT_WITHIN_DISTRICT
+    if mandi_state.strip().lower() == farmer_state.strip().lower():
+        return TRANSPORT_WITHIN_STATE
+    return TRANSPORT_OTHER_STATE
 
 
 def _to_response(market_price: MarketPrice) -> MarketPriceResponse:
@@ -46,6 +66,65 @@ async def list_market_prices():
 async def list_market_prices_by_crop(crop_name: str):
     market_prices = await MarketPrice.find(MarketPrice.crop_name == crop_name).to_list()
     return [_to_response(market_price) for market_price in market_prices]
+
+
+@router.get("/compare/{crop_name}", response_model=CompareMandisResponse)
+async def compare_mandis(
+    crop_name: str,
+    farmer_district: str = Query(..., min_length=1),
+    farmer_state: str = Query(..., min_length=1),
+):
+    market_prices = await MarketPrice.find(MarketPrice.crop_name == crop_name).to_list()
+
+    results = []
+    for market_price in market_prices:
+        transport_cost = _transport_cost(
+            market_price.state,
+            market_price.district,
+            farmer_state,
+            farmer_district,
+        )
+        sale_revenue = market_price.price_per_quintal
+        loading_cost = LOADING_COST
+        unloading_cost = 0.0
+        market_fees = MARKET_FEE_RATE * market_price.price_per_quintal
+        storage_cost = 0.0
+        expected_spoilage = 0.0
+        net_realisation = (
+            sale_revenue
+            - transport_cost
+            - loading_cost
+            - unloading_cost
+            - market_fees
+            - storage_cost
+            - expected_spoilage
+        )
+        results.append(
+            MandiComparisonResponse(
+                market_price_id=str(market_price.id),
+                crop_name=market_price.crop_name,
+                mandi_name=market_price.mandi_name,
+                state=market_price.state,
+                district=market_price.district,
+                price_per_quintal=market_price.price_per_quintal,
+                transport_cost=transport_cost,
+                loading_cost=loading_cost,
+                unloading_cost=unloading_cost,
+                market_fees=market_fees,
+                storage_cost=storage_cost,
+                expected_spoilage=expected_spoilage,
+                sale_revenue=sale_revenue,
+                net_realisation=net_realisation,
+            )
+        )
+
+    results.sort(key=lambda item: item.net_realisation, reverse=True)
+    return CompareMandisResponse(
+        crop_name=crop_name,
+        farmer_district=farmer_district,
+        farmer_state=farmer_state,
+        results=results,
+    )
 
 
 @router.get("/{market_price_id}", response_model=MarketPriceResponse)

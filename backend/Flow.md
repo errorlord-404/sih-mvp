@@ -47,7 +47,7 @@ notes: Full CRUD for central fertilizer reference records, including crop compat
 router: app/routers/market_price.py
 schema: app/schemas/market_price.py
 model: app/models/market_price.py
-notes: Full CRUD for central mandi price reference records. Includes a crop-scoped listing endpoint for prices across mandis.
+notes: Full CRUD for central mandi price reference records. Includes a crop-scoped listing endpoint for prices across mandis and a computed compare endpoint that ranks mandis by net realisation.
 
 ### GovScheme
 router: app/routers/gov_scheme.py
