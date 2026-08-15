@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from app.core.database import init_db
 from app.routers.crop import router as crop_router
+from app.routers.disease import router as disease_router
 from app.routers.fertilizer import router as fertilizer_router
 from app.routers.farmer import router as farmer_router
 from app.routers.gov_scheme import router as gov_scheme_router
@@ -32,6 +33,7 @@ app.add_middleware(
 )
 app.include_router(farmer_router)
 app.include_router(crop_router)
+app.include_router(disease_router)
 app.include_router(fertilizer_router)
 app.include_router(market_price_router)
 app.include_router(gov_scheme_router)

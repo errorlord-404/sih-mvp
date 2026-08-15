@@ -5,6 +5,20 @@ only ones where a reasonable person might ask "why did you do it this way?"
 
 ---
 
+## GovScheme eligibility interface scope
+**Date:** 2026-08-15
+**Context:** PRD section 22 requires `check_scheme_eligibility()` to accept a farmer state and optionally other criteria, but the current filtering rule is state-only plus nationwide schemes.
+**Decision:** Define the mutator interface with optional `eligibility_criteria`, but only apply the state and nationwide filter for now.
+**Alternatives considered:** Omit extra criteria from the interface entirely, or attempt to infer eligibility semantics from free-form scheme criteria text.
+**Trade-offs accepted:** The interface stays forward-compatible for future actor logic, but non-state criteria remain explicitly unsupported until the PRD defines machine-checkable rules.
+
+## Disease severity representation
+**Date:** 2026-08-15
+**Context:** The disease collection needs to pair knowledge-base records with ML vision model output, and the requested shape only specified `severity_levels` as a list.
+**Decision:** Store `severity_levels` as `List[str]` without enforcing an enum in the backend schema.
+**Alternatives considered:** Hard-code an enum such as `low`/`medium`/`high`, or model severity as nested scored objects.
+**Trade-offs accepted:** This keeps the collection flexible for different ML output labels and stays aligned with the existing lightweight reference-data CRUD pattern, but leaves canonical severity vocabulary to a later contract decision.
+
 ## Seed supplier info shape
 **Date:** 2026-08-15
 **Context:** The requested seed collection specified a `supplier_info` field name but did not define a nested structure.

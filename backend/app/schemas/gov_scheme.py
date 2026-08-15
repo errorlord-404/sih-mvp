@@ -32,3 +32,13 @@ class GovSchemeResponse(GovSchemeCreate):
     id: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class SchemeEligibilityRequest(BaseModel):
+    farmer_state: str
+    eligibility_criteria: List[str] = Field(default_factory=list)
+
+
+class SchemeEligibilityResponse(BaseModel):
+    farmer_state: str
+    eligible_schemes: List[GovSchemeResponse]

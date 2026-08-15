@@ -37,6 +37,12 @@ schema: app/schemas/crop.py
 model: app/models/crop.py
 notes: Full CRUD for central crop reference records, including rotation and soil/water compatibility metadata.
 
+### Disease
+router: app/routers/disease.py
+schema: app/schemas/disease.py
+model: app/models/disease.py
+notes: Full CRUD for central disease reference records, pairing crop-specific symptoms, severity labels, and treatment recommendations with future ML vision model outputs.
+
 ### Fertilizer
 router: app/routers/fertilizer.py
 schema: app/schemas/fertilizer.py
@@ -53,7 +59,7 @@ notes: Full CRUD for central mandi price reference records. Includes a crop-scop
 router: app/routers/gov_scheme.py
 schema: app/schemas/gov_scheme.py
 model: app/models/gov_scheme.py
-notes: Full CRUD for central government scheme reference records. Includes a state-scoped listing endpoint that returns both state-specific and nationwide schemes.
+notes: Full CRUD for central government scheme reference records. Includes a state-scoped listing endpoint that returns both state-specific and nationwide schemes, plus a `check_scheme_eligibility()` path backed by `app/services/gov_scheme_mutator.py` for PRD section 22 eligibility checks.
 
 ### MSP
 router: app/routers/msp.py

@@ -5,6 +5,44 @@ Format: `### YYYY-MM-DD HH:MM - short title`
 
 ---
 
+### 2026-08-15 - GovScheme eligibility mutator
+**What changed:**
+- Added a reusable `check_scheme_eligibility()` mutator contract for government scheme eligibility checks
+- Added request/response schemas for scheme eligibility evaluation
+- Added `/gov-schemes/check-eligibility` to return schemes where `applicable_states` contains the farmer state or is empty for nationwide coverage
+
+**Files touched:**
+- `app/services/gov_scheme_mutator.py`
+- `app/schemas/gov_scheme.py`
+- `app/routers/gov_scheme.py`
+- `Flow.md`
+- `Decisions.md`
+- `ChangeLog.md`
+
+**Why:** Needed a PRD-aligned `check_scheme_eligibility()` function that can be reused later by actor-based execution while keeping a simple HTTP surface for direct callers.
+
+**Status:** Ready
+
+### 2026-08-15 - Disease CRUD surface
+**What changed:**
+- Added the Disease Beanie document and Pydantic schemas for create/update/response shapes
+- Added full CRUD router for `/diseases`
+- Registered the Disease model with Beanie startup initialization and mounted the router in FastAPI
+
+**Files touched:**
+- `app/models/disease.py`
+- `app/schemas/disease.py`
+- `app/routers/disease.py`
+- `app/core/database.py`
+- `app/main.py`
+- `Flow.md`
+- `Decisions.md`
+- `ChangeLog.md`
+
+**Why:** Needed a standard Disease CRUD API for reference/knowledge data that pairs with ML vision model output and matches the existing shared-data collection pattern.
+
+**Status:** Ready
+
 ### 2026-08-15 - Seed CRUD surface
 **What changed:**
 - Added the Seed Beanie document and Pydantic schemas for create/update/response shapes

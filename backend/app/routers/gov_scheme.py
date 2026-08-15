@@ -2,10 +2,17 @@ from typing import List
 
 from bson.errors import InvalidId
 from beanie import PydanticObjectId
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.models.gov_scheme import GovScheme
-from app.schemas.gov_scheme import GovSchemeCreate, GovSchemeResponse, GovSchemeUpdate
+from app.schemas.gov_scheme import (
+    GovSchemeCreate,
+    GovSchemeResponse,
+    GovSchemeUpdate,
+    SchemeEligibilityRequest,
+    SchemeEligibilityResponse,
+)
+from app.services.gov_scheme_mutator import GovSchemeMutator, get_gov_scheme_mutator
 
 router = APIRouter(prefix="/gov-schemes", tags=["gov-schemes"])
 
@@ -51,6 +58,21 @@ async def list_gov_schemes_by_state(state: str):
         (GovScheme.applicable_states == []) | (GovScheme.applicable_states.in_([state]))
     ).to_list()
     return [_to_response(gov_scheme) for gov_scheme in gov_schemes]
+
+
+@router.post("/check-eligibility", response_model=SchemeEligibilityResponse)
+async def check_scheme_eligibility(
+    payload: SchemeEligibilityRequest,
+    mutator: GovSchemeMutator = Depends(get_gov_scheme_mutator),
+):
+    gov_schemes = await mutator.check_scheme_eligibility(
+        farmer_state=payload.farmer_state,
+        eligibility_criteria=payload.eligibility_criteria,
+    )
+    return SchemeEligibilityResponse(
+        farmer_state=payload.farmer_state,
+        eligible_schemes=[_to_response(gov_scheme) for gov_scheme in gov_schemes],
+    )
 
 
 @router.get("/{gov_scheme_id}", response_model=GovSchemeResponse)
