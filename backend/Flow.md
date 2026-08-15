@@ -61,6 +61,12 @@ schema: app/schemas/msp.py
 model: app/models/msp.py
 notes: Full CRUD for central MSP reference records. Includes a crop-scoped listing endpoint for MSP records tied to a crop.
 
+### Seed
+router: app/routers/seed.py
+schema: app/schemas/seed.py
+model: app/models/seed.py
+notes: Full CRUD for central seed reference records, including crop-specific variety, certification, pricing, and supplier metadata.
+
 ### Sensor
 router: app/routers/sensor.py
 schema: app/schemas/sensor.py

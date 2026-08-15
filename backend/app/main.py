@@ -8,8 +8,9 @@ from app.routers.fertilizer import router as fertilizer_router
 from app.routers.farmer import router as farmer_router
 from app.routers.gov_scheme import router as gov_scheme_router
 from app.routers.market_price import router as market_price_router
-from fastapi.middleware.cors import CORSMiddleware
 from app.routers.msp import router as msp_router
+from app.routers.seed import router as seed_router
+from fastapi.middleware.cors import CORSMiddleware
 
 
 @asynccontextmanager
@@ -35,3 +36,4 @@ app.include_router(fertilizer_router)
 app.include_router(market_price_router)
 app.include_router(gov_scheme_router)
 app.include_router(msp_router)
+app.include_router(seed_router)

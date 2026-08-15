@@ -5,6 +5,26 @@ Format: `### YYYY-MM-DD HH:MM - short title`
 
 ---
 
+### 2026-08-15 - Seed CRUD surface
+**What changed:**
+- Added the Seed Beanie document and Pydantic schemas for create/update/response shapes
+- Added full CRUD router for `/seeds`
+- Registered the Seed model with Beanie startup initialization and mounted the router in FastAPI
+
+**Files touched:**
+- `app/models/seed.py`
+- `app/schemas/seed.py`
+- `app/routers/seed.py`
+- `app/core/database.py`
+- `app/main.py`
+- `Flow.md`
+- `Decisions.md`
+- `ChangeLog.md`
+
+**Why:** Needed a standard Seed CRUD API that matches the existing Farmer/Crop/MarketPrice/GovScheme/MSP reference-data pattern.
+
+**Status:** Ready
+
 ### 2026-08-15 - MarketPrice mandi comparison endpoint
 **What changed:**
 - Added a computed compare endpoint at `/market-prices/compare/{crop_name}`

@@ -5,6 +5,13 @@ only ones where a reasonable person might ask "why did you do it this way?"
 
 ---
 
+## Seed supplier info shape
+**Date:** 2026-08-15
+**Context:** The requested seed collection specified a `supplier_info` field name but did not define a nested structure.
+**Decision:** Store `supplier_info` as a plain string in both the Beanie document and Pydantic schemas.
+**Alternatives considered:** A nested supplier object with contact/address fields, or a free-form dictionary.
+**Trade-offs accepted:** This keeps the CRUD surface aligned with the existing simple reference-data models, but defers stricter supplier structure until the API contract is explicitly defined.
+
 ## Chose Beanie over raw Motor/PyMongo
 **Date:** 2026-08-15
 **Context:** Needed an ODM/data layer for MongoDB with FastAPI.

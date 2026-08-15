@@ -49,4 +49,3 @@ memory files (ChangeLog, Decisions, Flow) are updated.
  build compare_mandis(). Write out the Pydantic response schema and the FastAPI router logic based on the exact math Net
   Realisation = Sale Revenue − Transport − Loading − Unloading − Market Fees − Storage − Expected Spoilage
 
-  
