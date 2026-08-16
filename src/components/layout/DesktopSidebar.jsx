@@ -26,31 +26,29 @@ export default function DesktopSidebar({ collapsed }) {
       </div>
 
       {/* Navigation Menu */}
-      <nav className="mt-9 space-y-1">
-        {navigation
-          // Exclude specific routes (e.g., '/voice') from the sidebar
-          .filter(({ to }) => to !== '/voice')
-          .map(({ label, key, to, icon: Icon }) => (
-            <NavLink
-              title={key ? t(key) : label}
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                `flex items-center rounded-lg py-2.5 text-sm font-medium transition ${
-                  collapsed ? 'justify-center px-2' : 'gap-3 px-3'
-                } ${
-                  isActive
-                    ? 'bg-[#dceedd] text-primary-dark' // Active link styling
-                    : 'text-text-secondary hover:bg-[#eaf5eb] hover:text-primary-dark' // Default/Hover styling
-                }`
-              }
-            >
-              <Icon size={18} />
-              {/* Only show the label text if the sidebar is fully expanded */}
-              {!collapsed && (key ? t(key) : label)}
-            </NavLink>
-          ))}
+      <nav className="mt-7 space-y-1">
+        {navigation.map(({ label, key, to, icon: Icon }) => (
+          <NavLink
+            title={key ? t(key) : label}
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              `flex items-center rounded-xl py-2.5 text-xs font-semibold transition ${
+                collapsed ? 'justify-center px-2' : 'gap-3 px-3'
+              } ${
+                isActive
+                  ? 'bg-[#dceedd] text-primary-dark shadow-xs' // Active link styling
+                  : 'text-text-secondary hover:bg-[#eaf5eb] hover:text-primary-dark' // Default/Hover styling
+              }`
+            }
+          >
+            <Icon size={17} />
+            {/* Only show the label text if the sidebar is fully expanded */}
+            {!collapsed && (key ? t(key) : label)}
+          </NavLink>
+        ))}
       </nav>
+
 
       {/* Help Banner: Pushed to the bottom ('mt-auto'), only visible when expanded */}
       {!collapsed && (

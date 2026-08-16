@@ -13,7 +13,8 @@ export const translations = {
     settings: 'Settings',
 
     // Greetings & Subtitles
-    greeting: 'Good Morning, Ramesh!',
+    greeting: 'Good Morning, Santosh!',
+
     greetingMobile: 'Hello Farmer!',
     subtitle: "Here's what's happening on your farm today.",
     smartFarming: 'Smart farming, better tomorrow.',

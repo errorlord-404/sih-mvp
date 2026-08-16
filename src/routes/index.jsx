@@ -12,6 +12,8 @@ import {
   Weather,
 } from '../pages/CorePages.jsx';
 import { CropGuide, FarmMap, PestDisease } from '../pages/FieldTools.jsx';
+import GovtSchemes from '../pages/GovtSchemes.jsx';
+import FarmFinance from '../pages/FarmFinance.jsx';
 import VoiceAssistant from '../pages/VoiceAssistant.jsx';
 import Settings from '../pages/Settings.jsx';
 
@@ -30,6 +32,8 @@ export const router = createBrowserRouter([
       { path: '/irrigation', element: <Irrigation /> },
       { path: '/pest', element: <PestDisease /> },
       { path: '/market', element: <MarketPrices /> },
+      { path: '/schemes', element: <GovtSchemes /> },
+      { path: '/finance', element: <FarmFinance /> },
       { path: '/ai', element: <AIAssistant /> },
       { path: '/voice', element: <VoiceAssistant /> },
       { path: '/reports', element: <Reports /> },
