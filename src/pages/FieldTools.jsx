@@ -48,13 +48,13 @@ const Page = ({ title, subtitle, children }) => {
   const hi = language === 'hi';
 
   const copyHi = {
-    'Pest & Disease': ['कीट रोग पहचान (AI Vision)', 'YOLOv11x मॉडल द्वारा फोटो से कीट एवं रोगों की सटीक पहचान एवं उपचार।'],
+    'Pest & Disease': ['कीट एवं रोग पहचान', 'फसल की फोटो से कीट एवं रोगों की पहचान और त्वरित उपचार सलाह।'],
     'Crop Guide': ['फसल सलाह', 'गेहूं व अन्य फसलों के लिए अवस्था-वार सम्पूर्ण कृषि सलाह।'],
     'My Farm Map': ['मेरा फार्म मैप (GIS)', 'सैटेलाइट व्यू में खेतों की सीमा, नमी और स्वास्थ्य स्थिति।'],
   };
 
   const copyMr = {
-    'Pest & Disease': ['कीड व रोग निदान (AI Vision)', 'YOLOv11x मॉडेलद्वारे फोटोवरून कीड व रोगांचे अचूक निदान आणि फवारणी सल्ला.'],
+    'Pest & Disease': ['कीड व रोग निदान', 'पिकाच्या फोटोवरून कीड व रोगांचे अचूक निदान आणि तात्काळ उपाययोजना.'],
     'Crop Guide': ['पीक सल्ला', 'गहू व इतर पिकांसाठी टप्प्याटप्प्याने संपूर्ण मार्गदर्शन.'],
     'My Farm Map': ['माझा शेत नकाशा (GIS)', 'सॅटेलाइट दृश्यामध्ये शेताच्या सीमा, ओलावा आणि पिकांची स्थिती.'],
   };
@@ -76,10 +76,10 @@ const Page = ({ title, subtitle, children }) => {
 // ==========================================
 export function FarmMap() {
   const { language } = useLanguage();
+  const mr = language === 'mr';
   const hi = language === 'hi';
   const [selected, setSelected] = useState(fields[0]);
   const [mode, setMode] = useState('map');
-  const [filterLayer, setFilterLayer] = useState('moisture'); // moisture | health | crop
 
   const localizedFields = fields.map((f) => localizeField(f, language));
   const activeField = localizeField(selected, language);
@@ -98,7 +98,7 @@ export function FarmMap() {
               mode === 'map' ? 'bg-primary text-white shadow-xs' : 'text-text-secondary'
             }`}
           >
-            {hi ? 'मैप व्यू (सैटेलाइट)' : 'Map View (GIS)'}
+            {mr ? 'नकाशा दृश्य (GIS)' : hi ? 'मैप व्यू (GIS)' : 'Map View (GIS)'}
           </button>
           <button
             onClick={() => setMode('list')}
@@ -106,7 +106,7 @@ export function FarmMap() {
               mode === 'list' ? 'bg-primary text-white shadow-xs' : 'text-text-secondary'
             }`}
           >
-            {hi ? 'सूची व्यू' : 'List View'}
+            {mr ? 'यादी दृश्य' : hi ? 'सूची व्यू' : 'List View'}
           </button>
         </div>
 
@@ -114,15 +114,15 @@ export function FarmMap() {
         <div className="flex items-center gap-4 rounded-xl border border-border bg-white px-4 py-2 text-xs font-semibold">
           <span className="flex items-center gap-1.5">
             <span className="size-3 rounded-full bg-emerald-500 ring-2 ring-emerald-200" />
-            <span className="text-text-secondary">{hi ? 'उत्तम (Good)' : 'Good'}</span>
+            <span className="text-text-secondary">{mr ? 'उत्कृष्ट (Good)' : hi ? 'उत्तम (Good)' : 'Good'}</span>
           </span>
           <span className="flex items-center gap-1.5">
             <span className="size-3 rounded-full bg-amber-500 ring-2 ring-amber-200" />
-            <span className="text-text-secondary">{hi ? 'ध्यान दें (Attention)' : 'Attention'}</span>
+            <span className="text-text-secondary">{mr ? 'लक्ष द्या (Attention)' : hi ? 'ध्यान दें (Attention)' : 'Attention'}</span>
           </span>
           <span className="flex items-center gap-1.5">
             <span className="size-3 rounded-full bg-red-500 ring-2 ring-red-200" />
-            <span className="text-text-secondary">{hi ? 'गंभीर (Critical)' : 'Critical'}</span>
+            <span className="text-text-secondary">{mr ? 'गंभीर (Critical)' : hi ? 'गंभीर (Critical)' : 'Critical'}</span>
           </span>
         </div>
       </div>
@@ -191,8 +191,8 @@ export function FarmMap() {
               <span className="flex items-center justify-center size-6 rounded-full bg-white text-emerald-900 text-xs font-bold mx-auto mb-1">
                 1
               </span>
-              <p className="text-xs font-bold">{hi ? 'गेहूं (Wheat)' : 'Wheat'}</p>
-              <p className="text-[10px] text-emerald-200">2.5 Acres · 28% Moist</p>
+              <p className="text-xs font-bold">{mr ? 'गहू (Wheat)' : hi ? 'गेहूं (Wheat)' : 'Wheat'}</p>
+              <p className="text-[10px] text-emerald-200">{mr ? '२.५ एकर · २८% ओलावा' : hi ? '2.5 एकड़ · 28% नमी' : '2.5 Acres · 28% Moist'}</p>
             </div>
 
             {/* Field 2 Badge (Attention) */}
@@ -207,8 +207,8 @@ export function FarmMap() {
               <span className="flex items-center justify-center size-6 rounded-full bg-white text-amber-900 text-xs font-bold mx-auto mb-1">
                 2
               </span>
-              <p className="text-xs font-bold">{hi ? 'आलू (Potato)' : 'Potato'}</p>
-              <p className="text-[10px] text-amber-200">1.2 Acres · 41% Moist</p>
+              <p className="text-xs font-bold">{mr ? 'बटाटा (Potato)' : hi ? 'आलू (Potato)' : 'Potato'}</p>
+              <p className="text-[10px] text-amber-200">{mr ? '१.२ एकर · ४१% ओलावा' : hi ? '1.2 एकड़ · 41% नमी' : '1.2 Acres · 41% Moist'}</p>
             </div>
 
             {/* Field 3 Badge */}
@@ -223,8 +223,8 @@ export function FarmMap() {
               <span className="flex items-center justify-center size-6 rounded-full bg-white text-emerald-900 text-xs font-bold mx-auto mb-1">
                 3
               </span>
-              <p className="text-xs font-bold">{hi ? 'सरसों (Mustard)' : 'Mustard'}</p>
-              <p className="text-[10px] text-emerald-200">1.0 Acre · 32% Moist</p>
+              <p className="text-xs font-bold">{mr ? 'मोहरी (Mustard)' : hi ? 'सरसों (Mustard)' : 'Mustard'}</p>
+              <p className="text-[10px] text-emerald-200">{mr ? '१.० एकर · ३२% ओलावा' : hi ? '1.0 एकड़ · 32% नमी' : '1.0 Acre · 32% Moist'}</p>
             </div>
 
             {/* Floating Alert Pill on Map */}
@@ -235,10 +235,10 @@ export function FarmMap() {
                 </span>
                 <div>
                   <p className="text-xs font-bold">
-                    {hi ? 'खेत 2: सिंचाई की आवश्यकता है' : 'Field 2 needs irrigation'}
+                    {mr ? 'शेत २: पाणी देणे आवश्यक आहे' : hi ? 'खेत 2: सिंचाई की आवश्यकता है' : 'Field 2 needs irrigation'}
                   </p>
                   <p className="text-[11px] text-gray-300">
-                    {hi ? 'नमी कम है (28%) · अगले 2 दिन में सींचें' : 'Soil moisture is low (28%)'}
+                    {mr ? 'मातीतील ओलावा कमी (२८%) · पुढील २ दिवसांत पाणी द्या' : hi ? 'नमी कम है (28%) · अगले 2 दिन में सींचें' : 'Soil moisture is low (28%) · Irrigate in 2 days'}
                   </p>
                 </div>
               </div>
@@ -246,7 +246,7 @@ export function FarmMap() {
                 to="/irrigation"
                 className="ml-3 rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-black hover:bg-gray-100"
               >
-                {hi ? 'सुझाव' : 'Details'}
+                {mr ? 'तपशील' : hi ? 'सुझाव' : 'Details'}
               </Link>
             </div>
           </div>
@@ -272,16 +272,16 @@ export function FarmMap() {
 
             <div className="mt-5 space-y-3 border-y border-border py-4 text-xs">
               <div className="flex justify-between">
-                <span className="text-text-secondary">{hi ? 'विकास अवस्था' : 'Growth stage'}</span>
+                <span className="text-text-secondary">{mr ? 'वाढ अवस्था' : hi ? 'विकास अवस्था' : 'Growth stage'}</span>
                 <b className="font-bold text-primary-dark">{activeField.stage}</b>
               </div>
               <div className="flex justify-between">
-                <span className="text-text-secondary">{hi ? 'मिट्टी की नमी' : 'Soil moisture'}</span>
+                <span className="text-text-secondary">{mr ? 'मातीतील ओलावा' : hi ? 'मिट्टी की नमी' : 'Soil moisture'}</span>
                 <b className="font-bold text-info">{activeField.moisture}%</b>
               </div>
               <div className="flex justify-between">
-                <span className="text-text-secondary">{hi ? 'अनुमानित पैदावार' : 'Estimated yield'}</span>
-                <b className="font-bold">22–25 Qtl / Acre</b>
+                <span className="text-text-secondary">{mr ? 'अनुमानित पैदावार' : hi ? 'अनुमानित पैदावार' : 'Estimated yield'}</span>
+                <b className="font-bold">{mr ? '२२–२५ क्विंटल / एकर' : hi ? '22–25 क्विंटल / एकड़' : '22–25 Qtl / Acre'}</b>
               </div>
             </div>
 
@@ -289,7 +289,7 @@ export function FarmMap() {
               to={`/fields/${selected.id}`}
               className="mt-5 flex w-full items-center justify-center gap-1.5 rounded-lg bg-primary py-2.5 text-xs font-bold text-white hover:bg-primary-dark shadow-sm"
             >
-              <span>{hi ? 'खेत का सम्पूर्ण टाइमलाइन देखें' : 'View Field Timeline'}</span>
+              <span>{mr ? 'शेताचा संपूर्ण टाइमलाइन पहा' : hi ? 'खेत का सम्पूर्ण टाइमलाइन देखें' : 'View Field Timeline'}</span>
               <ChevronRight size={15} />
             </Link>
           </Card>
@@ -319,11 +319,11 @@ export function FarmMap() {
               </div>
               <div className="mt-4 rounded-lg bg-surface-muted p-3">
                 <div className="flex justify-between text-xs">
-                  <span className="text-text-secondary">{hi ? 'अवस्था:' : 'Stage:'}</span>
+                  <span className="text-text-secondary">{mr ? 'अवस्था:' : hi ? 'अवस्था:' : 'Stage:'}</span>
                   <b className="text-primary-dark">{item.stage}</b>
                 </div>
                 <div className="mt-2 flex justify-between text-xs">
-                  <span className="text-text-secondary">{hi ? 'नमी:' : 'Moisture:'}</span>
+                  <span className="text-text-secondary">{mr ? 'ओलावा:' : hi ? 'नमी:' : 'Moisture:'}</span>
                   <b className="text-info">{item.moisture}%</b>
                 </div>
               </div>
