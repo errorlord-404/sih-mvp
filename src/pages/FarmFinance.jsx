@@ -396,55 +396,94 @@ export default function FarmFinance() {
                 </button>
               </div>
             ) : (
-              <div className="mt-4 divide-y divide-border overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="text-text-secondary border-b border-border">
-                      <th className="pb-3 font-semibold">{mr ? 'तारीख' : 'Date'}</th>
-                      <th className="pb-3 font-semibold">{mr ? 'तपशील' : 'Description'}</th>
-                      <th className="pb-3 font-semibold">{mr ? 'प्रवर्ग' : 'Category'}</th>
-                      <th className="pb-3 font-semibold">{mr ? 'पीक' : 'Crop'}</th>
-                      <th className="pb-3 text-right font-semibold">{mr ? 'रक्कम' : 'Amount'}</th>
-                      <th className="pb-3 text-center font-semibold">{mr ? 'क्रिया' : 'Action'}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {filteredTransactions.map((tx) => (
-                      <tr key={tx.id} className="hover:bg-surface-muted/50 transition">
-                        <td className="py-3 text-text-secondary whitespace-nowrap">{tx.date}</td>
-                        <td className="py-3">
-                          <p className="font-bold text-text-primary">{tx.title}</p>
-                          {tx.notes && <p className="text-[11px] text-text-muted mt-0.5">{tx.notes}</p>}
-                        </td>
-                        <td className="py-3">
-                          <span className="rounded-full bg-surface-muted px-2.5 py-0.5 text-[10px] font-bold text-text-secondary border border-border">
-                            {tx.category}
-                          </span>
-                        </td>
-                        <td className="py-3 text-text-secondary">{tx.crop || 'General'}</td>
-                        <td className="py-3 text-right font-bold whitespace-nowrap">
-                          <span
-                            className={
-                              tx.type === 'INCOME' ? 'text-emerald-700 font-bold' : 'text-rose-700 font-bold'
-                            }
-                          >
-                            {tx.type === 'INCOME' ? '+ ' : '- '}₹ {Number(tx.amount).toLocaleString('en-IN')}
-                          </span>
-                        </td>
-                        <td className="py-3 text-center">
-                          <button
-                            onClick={() => handleDeleteTransaction(tx.id)}
-                            className="p-1.5 text-text-muted hover:text-rose-600 rounded-lg hover:bg-rose-50 transition"
-                            title="Delete entry"
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        </td>
+              <>
+                {/* Mobile Cards View (Visible on small screens < md) */}
+                <div className="mt-4 divide-y divide-border md:hidden">
+                  {filteredTransactions.map((tx) => (
+                    <div key={tx.id} className="py-3.5 space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-bold text-xs text-text-primary truncate">{tx.title}</p>
+                          <p className="text-[10px] text-text-muted mt-0.5">{tx.date} · {tx.crop || 'General'}</p>
+                        </div>
+                        <span
+                          className={`text-sm font-bold whitespace-nowrap ${
+                            tx.type === 'INCOME' ? 'text-emerald-700' : 'text-rose-700'
+                          }`}
+                        >
+                          {tx.type === 'INCOME' ? '+ ' : '- '}₹ {Number(tx.amount).toLocaleString('en-IN')}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[9px] font-bold text-text-secondary border border-border">
+                          {tx.category}
+                        </span>
+
+                        <button
+                          onClick={() => handleDeleteTransaction(tx.id)}
+                          className="flex items-center gap-1 text-[10px] font-semibold text-rose-600 hover:text-rose-800 p-1"
+                          title="Delete entry"
+                        >
+                          <Trash2 size={13} />
+                          <span>{mr ? 'हटवा' : 'Delete'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop Table View (Visible on >= md screens) */}
+                <div className="mt-4 hidden md:block overflow-x-auto">
+                  <table className="w-full text-left text-xs min-w-[550px]">
+                    <thead>
+                      <tr className="text-text-secondary border-b border-border">
+                        <th className="pb-3 font-semibold">{mr ? 'तारीख' : 'Date'}</th>
+                        <th className="pb-3 font-semibold">{mr ? 'तपशील' : 'Description'}</th>
+                        <th className="pb-3 font-semibold">{mr ? 'प्रवर्ग' : 'Category'}</th>
+                        <th className="pb-3 font-semibold">{mr ? 'पीक' : 'Crop'}</th>
+                        <th className="pb-3 text-right font-semibold">{mr ? 'रक्कम' : 'Amount'}</th>
+                        <th className="pb-3 text-center font-semibold">{mr ? 'क्रिया' : 'Action'}</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {filteredTransactions.map((tx) => (
+                        <tr key={tx.id} className="hover:bg-surface-muted/50 transition">
+                          <td className="py-3 text-text-secondary whitespace-nowrap">{tx.date}</td>
+                          <td className="py-3">
+                            <p className="font-bold text-text-primary">{tx.title}</p>
+                            {tx.notes && <p className="text-[11px] text-text-muted mt-0.5">{tx.notes}</p>}
+                          </td>
+                          <td className="py-3">
+                            <span className="rounded-full bg-surface-muted px-2.5 py-0.5 text-[10px] font-bold text-text-secondary border border-border">
+                              {tx.category}
+                            </span>
+                          </td>
+                          <td className="py-3 text-text-secondary">{tx.crop || 'General'}</td>
+                          <td className="py-3 text-right font-bold whitespace-nowrap">
+                            <span
+                              className={
+                                tx.type === 'INCOME' ? 'text-emerald-700 font-bold' : 'text-rose-700 font-bold'
+                              }
+                            >
+                              {tx.type === 'INCOME' ? '+ ' : '- '}₹ {Number(tx.amount).toLocaleString('en-IN')}
+                            </span>
+                          </td>
+                          <td className="py-3 text-center">
+                            <button
+                              onClick={() => handleDeleteTransaction(tx.id)}
+                              className="p-1.5 text-text-muted hover:text-rose-600 rounded-lg hover:bg-rose-50 transition"
+                              title="Delete entry"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
         </div>
