@@ -1,26 +1,30 @@
 export const farmer = {
   name: 'Santosh Jadhav',
   nameHi: 'संतोष जाधव',
+  nameMr: 'संतोष जाधव',
   location: 'Pune, Maharashtra',
   locationHi: 'पुणे, महाराष्ट्र',
-
+  locationMr: 'पुणे, महाराष्ट्र',
   initials: 'SJ',
   avatar: '/farmer.jpg',
 };
 
-
-
 export const field = {
   name: 'Wheat Field',
   nameHi: 'गेहूं का खेत',
+  nameMr: 'गहू शेत',
   crop: 'Wheat',
   cropHi: 'गेहूं',
+  cropMr: 'गहू',
   area: '2.5 Acres',
   areaHi: '2.5 एकड़',
+  areaMr: '२.५ एकर',
   sowingDate: '15 Nov 2024',
   sowingDateHi: '15 नवंबर 2024',
+  sowingDateMr: '१५ नोव्हेंबर २०२४',
   stage: 'Grain Filling',
   stageHi: 'दाना भराव / बाल निकलना',
+  stageMr: 'दाणे भरणे (Grain Filling)',
   progress: 60,
 };
 

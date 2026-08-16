@@ -4,6 +4,7 @@ import { useLanguage } from '../../hooks/useLanguage.jsx';
 
 export default function Header({ onMenuClick }) {
   const { language, setLanguage, t } = useLanguage();
+  const mr = language === 'mr';
   const hi = language === 'hi';
 
   return (
@@ -12,7 +13,7 @@ export default function Header({ onMenuClick }) {
       <div className="flex items-center gap-4">
         <button
           onClick={onMenuClick}
-          aria-label={hi ? 'साइडबार खोलें या बंद करें' : 'Toggle sidebar'}
+          aria-label={mr ? 'मेनू उघडा/बंद करा' : hi ? 'साइडबार खोलें या बंद करें' : 'Toggle sidebar'}
           className="rounded-xl p-2 hover:bg-surface-muted transition text-text-secondary"
         >
           <Menu size={20} />
@@ -23,7 +24,13 @@ export default function Header({ onMenuClick }) {
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
-            placeholder={hi ? 'खोजें: फसल, मंडी, योजना...' : 'Search fields, mandis, schemes...'}
+            placeholder={
+              mr
+                ? 'शोधा: पिके, बाजार भाव, योजना...'
+                : hi
+                ? 'खोजें: फसल, मंडी, योजना...'
+                : 'Search fields, mandis, schemes...'
+            }
             className="w-full rounded-xl border border-border bg-surface-muted/60 py-2 pl-9 pr-3 text-xs outline-none focus:border-primary focus:bg-white transition"
           />
         </div>
@@ -34,13 +41,13 @@ export default function Header({ onMenuClick }) {
         {/* Weather Indicator Pill */}
         <div className="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 font-bold text-emerald-800 border border-emerald-100">
           <CloudSun size={15} className="text-amber-500" />
-          <span>28°C · {hi ? 'धूप' : 'Sunny'}</span>
+          <span>28°C · {mr ? 'निरभ्र ऊन' : hi ? 'धूप' : 'Sunny'}</span>
         </div>
 
         {/* Location Indicator */}
         <span className="flex items-center gap-1.5 font-medium text-text-secondary">
           <MapPin size={15} className="text-primary" />
-          {hi ? farmer.locationHi : farmer.location}
+          {mr ? farmer.locationMr || 'पुणे, महाराष्ट्र' : hi ? farmer.locationHi : farmer.location}
         </span>
 
         {/* Language Selector Dropdown */}
@@ -72,10 +79,10 @@ export default function Header({ onMenuClick }) {
 
           <div className="text-left">
             <p className="font-bold text-xs text-text-primary">
-              {hi ? farmer.nameHi : farmer.name}
+              {mr ? farmer.nameMr || 'संतोष जाधव' : hi ? farmer.nameHi : farmer.name}
             </p>
             <p className="text-[10px] text-emerald-700 font-semibold">
-              {hi ? 'सत्यापित किसान' : 'Verified Farmer'}
+              {mr ? 'प्रमाणित शेतकरी' : hi ? 'सत्यापित किसान' : 'Verified Farmer'}
             </p>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { useLanguage } from '../hooks/useLanguage.jsx';
 
 export default function Settings() {
   const { language, setLanguage, t } = useLanguage();
+  const mr = language === 'mr';
   const hi = language === 'hi';
 
   return (
@@ -26,15 +27,15 @@ export default function Settings() {
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <p className="font-bold text-base text-text-primary">
-                {hi ? farmer.nameHi : farmer.name}
+                {mr ? farmer.nameMr || 'संतोष जाधव' : hi ? farmer.nameHi : farmer.name}
               </p>
               <span className="flex items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
                 <ShieldCheck size={12} />
-                {hi ? 'सत्यापित किसान' : 'Verified'}
+                {mr ? 'प्रमाणित शेतकरी' : hi ? 'सत्यापित किसान' : 'Verified'}
               </span>
             </div>
             <p className="text-xs text-text-secondary mt-0.5">
-              {hi ? farmer.locationHi : farmer.location} · 2.5 Acres
+              {mr ? farmer.locationMr || 'पुणे, महाराष्ट्र' : hi ? farmer.locationHi : farmer.location} · {mr ? '२.५ एकर' : hi ? '2.5 एकड़' : '2.5 Acres'}
             </p>
           </div>
         </div>

@@ -771,47 +771,58 @@ export function PestDisease() {
 // ==========================================
 export function CropGuide() {
   const { language } = useLanguage();
+  const mr = language === 'mr';
   const hi = language === 'hi';
 
   const stages = [
     {
-      stage: hi ? '1. भूमि तैयारी (Land Prep)' : '1. Land Preparation',
-      desc: hi
+      stage: mr ? '१. जमीन तयार करणे (Land Prep)' : hi ? '1. भूमि तैयारी (Land Prep)' : '1. Land Preparation',
+      desc: mr
+        ? 'खोल नांगरट करून ढेकळे फोडा आणि जमीन सपाट करा. चांगले कुजलेले शेणखत (FYM) ४-५ टन प्रति एकर मिसळा.'
+        : hi
         ? 'गहरी जुताई कर पाटा लगाएं, जल निकास सुनिश्चित करें। गोबर की सड़ी खाद (FYM) 4-5 टन/एकड़ मिलाएं।'
         : 'Deep ploughing followed by planking. Incorporate well-decomposed FYM at 4-5 tons/acre.',
-      due: '15 Oct – 05 Nov',
+      due: mr ? '१५ ऑक्टो – ०५ नोव्हें' : '15 Oct – 05 Nov',
       done: true,
     },
     {
-      stage: hi ? '2. बुवाई एवं बीजोपचार (Sowing)' : '2. Seed Sowing & Treatment',
-      desc: hi
+      stage: mr ? '२. बियाणे पेरणी व बीजप्रक्रिया (Sowing)' : hi ? '2. बुवाई एवं बीजोपचार (Sowing)' : '2. Seed Sowing & Treatment',
+      desc: mr
+        ? 'प्रमाणित बियाणे (HD-2967 / GW-322) ४० किलो/एकर. पेरणीपूर्वी कार्बेन्डाझिम (२ ग्रॅम/किलो) बुरशीनाशकाची प्रक्रिया करा.'
+        : hi
         ? 'प्रमाणित बीज (HD-2967 / GW-322) 40 किग्रा/एकड़। कार्बेन्डाजिम (2 ग्राम/किग्रा) से बीजोपचार करें।'
         : 'Certified seed (HD-2967) @ 40 kg/acre. Seed treatment with Carbendazim @ 2g/kg.',
-      due: '15 Nov 2024',
+      due: mr ? '१५ नोव्हेंबर २०२४' : '15 Nov 2024',
       done: true,
     },
     {
-      stage: hi ? '3. कल्ले निकलना (Tillering)' : '3. Tillering Stage',
-      desc: hi
+      stage: mr ? '३. फुटवे फुटणे / मुकुट मुळे अवस्था (Tillering)' : hi ? '3. कल्ले निकलना (Tillering)' : '3. Tillering Stage',
+      desc: mr
+        ? 'पहिले महत्त्वाचे पाणी (CRI अवस्था २१ व्या दिवशी). युरियाचा पहिला हप्ता (४० किलो/एकर) द्यावा.'
+        : hi
         ? 'पहली सिंचाई (CRI अवस्था 21 दिन पर)। यूरिया की पहली खुराक (40 किग्रा/एकड़) डालें।'
         : 'First critical irrigation (CRI stage). Top-dress first dose of Urea @ 40 kg/acre.',
-      due: '10 Dec 2024',
+      due: mr ? '१० डिसेंबर २०२४' : '10 Dec 2024',
       done: true,
     },
     {
-      stage: hi ? '4. दाना भराव (Grain Filling) - वर्तमान' : '4. Grain Filling (Active)',
-      desc: hi
+      stage: mr ? '४. दाणे भरणे अवस्था (Grain Filling) - सध्या सुरू' : hi ? '4. दाना भराव (Grain Filling) - वर्तमान' : '4. Grain Filling (Active)',
+      desc: mr
+        ? 'मातीत ओलावा टिकवून ठेवा. पोटॅश (MOP) चा वापर करा. पानांवरील पिवळ्या तांबेरा रोगावर नियमित लक्ष ठेवा.'
+        : hi
         ? 'नमी बनाए रखें। पोटाश (MOP) का छिड़काव करें। पीला रतुआ (Yellow Rust) की नियमित निगरानी करें।'
         : 'Maintain adequate moisture. Apply MOP potash. Monitor closely for yellow rust symptoms.',
-      due: '10 Feb – 28 Feb',
+      due: mr ? '१० फेब्रु – २८ फेब्रु' : '10 Feb – 28 Feb',
       current: true,
     },
     {
-      stage: hi ? '5. परिपक्वता एवं कटाई (Harvesting)' : '5. Harvesting & Storage',
-      desc: hi
+      stage: mr ? '५. पक्वता व काढणी (Harvesting & Storage)' : hi ? '5. परिपक्वता एवं कटाई (Harvesting)' : '5. Harvesting & Storage',
+      desc: mr
+        ? 'दाणे कडक व सोनेरी झाल्यावर कंबाइन हार्वेस्टरने काढणी करावी. साठवणुकीसाठी दाण्यांमधील ओलावा १२% पेक्षा कमी असावा.'
+        : hi
         ? 'दाने सख्त और सुनहरे होने पर कंबाइन हार्वेस्टर से कटाई करें। दानों में नमी 12% से कम रखें।'
         : 'Harvest when grains are hard and golden yellow. Ensure grain moisture is below 12% for storage.',
-      due: '20 March 2025',
+      due: mr ? '२० मार्च २०२५' : '20 March 2025',
       done: false,
     },
   ];
@@ -827,15 +838,15 @@ export function CropGuide() {
             </span>
             <div>
               <h2 className="text-lg font-bold text-text-primary">
-                {hi ? 'गेहूं फसल प्रबंधन योजना (HD-2967)' : 'Wheat Crop Lifecycle (HD-2967)'}
+                {mr ? 'गहू पीक व्यवस्थापन वेळापत्रक (HD-2967)' : hi ? 'गेहूं फसल प्रबंधन योजना (HD-2967)' : 'Wheat Crop Lifecycle (HD-2967)'}
               </h2>
               <p className="text-xs text-text-secondary mt-0.5">
-                {hi ? 'रबी सत्र · 120-135 दिन चक्र · कुल 2.5 एकड़' : 'Rabi Season · 120-135 Days Cycle · 2.5 Acres'}
+                {mr ? 'रब्बी हंगाम · १२०-१३५ दिवस चक्र · एकूण २.५ एकर' : hi ? 'रबी सत्र · 120-135 दिन चक्र · कुल 2.5 एकड़' : 'Rabi Season · 120-135 Days Cycle · 2.5 Acres'}
               </p>
             </div>
           </div>
           <span className="rounded-full bg-emerald-800 px-4 py-1 text-xs font-bold text-white shadow-xs">
-            {hi ? 'अवस्था 4 / 5 (सक्रिय)' : 'Stage 4 of 5 (Active)'}
+            {mr ? 'टप्पा ४ / ५ (सध्या सुरू)' : hi ? 'अवस्था 4 / 5 (सक्रिय)' : 'Stage 4 of 5 (Active)'}
           </span>
         </div>
 

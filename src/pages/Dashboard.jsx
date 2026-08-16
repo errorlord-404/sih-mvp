@@ -242,7 +242,7 @@ function Mobile() {
             {mr ? 'नमस्कार शेतकरी मित्र! 👋' : hi ? 'नमस्ते किसान भाई! 👋' : 'Hello Farmer! 👋'}
           </h1>
           <p className="flex items-center gap-1 text-xs text-text-secondary mt-0.5">
-            <span>📍</span> {farmer.location}
+            <span>📍</span> {mr ? farmer.locationMr || 'पुणे, महाराष्ट्र' : hi ? farmer.locationHi : farmer.location}
           </p>
         </div>
         <Link
@@ -255,7 +255,7 @@ function Mobile() {
             className="size-7 rounded-full object-cover border border-primary"
           />
           <span className="text-xs font-bold text-text-primary">
-            {mr ? farmer.nameHi : hi ? farmer.nameHi : farmer.name}
+            {mr ? farmer.nameMr || 'संतोष जाधव' : hi ? farmer.nameHi : farmer.name}
           </span>
         </Link>
       </div>
@@ -557,7 +557,9 @@ function Desktop() {
               <h2 className="font-bold text-base text-text-primary">
                 {mr ? 'हवामान अंदाज' : hi ? 'मौसम पूर्वानुमान' : 'Weather Forecast'}
               </h2>
-              <p className="text-xs text-text-secondary">{farmer.location}</p>
+              <p className="text-xs text-text-secondary">
+                {mr ? farmer.locationMr || 'पुणे, महाराष्ट्र' : hi ? farmer.locationHi : farmer.location}
+              </p>
             </div>
             <Link to="/weather" className="text-xs font-bold text-primary hover:underline">
               {mr ? 'सविस्तर →' : hi ? 'विस्तार से →' : 'Radar →'}
@@ -645,12 +647,16 @@ function Desktop() {
             </span>
             <div>
               <h3 className="text-lg font-bold text-emerald-950">
-                {hi
+                {mr
+                  ? 'शेतीशी संबंधित प्रत्येक माहिती, थेट तुमच्या मोबाईलवर'
+                  : hi
                   ? 'खेती से जुड़ी हर जानकारी, आपके मोबाइल पर'
                   : 'All farm intelligence on your mobile'}
               </h3>
               <p className="text-xs text-emerald-800 mt-0.5">
-                {hi
+                {mr
+                  ? 'अचूक, सोपे आणि आपल्या मराठी भाषेत.'
+                  : hi
                   ? 'सटीक, आसान और आपकी भाषा में'
                   : 'Accurate, simple and in your local language.'}
               </p>
@@ -658,11 +664,11 @@ function Desktop() {
           </div>
 
           <button
-            onClick={() => alert(hi ? 'ऐप डाउनलोड लिंक आपके फोन पर भेजी गई!' : 'App download link sent to your phone!')}
+            onClick={() => alert(mr ? 'ॲप डाउनलोड लिंक तुमच्या फोनवर पाठवली आहे!' : hi ? 'ऐप डाउनलोड लिंक आपके फोन पर भेजी गई!' : 'App download link sent to your phone!')}
             className="inline-flex items-center gap-2 rounded-xl bg-emerald-800 px-5 py-3 text-xs font-bold text-white shadow-md transition hover:bg-emerald-900"
           >
             <Smartphone size={16} />
-            <span>{hi ? 'ऐप डाउनलोड करें' : 'Get Mobile App'}</span>
+            <span>{mr ? 'ॲप डाउनलोड करा' : hi ? 'ऐप डाउनलोड करें' : 'Get Mobile App'}</span>
           </button>
         </div>
       </div>

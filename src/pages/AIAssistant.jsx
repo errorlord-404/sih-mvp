@@ -24,6 +24,7 @@ import { useLanguage } from '../hooks/useLanguage.jsx';
 
 export default function AIAssistant() {
   const { language } = useLanguage();
+  const mr = language === 'mr';
   const hi = language === 'hi';
 
   const localizedFields = fields.map((f) => localizeField(f, language));
@@ -35,13 +36,19 @@ export default function AIAssistant() {
     {
       id: 1,
       role: 'user',
-      text: hi ? 'मेरे गेहूं में पत्ते पीले हो रहे हैं, क्या करें?' : 'Leaves in my wheat field are turning yellowish, what should I do?',
+      text: mr
+        ? 'माझ्या गव्हाच्या पिकाची पाने पिवळी पडत आहेत, काय उपाय करावा?'
+        : hi
+        ? 'मेरे गेहूं में पत्ते पीले हो रहे हैं, क्या करें?'
+        : 'Leaves in my wheat field are turning yellowish, what should I do?',
       time: '10:30 AM',
     },
     {
       id: 2,
       role: 'assistant',
-      text: hi
+      text: mr
+        ? 'हे नत्र (Nitrogen) ची कमतरता किंवा पाण्याचा ताण (ओलावा कमी) असल्याचे लक्षण असू शकते. कृपया अचूक निदानासाठी शेतातील पानाचा एक स्पष्ट फोटो पाठवा.'
+        : hi
         ? 'यह नाइट्रोजन (N) की कमी या सिंचाई के अभाव का लक्षण हो सकता है। कृपया अपने खेत की एक फोटो भेजें ताकि मैं सटीक जांच कर सकूं।'
         : 'This could indicate nitrogen deficiency or soil moisture stress. Please upload a clear photo of the leaf for exact diagnosis.',
       time: '10:31 AM',
@@ -49,28 +56,26 @@ export default function AIAssistant() {
     {
       id: 3,
       role: 'user',
-      text: hi ? 'यह देखिए खेत की फोटो।' : 'Here is the crop photo.',
+      text: mr ? 'हे पहा पिकाचा फोटो.' : hi ? 'यह देखिए खेत की फोटो।' : 'Here is the crop photo.',
       time: '10:32 AM',
       image: 'https://images.unsplash.com/photo-1599818816949-a2e6f47f2015?auto=format&fit=crop&w=500&q=80',
     },
     {
       id: 4,
       role: 'assistant',
-      text: hi
+      text: mr
+        ? 'फोटो तपासणी व तुमच्या शेतातील ओलावा (२८%) यानुसार:\n१. मातीतील ओलावा कमी आहे, आधी २५,००० लिटर/एकर पाणी द्या.\n२. पाणी दिल्यानंतर २४ तासांनी ४० किलो युरिया प्रति एकर टाका.\n३. दाण्यांची चकाकी व वजन वाढवण्यासाठी पोटॅश खताचा वापर करा.'
+        : hi
         ? 'फोटो विश्लेषण और आपके खेत की नमी (28%) के आधार पर:\n1. मिट्टी में नमी कम है, पहले 25,000 L/एकड़ सिंचाई करें।\n2. सिंचाई के 24 घंटे बाद 40 kg यूरिया प्रति एकड़ की दर से डालें।\n3. दानों की चमक व वजन बढ़ाने के लिए पोटाश का प्रयोग करें।'
         : 'Based on image analysis and your current soil moisture (28%):\n1. Soil moisture is low, irrigate 25,000 L/acre first.\n2. Top-dress 40 kg/acre Urea (46% N) 24 hours after irrigation.\n3. Apply Potash to boost grain weight and shine.',
       time: '10:33 AM',
       recommendation: {
-        product: 'Urea (46% N)',
-        productHi: 'यूरिया उर्वरक (46% N)',
-        dosage: '40 kg / Acre',
-        dosageHi: '40 किग्रा / एकड़ (सिंचाई उपरांत)',
+        product: mr ? 'युरिया खत (४६% N)' : hi ? 'यूरिया उर्वरक (46% N)' : 'Urea (46% N)',
+        dosage: mr ? '४० किलो / एकर (पाणी दिल्यावर)' : hi ? '40 किग्रा / एकड़ (सिंचाई उपरांत)' : '40 kg / Acre',
         confidence: '95% Match',
       },
     },
   ]);
-
-  const mr = language === 'mr';
 
   const quickChips = [
     {
@@ -103,11 +108,10 @@ export default function AIAssistant() {
     };
 
     let replyText = mr
-      ? `तुमच्या ${activeField.name} (मातीतील ओलावा ${activeField.moisture}%) नुसार: पिकाला योग्य वेळी पाणी द्या आणि पानांचे नियमित निरीक्षण करा. तुमच्या शेतातील सेन्सर आणि हवामानानुसार मी निरंतर मार्गदर्शन करत राहीन.`
+      ? `तुमच्या ${activeField.name} (मातीतील ओलावा ${activeField.moisture}%) नुसार: पिकाला वेळेवर पाणी द्या आणि पानांचे नियमित निरीक्षण करा. तुमच्या शेतातील सेन्सर आणि हवामानानुसार मी निरंतर मार्गदर्शन करत राहीन.`
       : hi
       ? `आपके ${activeField.name} (नमी ${activeField.moisture}%) के संदर्भ में: खेत में पर्याप्त नमी बनाए रखें और शाम के समय निरीक्षण करें। मैं आपके सेंसर डेटा और मौसम को ध्यान में रखकर निरंतर सलाह देता रहूंगा।`
       : `Based on ${activeField.name} (soil moisture ${activeField.moisture}%): maintain regular moisture levels and inspect during evening hours. I will continue utilizing your IoT telemetry and weather forecasts.`;
-
 
     const assistantMsg = {
       id: Date.now() + 1,
@@ -124,7 +128,7 @@ export default function AIAssistant() {
     const userMsg = {
       id: Date.now(),
       role: 'user',
-      text: hi ? 'मैंने यह पत्ती की फोटो अपलोड की है।' : 'I uploaded this crop leaf photo.',
+      text: mr ? 'मी पानाचा फोटो अपलोड केला आहे.' : hi ? 'मैंने यह पत्ती की फोटो अपलोड की है।' : 'I uploaded this crop leaf photo.',
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       image: 'https://images.unsplash.com/photo-1628170490378-d5677b102b48?auto=format&fit=crop&w=500&q=80',
     };
@@ -132,15 +136,15 @@ export default function AIAssistant() {
     const assistantMsg = {
       id: Date.now() + 1,
       role: 'assistant',
-      text: hi
+      text: mr
+        ? 'AI मॉडेलने पानांवर मावा किडीचा (Aphids) प्रादुर्भाव ओळखला आहे (अचूकता: ९२%). सकाळी लवकर १५०० PPM निंबोळी अर्क/तेल (५ मिली/लिटर) फवारणी करावी.'
+        : hi
         ? 'AI दृष्टि मॉडल ने एफिड कीट (माहू) के लक्षण पहचाने हैं (सटीकता: 92%)। सुबह के समय 1500 PPM नीम के तेल (5ml/लीटर) का छिड़काव करें।'
         : 'AI Vision model detected Aphids infestation (Confidence: 92%). Spray 1500 PPM Neem Oil (5ml/Litre) in early morning.',
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       recommendation: {
-        product: 'Neem Oil 1500 PPM',
-        productHi: 'नीम का तेल (1500 PPM)',
-        dosage: '5 ml / Litre',
-        dosageHi: '5 मिली / लीटर पानी',
+        product: mr ? 'निंबोळी अर्क / तेल (1500 PPM)' : hi ? 'नीम का तेल (1500 PPM)' : 'Neem Oil 1500 PPM',
+        dosage: mr ? '५ मिली / लिटर पाणी' : hi ? '5 मिली / लीटर पानी' : '5 ml / Litre',
         confidence: '92% Confidence',
       },
     };
@@ -163,11 +167,11 @@ export default function AIAssistant() {
               />
               <div>
                 <h3 className="font-bold text-sm text-text-primary">
-                  {hi ? farmer.nameHi : farmer.name}
+                  {mr ? farmer.nameMr || 'संतोष जाधव' : hi ? farmer.nameHi : farmer.name}
                 </h3>
                 <p className="flex items-center gap-1 text-[11px] text-text-secondary">
                   <MapPin size={12} className="text-primary" />
-                  {hi ? farmer.locationHi : farmer.location}
+                  {mr ? farmer.locationMr || 'पुणे, महाराष्ट्र' : hi ? farmer.locationHi : farmer.location}
                 </p>
               </div>
             </div>
@@ -175,7 +179,7 @@ export default function AIAssistant() {
             {/* Field Picker */}
             <div className="mt-4 border-t border-border pt-4">
               <label className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
-                {hi ? 'खेत का संदर्भ चुनें:' : 'Selected Field Context:'}
+                {mr ? 'शेताचा संदर्भ निवडा:' : hi ? 'खेत का संदर्भ चुनें:' : 'Selected Field Context:'}
               </label>
               <select
                 value={selectedId}
@@ -193,19 +197,19 @@ export default function AIAssistant() {
             {/* Real-time Field Telemetry Signals */}
             <div className="mt-4 grid grid-cols-2 gap-2 text-xs">
               <div className="rounded-lg bg-blue-50 p-2.5">
-                <p className="text-[10px] text-text-secondary">{hi ? 'मिट्टी नमी' : 'Moisture'}</p>
-                <p className="font-bold text-info">{activeField.moisture}% (Low)</p>
+                <p className="text-[10px] text-text-secondary">{mr ? 'माती ओलावा' : hi ? 'मिट्टी नमी' : 'Moisture'}</p>
+                <p className="font-bold text-info">{activeField.moisture}% ({mr ? 'कमी' : hi ? 'कम' : 'Low'})</p>
               </div>
               <div className="rounded-lg bg-emerald-50 p-2.5">
-                <p className="text-[10px] text-text-secondary">{hi ? 'स्वास्थ्य' : 'Health'}</p>
+                <p className="text-[10px] text-text-secondary">{mr ? 'आरोग्य स्थिती' : hi ? 'स्वास्थ्य' : 'Health'}</p>
                 <p className="font-bold text-emerald-800">{activeField.status}</p>
               </div>
               <div className="rounded-lg bg-amber-50 p-2.5">
-                <p className="text-[10px] text-text-secondary">{hi ? 'कीट जोखिम' : 'Pest Risk'}</p>
-                <p className="font-bold text-amber-800">{hi ? 'मध्यम' : 'Medium'}</p>
+                <p className="text-[10px] text-text-secondary">{mr ? 'कीड धोका' : hi ? 'कीट जोखिम' : 'Pest Risk'}</p>
+                <p className="font-bold text-amber-800">{mr ? 'मध्यम' : hi ? 'मध्यम' : 'Medium'}</p>
               </div>
               <div className="rounded-lg bg-emerald-50 p-2.5">
-                <p className="text-[10px] text-text-secondary">{hi ? 'गेहूं भाव' : 'Mandi Rate'}</p>
+                <p className="text-[10px] text-text-secondary">{mr ? 'गहू भाव' : hi ? 'गेहूं भाव' : 'Mandi Rate'}</p>
                 <p className="font-bold text-emerald-800">₹ 2,125</p>
               </div>
             </div>
@@ -220,7 +224,7 @@ export default function AIAssistant() {
               <span className="grid size-8 place-items-center rounded-lg bg-primary text-white">
                 <Mic size={16} />
               </span>
-              <span>{hi ? 'बोलकर पूछें (वॉइस मोड)' : 'Switch to Voice Mode'}</span>
+              <span>{mr ? 'बोलून विचारा (व्हॉइस मोड)' : hi ? 'बोलकर पूछें (वॉइस मोड)' : 'Switch to Voice Mode'}</span>
             </div>
             <span>🎙️</span>
           </Link>
@@ -243,7 +247,7 @@ export default function AIAssistant() {
                   </span>
                 </div>
                 <p className="text-[11px] text-text-secondary">
-                  {hi ? 'हिंदी व अंग्रेज़ी में कृषि सलाहकार' : 'Bilingual Agro Intelligence Assistant'}
+                  {mr ? 'मराठी, हिंदी व इंग्रजी भाषेत कृषी सल्लागार' : hi ? 'हिंदी व अंग्रेज़ी में कृषि सलाहकार' : 'Trilingual Agro Intelligence Assistant'}
                 </p>
               </div>
             </div>
@@ -253,7 +257,7 @@ export default function AIAssistant() {
               className="inline-flex items-center gap-1.5 rounded-lg border border-primary/20 bg-white px-3 py-1.5 text-xs font-bold text-primary hover:bg-primary-50 transition shadow-xs"
             >
               <Camera size={15} />
-              <span>{hi ? 'फोटो डायग्नोसिस' : 'Test Photo'}</span>
+              <span>{mr ? 'फोटो निदान' : hi ? 'फोटो डायग्नोसिस' : 'Test Photo'}</span>
             </button>
           </div>
 
@@ -296,18 +300,18 @@ export default function AIAssistant() {
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-xs flex items-center gap-1">
                           <Sparkles size={14} className="text-emerald-700" />
-                          {hi ? 'सुझाया गया उत्पाद:' : 'Recommended Product:'}
+                          {mr ? 'शिफारस केलेले उत्पादन:' : hi ? 'सुझाया गया उत्पाद:' : 'Recommended Product:'}
                         </span>
                         <span className="rounded bg-emerald-700 px-2 py-0.5 text-[9px] font-bold text-white">
                           {msg.recommendation.confidence}
                         </span>
                       </div>
                       <p className="mt-1 font-bold text-sm text-emerald-900">
-                        {hi ? msg.recommendation.productHi : msg.recommendation.product}
+                        {msg.recommendation.product}
                       </p>
                       <p className="text-[11px] text-emerald-800">
-                        {hi ? 'मात्रा:' : 'Dosage:'}{' '}
-                        {hi ? msg.recommendation.dosageHi : msg.recommendation.dosage}
+                        {mr ? 'मात्रा:' : hi ? 'मात्रा:' : 'Dosage:'}{' '}
+                        {msg.recommendation.dosage}
                       </p>
                     </div>
                   )}
@@ -348,7 +352,7 @@ export default function AIAssistant() {
             <button
               type="button"
               onClick={uploadSamplePhoto}
-              title={hi ? 'फसल की फोटो अपलोड करें' : 'Attach crop photo'}
+              title={mr ? 'पिकाचा फोटो जोडा' : hi ? 'फसल की फोटो अपलोड करें' : 'Attach crop photo'}
               className="grid size-10 place-items-center rounded-xl border border-border text-text-secondary hover:bg-surface-muted"
             >
               <Camera size={18} />
@@ -358,13 +362,19 @@ export default function AIAssistant() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={hi ? 'अपनी खेती या फसल के बारे में पूछें...' : 'Ask about your crops, soil, water or prices...'}
+              placeholder={
+                mr
+                  ? 'तुमच्या शेती, पिके, खते किंवा बाजार भावाबाबत विचारा...'
+                  : hi
+                  ? 'अपनी खेती या फसल के बारे में पूछें...'
+                  : 'Ask about your crops, soil, water or prices...'
+              }
               className="flex-1 rounded-xl border border-border px-4 py-2.5 text-xs outline-none focus:border-primary"
             />
 
             <Link
               to="/voice"
-              title={hi ? 'बोलकर पूछें' : 'Voice assistant'}
+              title={mr ? 'बोलून विचारा' : hi ? 'बोलकर पूछें' : 'Voice assistant'}
               className="grid size-10 place-items-center rounded-xl border border-primary/20 bg-primary-50 text-primary hover:bg-primary-100"
             >
               <Mic size={18} />
@@ -374,7 +384,7 @@ export default function AIAssistant() {
               type="submit"
               className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white hover:bg-primary-dark shadow-sm transition"
             >
-              <span>{hi ? 'पूछें' : 'Send'}</span>
+              <span>{mr ? 'विचारा' : hi ? 'पूछें' : 'Send'}</span>
               <Send size={14} />
             </button>
           </form>

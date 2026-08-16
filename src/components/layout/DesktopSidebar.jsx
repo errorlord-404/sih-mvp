@@ -4,7 +4,9 @@ import { navigation } from '../../data/navigation.js';
 import { useLanguage } from '../../hooks/useLanguage.jsx';
 
 export default function DesktopSidebar({ collapsed }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const mr = language === 'mr';
+  const hi = language === 'hi';
 
   return (
     // Main sidebar container: Adjusts width and padding based on 'collapsed' state
@@ -53,15 +55,15 @@ export default function DesktopSidebar({ collapsed }) {
       {/* Help Banner: Pushed to the bottom ('mt-auto'), only visible when expanded */}
       {!collapsed && (
         <div className="mt-auto rounded-xl bg-primary-dark p-4 text-white">
-          <p className="text-sm font-semibold">Need Help?</p>
+          <p className="text-sm font-semibold">{mr ? 'मदत हवी आहे?' : hi ? 'मदद चाहिए?' : 'Need Help?'}</p>
           <p className="mt-1 text-xs text-green-100">
-            Talk to KisanSathi anytime.
+            {mr ? 'कधीही किसानसाथीशी बोला.' : hi ? 'कभी भी किसानसाथी से बात करें।' : 'Talk to KisanSathi anytime.'}
           </p>
           <NavLink
             to="/ai"
-            className="mt-3 flex w-fit items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-primary"
+            className="mt-3 flex w-fit items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-primary shadow-xs hover:bg-green-50 transition"
           >
-            <MessageCircle size={14} /> Chat Now
+            <MessageCircle size={14} /> {mr ? 'आताच चॅट करा' : hi ? 'अभी चैट करें' : 'Chat Now'}
           </NavLink>
         </div>
       )}

@@ -166,8 +166,16 @@ export default function VoiceAssistant() {
           }`}
         >
           {listening
-            ? (hi ? '🎙️ सुन रहा हूँ… अपनी भाषा में बोलें' : '🎙️ Listening… speak naturally')
-            : (hi ? 'बोलने के लिए माइक्रोफ़ोन दबाएं' : 'Tap the microphone to speak')}
+            ? mr
+              ? '🎙️ ऐकत आहे… आपल्या भाषेत बोला'
+              : hi
+              ? '🎙️ सुन रहा हूँ… अपनी भाषा में बोलें'
+              : '🎙️ Listening… speak naturally'
+            : mr
+            ? 'बोलण्यासाठी मायक्रोफोनवर टॅप करा'
+            : hi
+            ? 'बोलने के लिए माइक्रोफ़ोन दबाएं'
+            : 'Tap the microphone to speak'}
         </p>
 
         {/* Spoken Query & Response Box */}
@@ -176,7 +184,7 @@ export default function VoiceAssistant() {
             {spokenText && (
               <div className="border-b border-border pb-3">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
-                  {hi ? 'आपका सवाल:' : 'You asked:'}
+                  {mr ? 'तुमचा प्रश्न:' : hi ? 'आपका सवाल:' : 'You asked:'}
                 </p>
                 <p className="mt-0.5 text-xs font-bold text-text-primary">{spokenText}</p>
               </div>
@@ -187,7 +195,7 @@ export default function VoiceAssistant() {
                 <div className="flex items-center justify-between">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-primary flex items-center gap-1">
                     <Sparkles size={12} />
-                    {hi ? 'किसानसाथी का उत्तर:' : 'KisanSathi Response:'}
+                    {mr ? 'किसानसाथीचे उत्तर:' : hi ? 'किसानसाथी का उत्तर:' : 'KisanSathi Response:'}
                   </p>
                   <button
                     onClick={() => setSpeaking(!speaking)}
@@ -206,7 +214,7 @@ export default function VoiceAssistant() {
       {/* Bottom Voice Prompt Chips matching Mockup Screen 5 */}
       <div className="w-full">
         <p className="text-[11px] font-semibold text-text-muted mb-2">
-          {hi ? 'या इनमें से कोई सवाल चुनें:' : 'Or tap a popular question:'}
+          {mr ? 'किंवा खालीलपैकी एक प्रश्न निवडा:' : hi ? 'या इनमें से कोई सवाल चुनें:' : 'Or tap a popular question:'}
         </p>
         <div className="flex flex-wrap justify-center gap-2.5">
           {voicePrompts.map((p) => (

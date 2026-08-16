@@ -51,6 +51,7 @@ function Page({ title, subtitle, children }) {
 // ==========================================
 export function SoilHealth() {
   const { language } = useLanguage();
+  const mr = language === 'mr';
   const hi = language === 'hi';
   const [selectedFieldId, setSelectedFieldId] = useState('field-1');
 
@@ -59,37 +60,37 @@ export function SoilHealth() {
 
   const nutrients = [
     {
-      name: hi ? 'पीएच मान (pH)' : 'pH Level',
+      name: mr ? 'सामू मूल्य (pH)' : hi ? 'पीएच मान (pH)' : 'pH Level',
       value: '6.8',
-      status: hi ? 'सही (उपयुक्त)' : 'Optimal',
+      status: mr ? 'उत्कृष्ट (योग्य)' : hi ? 'सही (उपयुक्त)' : 'Optimal',
       range: '6.0 – 7.5',
       badge: 'bg-emerald-50 text-emerald-800',
     },
     {
-      name: hi ? 'जैविक कार्बन (OC)' : 'Organic Carbon',
+      name: mr ? 'सेंद्रिय कर्ब (OC)' : hi ? 'जैविक कार्बन (OC)' : 'Organic Carbon',
       value: '0.56%',
-      status: hi ? 'मध्यम' : 'Medium',
+      status: mr ? 'मध्यम' : hi ? 'मध्यम' : 'Medium',
       range: '0.50% – 0.75%',
       badge: 'bg-amber-50 text-amber-800',
     },
     {
-      name: hi ? 'नाइट्रोजन (N)' : 'Nitrogen (N)',
+      name: mr ? 'नत्र (Nitrogen - N)' : hi ? 'नाइट्रोजन (N)' : 'Nitrogen (N)',
       value: '215 kg/ha',
-      status: hi ? 'मध्यम' : 'Medium',
+      status: mr ? 'मध्यम' : hi ? 'मध्यम' : 'Medium',
       range: '280 – 560 kg/ha',
       badge: 'bg-amber-50 text-amber-800',
     },
     {
-      name: hi ? 'फॉस्फोरस (P)' : 'Phosphorus (P)',
+      name: mr ? 'स्फुरद (Phosphorus - P)' : hi ? 'फॉस्फोरस (P)' : 'Phosphorus (P)',
       value: '18 kg/ha',
-      status: hi ? 'कम (उर्वरक डालें)' : 'Low (Deficient)',
+      status: mr ? 'कमी (खताची गरज)' : hi ? 'कम (उर्वरक डालें)' : 'Low (Deficient)',
       range: '23 – 56 kg/ha',
       badge: 'bg-red-50 text-red-800',
     },
     {
-      name: hi ? 'पोटाश (K)' : 'Potassium (K)',
+      name: mr ? 'पालाश (Potash - K)' : hi ? 'पोटाश (K)' : 'Potassium (K)',
       value: '312 kg/ha',
-      status: hi ? 'उच्च (उत्कृष्ट)' : 'High (Good)',
+      status: mr ? 'उच्च (उत्कृष्ट)' : hi ? 'उच्च (उत्कृष्ट)' : 'High (Good)',
       range: '140 – 280 kg/ha',
       badge: 'bg-emerald-50 text-emerald-800',
     },
@@ -97,8 +98,14 @@ export function SoilHealth() {
 
   return (
     <Page
-      title={hi ? 'मिट्टी की जांच एवं पोषक तत्व' : 'Soil Health & Nutrients'}
-      subtitle={hi ? 'प्रयोगशाला जांच रिपोर्ट और खाद की संतुलित सलाह।' : 'Soil lab test report and balanced nutrient advisory.'}
+      title={mr ? 'माती परीक्षण व पोषण घटक' : hi ? 'मिट्टी की जांच एवं पोषक तत्व' : 'Soil Health & Nutrients'}
+      subtitle={
+        mr
+          ? 'प्रयोगशाळेचा तपासणी अहवाल आणि संतुलित खत व्यवस्थापन सल्ला.'
+          : hi
+          ? 'प्रयोगशाला जांच रिपोर्ट और खाद की संतुलित सलाह।'
+          : 'Soil lab test report and balanced nutrient advisory.'
+      }
     >
       {/* Field Selector & Report Meta */}
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-white p-4 shadow-card">
@@ -108,7 +115,7 @@ export function SoilHealth() {
           </span>
           <div>
             <label className="text-[10px] font-bold uppercase tracking-wider text-text-muted">
-              {hi ? 'खेत का चयन करें:' : 'Select Field:'}
+              {mr ? 'शेताची निवड करा:' : hi ? 'खेत का चयन करें:' : 'Select Field:'}
             </label>
             <select
               value={selectedFieldId}
@@ -126,7 +133,7 @@ export function SoilHealth() {
 
         <div className="flex items-center gap-2 rounded-xl bg-surface-muted px-4 py-2 text-xs font-semibold text-text-secondary">
           <CalendarDays size={15} />
-          <span>{hi ? 'जांच रिपोर्ट: 10 मई 2025' : 'Test Date: 10 May 2025'}</span>
+          <span>{mr ? 'तपासणी अहवाल: १० मे २०२५' : hi ? 'जांच रिपोर्ट: 10 मई 2025' : 'Test Date: 10 May 2025'}</span>
         </div>
       </div>
 
@@ -140,7 +147,7 @@ export function SoilHealth() {
               {n.status}
             </span>
             <p className="mt-2 text-[10px] text-text-muted">
-              {hi ? 'आदर्श स्तर:' : 'Optimal:'} {n.range}
+              {mr ? 'योग्य प्रमाण:' : hi ? 'आदर्श स्तर:' : 'Optimal:'} {n.range}
             </p>
           </div>
         ))}
@@ -153,10 +160,10 @@ export function SoilHealth() {
           <div className="flex items-center justify-between border-b border-border pb-4">
             <h2 className="font-bold text-base flex items-center gap-2">
               <Droplets size={20} className="text-info" />
-              <span>{hi ? 'मिट्टी की नमी स्तर' : 'Soil Moisture Level'}</span>
+              <span>{mr ? 'मातीतील ओलावा पातळी' : hi ? 'मिट्टी की नमी स्तर' : 'Soil Moisture Level'}</span>
             </h2>
             <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-800">
-              {hi ? '28% (कम - सिंचाई करें)' : '28% (Low)'}
+              {mr ? '२८% (कमी - पाणी द्या)' : hi ? '28% (कम - सिंचाई करें)' : '28% (Low)'}
             </span>
           </div>
 
@@ -164,7 +171,7 @@ export function SoilHealth() {
             <div className="flex items-end justify-between">
               <span className="text-4xl font-bold text-info">28%</span>
               <span className="text-xs text-text-secondary font-medium">
-                {hi ? 'लक्ष्य नमी: 50% – 60%' : 'Target: 50% – 60%'}
+                {mr ? 'लक्ष्य ओलावा: ५०% – ६०%' : hi ? 'लक्ष्य नमी: 50% – 60%' : 'Target: 50% – 60%'}
               </span>
             </div>
 
@@ -173,18 +180,20 @@ export function SoilHealth() {
             </div>
 
             <div className="mt-2 flex justify-between text-xs text-text-secondary">
-              <span>{hi ? 'सूखा (0-30%)' : 'Dry (0-30%)'}</span>
-              <span>{hi ? 'उपयुक्त (30-65%)' : 'Optimal (30-65%)'}</span>
-              <span>{hi ? 'गीला (>65%)' : 'Wet (>65%)'}</span>
+              <span>{mr ? 'कोरडे (०-३०%)' : hi ? 'सूखा (0-30%)' : 'Dry (0-30%)'}</span>
+              <span>{mr ? 'योग्य (३०-६५%)' : hi ? 'उपयुक्त (30-65%)' : 'Optimal (30-65%)'}</span>
+              <span>{mr ? 'ओलसर (>६५%)' : hi ? 'गीला (>65%)' : 'Wet (>65%)'}</span>
             </div>
           </div>
 
           <div className="mt-6 rounded-xl bg-blue-50 border border-blue-200 p-4">
             <p className="text-xs font-bold text-blue-950">
-              {hi ? 'सिंचाई की त्वरित सलाह:' : 'Immediate Action:'}
+              {mr ? 'पाणी देण्याचा त्वरित सल्ला:' : hi ? 'सिंचाई की त्वरित सलाह:' : 'Immediate Action:'}
             </p>
             <p className="mt-1 text-xs text-blue-800 leading-5">
-              {hi
+              {mr
+                ? 'पुढील १-२ दिवसांत २५,००० लिटर/एकर पाणी द्या. सकाळी ६ ते १० दरम्यान पाणी देणे सर्वोत्तम राहील.'
+                : hi
                 ? 'अगले 1-2 दिनों में 25,000 लीटर/एकड़ सिंचाई करें। सुबह 6-10 बजे पानी देना सर्वोत्तम है।'
                 : 'Plan irrigation within 1-2 days (25,000 L/acre). Early morning is best.'}
             </p>
@@ -196,7 +205,7 @@ export function SoilHealth() {
           <div className="flex items-center justify-between border-b border-border pb-4">
             <h2 className="font-bold text-base flex items-center gap-2">
               <Sparkles size={20} className="text-primary" />
-              <span>{hi ? 'संतुलित खाद एवं पोषण सलाह' : 'Fertilizer & Nutrition Plan'}</span>
+              <span>{mr ? 'संतुलित खत व पोषण नियोजन' : hi ? 'संतुलित खाद एवं पोषण सलाह' : 'Fertilizer & Nutrition Plan'}</span>
             </h2>
           </div>
 
@@ -204,8 +213,10 @@ export function SoilHealth() {
             <li className="flex gap-2.5 items-start">
               <CheckCircle2 size={16} className="text-primary shrink-0 mt-0.5" />
               <span>
-                <strong className="text-text-primary">{hi ? 'फॉस्फोरस की कमी:' : 'Phosphorus Deficit:'}</strong>{' '}
-                {hi
+                <strong className="text-text-primary">{mr ? 'स्फुरदाची कमतरता:' : hi ? 'फॉस्फोरस की कमी:' : 'Phosphorus Deficit:'}</strong>{' '}
+                {mr
+                  ? 'पुढील पाणी देण्यापूर्वी डीएपी (DAP) किंवा एसएसपी (SSP) ३० किलो/एकर टाका.'
+                  : hi
                   ? 'अगली सिंचाई से पहले डीएपी (DAP) या एसएसपी (SSP) 30 किग्रा/एकड़ डालें।'
                   : 'Apply DAP or SSP @ 30 kg/acre before next watering.'}
               </span>
@@ -213,8 +224,10 @@ export function SoilHealth() {
             <li className="flex gap-2.5 items-start">
               <CheckCircle2 size={16} className="text-primary shrink-0 mt-0.5" />
               <span>
-                <strong className="text-text-primary">{hi ? 'नाइट्रोजन प्रबंधन:' : 'Nitrogen Top-Dressing:'}</strong>{' '}
-                {hi
+                <strong className="text-text-primary">{mr ? 'नत्र व्यवस्थापन:' : hi ? 'नाइट्रोजन प्रबंधन:' : 'Nitrogen Top-Dressing:'}</strong>{' '}
+                {mr
+                  ? 'दाणे भरण्याच्या अवस्थेत युरिया (Urea 46% N) ४० किलो/एकर पाणी दिल्यानंतर लगेच टाका.'
+                  : hi
                   ? 'दाना भराव अवस्था पर यूरिया (Urea 46% N) 40 किग्रा/एकड़ सिंचाई के तुरंत बाद दें।'
                   : 'Top-dress 40 kg/acre Urea (46% N) right after irrigation.'}
               </span>
@@ -222,8 +235,10 @@ export function SoilHealth() {
             <li className="flex gap-2.5 items-start">
               <CheckCircle2 size={16} className="text-primary shrink-0 mt-0.5" />
               <span>
-                <strong className="text-text-primary">{hi ? 'पोटाश स्तर:' : 'Potassium Level:'}</strong>{' '}
-                {hi
+                <strong className="text-text-primary">{mr ? 'पालाश पातळी:' : hi ? 'पोटाश स्तर:' : 'Potassium Level:'}</strong>{' '}
+                {mr
+                  ? 'पालाशचे प्रमाण ३१२ kg/ha उत्कृष्ट आहे. दाण्यांच्या चकाकीसाठी ००:५२:३४ ची फवारणी करावी.'
+                  : hi
                   ? 'पोटाश का स्तर 312 kg/ha उत्कृष्ट है। दानों की चमक बढ़ाने के लिए 00:52:34 का स्प्रे करें।'
                   : 'Potash is healthy. 1% NPK 00:52:34 foliar spray recommended for grain sheen.'}
               </span>
@@ -240,13 +255,20 @@ export function SoilHealth() {
 // ==========================================
 export function Weather() {
   const { language } = useLanguage();
+  const mr = language === 'mr';
   const hi = language === 'hi';
-  const days = hi ? ['आज', 'कल', '20 मई', '21 मई', '22 मई'] : forecast.map((f) => f.day);
+  const days = mr ? ['आज', 'उद्या', '२० मे', '२१ मे', '२२ मे'] : hi ? ['आज', 'कल', '20 मई', '21 मई', '22 मई'] : forecast.map((f) => f.day);
 
   return (
     <Page
-      title={hi ? 'मौसम पूर्वानुमान एवं कृषि सलाह' : 'Weather Forecast & Agro-Advisory'}
-      subtitle={hi ? 'पुणे, महाराष्ट्र · आपके खेत के लिए सटीक मौसम योजना।' : 'Pune, Maharashtra · Hyper-local field weather plan.'}
+      title={mr ? 'हवामान अंदाज व कृषी सल्ला' : hi ? 'मौसम पूर्वानुमान एवं कृषि सलाह' : 'Weather Forecast & Agro-Advisory'}
+      subtitle={
+        mr
+          ? 'पुणे, महाराष्ट्र · तुमच्या शेतासाठी अचूक सूक्ष्म हवामान नियोजन.'
+          : hi
+          ? 'पुणे, महाराष्ट्र · आपके खेत के लिए सटीक मौसम योजना।'
+          : 'Pune, Maharashtra · Hyper-local field weather plan.'
+      }
     >
       {/* Current Weather Card & Hourly Rain Probability */}
       <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
@@ -255,16 +277,16 @@ export function Weather() {
           <div className="flex items-start justify-between">
             <div>
               <span className="rounded-full bg-emerald-800 px-3 py-1 text-xs font-bold text-white shadow-xs">
-                {hi ? 'वर्तमान मौसम' : 'Live Condition'}
+                {mr ? 'सध्याचे हवामान' : hi ? 'वर्तमान मौसम' : 'Live Condition'}
               </span>
               <div className="mt-3 flex items-baseline gap-3">
                 <p className="text-5xl font-bold tracking-tight text-text-primary">28°C</p>
                 <span className="text-sm text-text-secondary">
-                  {hi ? 'महसूस: 30°C' : 'Feels like 30°C'}
+                  {mr ? 'भासमान: ३०°C' : hi ? 'महसूस: 30°C' : 'Feels like 30°C'}
                 </span>
               </div>
               <p className="mt-1 text-base font-semibold text-emerald-950">
-                {hi ? '🌤️ आंशिक रूप से धूप / बादल' : '🌤️ Partly Sunny & Mild'}
+                {mr ? '🌤️ निरभ्र ऊन व हलके ढग' : hi ? '🌤️ आंशिक रूप से धूप / बादल' : '🌤️ Partly Sunny & Mild'}
               </p>
             </div>
             <span className="grid size-16 place-items-center rounded-2xl bg-white/80 text-amber-500 shadow-sm">
@@ -275,22 +297,22 @@ export function Weather() {
           <div className="mt-6 grid grid-cols-2 gap-3 border-t border-emerald-200/60 pt-5 sm:grid-cols-4">
             <div className="rounded-xl bg-white/70 p-3">
               <Droplets size={16} className="text-primary" />
-              <p className="text-[10px] text-text-secondary mt-1">{hi ? 'हवा में नमी' : 'Humidity'}</p>
+              <p className="text-[10px] text-text-secondary mt-1">{mr ? 'हवेतील आर्द्रता' : hi ? 'हवा में नमी' : 'Humidity'}</p>
               <p className="text-sm font-bold">45%</p>
             </div>
             <div className="rounded-xl bg-white/70 p-3">
               <Wind size={16} className="text-primary" />
-              <p className="text-[10px] text-text-secondary mt-1">{hi ? 'हवा की गति' : 'Wind Speed'}</p>
+              <p className="text-[10px] text-text-secondary mt-1">{mr ? 'वाऱ्याचा वेग' : hi ? 'हवा की गति' : 'Wind Speed'}</p>
               <p className="text-sm font-bold">12 km/h</p>
             </div>
             <div className="rounded-xl bg-white/70 p-3">
               <Umbrella size={16} className="text-primary" />
-              <p className="text-[10px] text-text-secondary mt-1">{hi ? 'बारिश की संभावना' : 'Rain Chance'}</p>
+              <p className="text-[10px] text-text-secondary mt-1">{mr ? 'पावसाची शक्यता' : hi ? 'बारिश की संभावना' : 'Rain Chance'}</p>
               <p className="text-sm font-bold">20%</p>
             </div>
             <div className="rounded-xl bg-white/70 p-3">
               <Sunrise size={16} className="text-primary" />
-              <p className="text-[10px] text-text-secondary mt-1">{hi ? 'सूर्योदय' : 'Sunrise'}</p>
+              <p className="text-[10px] text-text-secondary mt-1">{mr ? 'सूर्योदय' : hi ? 'सूर्योदय' : 'Sunrise'}</p>
               <p className="text-sm font-bold">5:42 AM</p>
             </div>
           </div>
@@ -301,13 +323,12 @@ export function Weather() {
           <div className="flex items-center justify-between border-b border-border pb-3">
             <div>
               <h2 className="font-bold text-sm text-text-primary">
-                {hi ? 'अगले 24 घंटे में वर्षा की संभावना' : '24h Rainfall Probability'}
+                {mr ? 'पुढील २४ तासांत पावसाचा अंदाज' : hi ? 'अगले 24 घंटे में वर्षा की संभावना' : '24h Rainfall Probability'}
               </h2>
               <p className="text-[11px] text-text-secondary">Pune station radar</p>
             </div>
             <CloudRain size={22} className="text-info" />
           </div>
-
 
           <div className="mt-6 flex h-20 items-end gap-1.5" aria-label="Hourly rain graph">
             {[10, 15, 10, 20, 25, 45, 65, 50, 35, 25, 15, 10].map((h, i) => (
@@ -329,7 +350,9 @@ export function Weather() {
           </div>
 
           <div className="mt-4 rounded-xl bg-blue-50 p-3 text-xs text-blue-900 leading-snug">
-            {hi
+            {mr
+              ? 'सकाळच्या सत्रात हवामान कोरडे राहील. संध्याकाळी ४ ते ७ दरम्यान हलक्या सरींची शक्यता आहे.'
+              : hi
               ? 'सुबह का समय सूखा रहेगा। शाम को 4-7 बजे हल्की बूंदाबांदी संभव है।'
               : 'Dry through the morning. Light isolated showers possible between 4–7 PM.'}
           </div>
@@ -344,10 +367,12 @@ export function Weather() {
           </span>
           <div>
             <h3 className="font-bold text-sm text-amber-950">
-              {hi ? 'मौसम अलर्ट: 20-21 मई को तेज बारिश की संभावना' : 'Weather Alert: Heavy Rain on 20-21 May'}
+              {mr ? 'हवामान इशारा: २०-२१ मे रोजी मुसळधार पावसाची शक्यता' : hi ? 'मौसम अलर्ट: 20-21 मई को तेज बारिश की संभावना' : 'Weather Alert: Heavy Rain on 20-21 May'}
             </h3>
             <p className="mt-1 text-xs text-amber-900 leading-5">
-              {hi
+              {mr
+                ? 'हवामान विभागानुसार २० व २१ मे रोजी ४०-५० किमी/तास वेगाच्या वाऱ्यासह पाऊस होऊ शकतो. शेतातील पाण्याचा निचरा योग्य ठेवा आणि औषध फवारणी २२ मे नंतरच करावी.'
+                : hi
                 ? 'मौसम विभाग के अनुसार 20 और 21 मई को 40-50 किमी/घंटा की हवाओं के साथ बारिश हो सकती है। खेत के जल निकास रास्तों को साफ रखें एवं खड़ी फसल पर कीटनाशक का छिड़काव 22 मई के बाद ही करें।'
                 : 'Thunderstorms with moderate to heavy rain and gusty winds predicted on 20-21 May. Clear drainage channels and postpone pesticide foliar spray until 22 May.'}
             </p>
@@ -358,7 +383,7 @@ export function Weather() {
       {/* 5-Day Detailed Forecast Grid */}
       <div className="mt-6 rounded-2xl border border-border bg-white p-6 shadow-card">
         <h2 className="font-bold text-base text-text-primary mb-4">
-          {hi ? '5 दिन का विस्तृत पूर्वानुमान' : '5-Day Weather Forecast'}
+          {mr ? '५ दिवसांचा सविस्तर हवामान अंदाज' : hi ? '5 दिन का विस्तृत पूर्वानुमान' : '5-Day Weather Forecast'}
         </h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           {forecast.map((f, i) => (
@@ -390,20 +415,42 @@ export function Weather() {
 // ==========================================
 export function Irrigation() {
   const { language } = useLanguage();
+  const mr = language === 'mr';
   const hi = language === 'hi';
   const [pumpOn, setPumpOn] = useState(false);
   const [selectedField, setSelectedField] = useState('Wheat Field');
 
   const schedule = [
-    { field: hi ? 'गेहूं का खेत' : 'Wheat Field', date: '21 May 2025', volume: '25,000 L/Acre', status: hi ? 'नियोजित (2 दिन बाद)' : 'Scheduled (In 2 Days)' },
-    { field: hi ? 'आलू का खेत' : 'Potato Patch', date: hi ? 'आज शाम' : 'Today Evening', volume: '18,000 L/Acre', status: hi ? 'तत्काल आवश्यक' : 'Urgent' },
-    { field: hi ? 'सरसों का खेत' : 'Mustard Plot', date: '24 May 2025', volume: '15,000 L/Acre', status: hi ? 'नियोजित' : 'Scheduled' },
+    {
+      field: mr ? 'गव्हाचे शेत' : hi ? 'गेहूं का खेत' : 'Wheat Field',
+      date: mr ? '२१ मे २०२५' : '21 May 2025',
+      volume: mr ? '२५,००० लि/एकर' : '25,000 L/Acre',
+      status: mr ? 'नियोजित (२ दिवसांनंतर)' : hi ? 'नियोजित (2 दिन बाद)' : 'Scheduled (In 2 Days)',
+    },
+    {
+      field: mr ? 'बटाट्याचे शेत' : hi ? 'आलू का खेत' : 'Potato Patch',
+      date: mr ? 'आज संध्याकाळी' : hi ? 'आज शाम' : 'Today Evening',
+      volume: mr ? '१८,००० लि/एकर' : '18,000 L/Acre',
+      status: mr ? 'तातडीने आवश्यक' : hi ? 'तत्काल आवश्यक' : 'Urgent',
+    },
+    {
+      field: mr ? 'मोहरीचे शेत' : hi ? 'सरसों का खेत' : 'Mustard Plot',
+      date: mr ? '२४ मे २०२५' : '24 May 2025',
+      volume: mr ? '१५,००० लि/एकर' : '15,000 L/Acre',
+      status: mr ? 'नियोजित' : hi ? 'नियोजित' : 'Scheduled',
+    },
   ];
 
   return (
     <Page
-      title={hi ? 'स्मार्ट सिंचाई सलाह एवं पंप नियंत्रण' : 'Smart Irrigation & Pump Control'}
-      subtitle={hi ? 'मिट्टी की नमी आधारित पानी की गणना एवं IoT ऑटोमेशन।' : 'Moisture-driven water volume calculation and IoT pump actuation.'}
+      title={mr ? 'स्मार्ट सिंचन सल्ला व पंप नियंत्रण' : hi ? 'स्मार्ट सिंचाई सलाह एवं पंप नियंत्रण' : 'Smart Irrigation & Pump Control'}
+      subtitle={
+        mr
+          ? 'मातीतील ओलाव्यावर आधारित पाणी गणना आणि IoT पंप ऑटोमेशन.'
+          : hi
+          ? 'मिट्टी की नमी आधारित पानी की गणना एवं IoT ऑटोमेशन।'
+          : 'Moisture-driven water volume calculation and IoT pump actuation.'
+      }
     >
       <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
         {/* Moisture & Advice */}
@@ -415,37 +462,39 @@ export function Irrigation() {
               </span>
               <div>
                 <h2 className="font-bold text-base text-text-primary">
-                  {hi ? 'गेहूं का खेत: सिंचाई स्थिति' : 'Wheat Field: Water Need'}
+                  {mr ? 'गहू शेत: पाणी आवश्यकता' : hi ? 'गेहूं का खेत: सिंचाई स्थिति' : 'Wheat Field: Water Need'}
                 </h2>
-                <p className="text-xs text-text-secondary">2.5 Acres · Grain Filling Stage</p>
+                <p className="text-xs text-text-secondary">{mr ? '२.५ एकर · दाणे भरणे अवस्था' : '2.5 Acres · Grain Filling Stage'}</p>
               </div>
             </div>
             <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-700">
-              {hi ? 'नमी कम (28%)' : 'Low (28%)'}
+              {mr ? 'ओलावा कमी (२८%)' : hi ? 'नमी कम (28%)' : 'Low (28%)'}
             </span>
           </div>
 
           <div className="mt-5 space-y-4 text-xs">
             <div className="flex justify-between border-b border-border pb-2">
-              <span className="text-text-secondary">{hi ? 'अगली सुझाई गई सिंचाई:' : 'Next Scheduled Watering:'}</span>
-              <b className="font-bold text-primary-dark">21 May 2025 (Early Morning)</b>
+              <span className="text-text-secondary">{mr ? 'पुढील नियोजित पाणी:' : hi ? 'अगली सुझाई गई सिंचाई:' : 'Next Scheduled Watering:'}</span>
+              <b className="font-bold text-primary-dark">{mr ? '२१ मे २०२५ (पहाटे)' : '21 May 2025 (Early Morning)'}</b>
             </div>
             <div className="flex justify-between border-b border-border pb-2">
-              <span className="text-text-secondary">{hi ? 'आवश्यक पानी की मात्रा:' : 'Water Volume Required:'}</span>
-              <b className="font-bold text-info">25,000 {hi ? 'लीटर / एकड़' : 'L / Acre'}</b>
+              <span className="text-text-secondary">{mr ? 'आवश्यक पाणी प्रमाण:' : hi ? 'आवश्यक पानी की मात्रा:' : 'Water Volume Required:'}</span>
+              <b className="font-bold text-info">{mr ? '२५,००० लिटर / एकर' : hi ? '25,000 लीटर / एकड़' : '25,000 L / Acre'}</b>
             </div>
             <div className="flex justify-between">
-              <span className="text-text-secondary">{hi ? 'अनुमानित पंप रन टाइम:' : 'Estimated Pump Run Time:'}</span>
-              <b className="font-bold">2.5 {hi ? 'घंटे (5 HP पंप)' : 'Hours (5 HP Pump)'}</b>
+              <span className="text-text-secondary">{mr ? 'अंदाजे पंप रन वेळ:' : hi ? 'अनुमानित पंप रन टाइम:' : 'Estimated Pump Run Time:'}</span>
+              <b className="font-bold">{mr ? '२.५ तास (५ HP पंप)' : hi ? '2.5 घंटे (5 HP पंप)' : '2.5 Hours (5 HP Pump)'}</b>
             </div>
           </div>
 
           <div className="mt-6 rounded-xl bg-primary-50 border border-primary/20 p-4">
             <p className="text-xs font-bold text-primary-dark">
-              {hi ? 'सिंचाई के बाद आवश्यक कार्य:' : 'Post-Irrigation Task:'}
+              {mr ? 'पाणी दिल्यानंतरचे कार्य:' : hi ? 'सिंचाई के बाद आवश्यक कार्य:' : 'Post-Irrigation Task:'}
             </p>
             <p className="mt-1 text-xs text-text-secondary leading-5">
-              {hi
+              {mr
+                ? 'पाणी दिल्यानंतर २४ तासांत युरिया खताची मात्रा (४० किलो/एकर) द्या, ज्यामुळे नत्र शोषण उत्तम होईल.'
+                : hi
                 ? 'पानी देने के 24 घंटे के अंदर यूरिया की दूसरी खुराक (40 किग्रा/एकड़) डालें।'
                 : 'Top dress 40 kg/acre urea within 24 hours of irrigation for maximum nitrogen uptake.'}
             </p>
@@ -457,7 +506,7 @@ export function Irrigation() {
           <div className="flex items-center justify-between border-b border-border pb-4">
             <div>
               <h2 className="font-bold text-base text-text-primary">
-                {hi ? 'IoT ट्यूबवेल पंप नियंत्रक' : 'IoT Tubewell Controller'}
+                {mr ? 'IoT विहीर/बोअरवेल पंप नियंत्रक' : hi ? 'IoT ट्यूबवेल पंप नियंत्रक' : 'IoT Tubewell Controller'}
               </h2>
               <p className="text-xs text-text-secondary">ESP32 Smart Relay #01</p>
             </div>
@@ -466,7 +515,7 @@ export function Irrigation() {
                 pumpOn ? 'bg-emerald-100 text-emerald-800 animate-pulse' : 'bg-gray-200 text-gray-700'
               }`}
             >
-              {pumpOn ? (hi ? 'चालू (ON)' : 'RUNNING') : (hi ? 'बंद (OFF)' : 'IDLE')}
+              {pumpOn ? (mr ? 'सुरू (ON)' : hi ? 'चालू (ON)' : 'RUNNING') : (mr ? 'बंद (OFF)' : hi ? 'बंद (OFF)' : 'IDLE')}
             </span>
           </div>
 
@@ -483,11 +532,11 @@ export function Irrigation() {
             </button>
             <p className="mt-4 text-xs font-bold text-text-primary">
               {pumpOn
-                ? (hi ? 'पंप चल रहा है · पानी का प्रवाह: 450 L/min' : 'Pump Active · Flow: 450 L/min')
-                : (hi ? 'पंप चालू करने के लिए टैप करें' : 'Tap to start irrigation pump')}
+                ? (mr ? 'पंप सुरू आहे · पाणी प्रवाह: ४५० L/min' : hi ? 'पंप चल रहा है · पानी का प्रवाह: 450 L/min' : 'Pump Active · Flow: 450 L/min')
+                : (mr ? 'पंप सुरू करण्यासाठी टॅप करा' : hi ? 'पंप चालू करने के लिए टैप करें' : 'Tap to start irrigation pump')}
             </p>
             <p className="text-[11px] text-text-muted mt-0.5">
-              {hi ? 'सुरक्षा कट-ऑफ: 3 घंटे बाद ऑटो बंद' : 'Auto-safety shutoff active (3h timer)'}
+              {mr ? 'सुरक्षा कट-ऑफ: ३ तासांनंतर आपोआप बंद' : hi ? 'सुरक्षा कट-ऑफ: 3 घंटे बाद ऑटो बंद' : 'Auto-safety shutoff active (3h timer)'}
             </p>
           </div>
         </Card>
@@ -496,16 +545,16 @@ export function Irrigation() {
       {/* All Fields Irrigation Schedule Table */}
       <div className="mt-6 rounded-2xl border border-border bg-white p-6 shadow-card">
         <h2 className="font-bold text-base text-text-primary mb-4">
-          {hi ? 'सभी खेतों की सिंचाई अनुसूची' : 'Farm-Wide Irrigation Schedule'}
+          {mr ? 'सर्व शेतांचे सिंचन वेळापत्रक' : hi ? 'सभी खेतों की सिंचाई अनुसूची' : 'Farm-Wide Irrigation Schedule'}
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="border-y border-border bg-surface-muted text-text-secondary">
               <tr>
-                <th className="py-3 px-4 font-bold">{hi ? 'खेत का नाम' : 'Field'}</th>
-                <th className="py-3 px-4 font-bold">{hi ? 'नियोजित तारीख' : 'Scheduled Date'}</th>
-                <th className="py-3 px-4 font-bold">{hi ? 'पानी की मात्रा' : 'Water Volume'}</th>
-                <th className="py-3 px-4 font-bold text-right">{hi ? 'स्थिति' : 'Status'}</th>
+                <th className="py-3 px-4 font-bold">{mr ? 'शेताचे नाव' : hi ? 'खेत का नाम' : 'Field'}</th>
+                <th className="py-3 px-4 font-bold">{mr ? 'नियोजित तारीख' : hi ? 'नियोजित तारीख' : 'Scheduled Date'}</th>
+                <th className="py-3 px-4 font-bold">{mr ? 'पाण्याचे प्रमाण' : hi ? 'पानी की मात्रा' : 'Water Volume'}</th>
+                <th className="py-3 px-4 font-bold text-right">{mr ? 'स्थिती' : hi ? 'स्थिति' : 'Status'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -529,9 +578,6 @@ export function Irrigation() {
   );
 }
 
-// ==========================================
-// 4. MANDI MARKET PRICES & 7-DAY TRENDS
-// ==========================================
 // ==========================================
 // 4. MANDI MARKET PRICES & MACHINERY RENTAL DISCOVERY
 // ==========================================
@@ -936,34 +982,45 @@ export function MarketPrices() {
 // ==========================================
 export function Reports() {
   const { language } = useLanguage();
+  const mr = language === 'mr';
   const hi = language === 'hi';
 
   return (
     <Page
-      title={hi ? 'फार्म रिपोर्ट एवं प्रमाण पत्र' : 'Farm Reports & Certificates'}
-      subtitle={hi ? 'फसल चक्र, मिट्टी स्वास्थ्य एवं पानी उपयोग की मासिक रिपोर्ट।' : 'Comprehensive monthly agro-intelligence report and Soil Health certificate.'}
+      title={mr ? 'शेती अहवाल व प्रमाणपत्र' : hi ? 'फार्म रिपोर्ट एवं प्रमाण पत्र' : 'Farm Reports & Certificates'}
+      subtitle={
+        mr
+          ? 'पीक चक्र, माती परीक्षण, हवामान इतिहास आणि सिंचन नोंदींचा मासिक अहवाल.'
+          : hi
+          ? 'फसल चक्र, मिट्टी स्वास्थ्य एवं पानी उपयोग की मासिक रिपोर्ट।'
+          : 'Comprehensive monthly agro-intelligence report and Soil Health certificate.'
+      }
     >
       <Card className="p-6">
         <div className="flex items-center gap-3">
-          <span className="grid size-12 place-items-center rounded-2xl bg-primary text-white">
+          <span className="grid size-12 place-items-center rounded-xl bg-primary text-white">
             <Sprout size={24} />
           </span>
           <div>
             <h2 className="font-bold text-base text-text-primary">
-              {hi ? 'मई 2025 सम्पूर्ण फार्म रिपोर्ट (PDF)' : 'May 2025 Complete Farm Intelligence Report (PDF)'}
+              {mr ? 'मे २०२५ संपूर्ण शेती अहवाल (PDF)' : hi ? 'मई 2025 सम्पूर्ण फार्म रिपोर्ट (PDF)' : 'May 2025 Complete Farm Intelligence Report (PDF)'}
             </h2>
             <p className="text-xs text-text-secondary mt-0.5">
-              {hi ? 'फसल वृद्धि, मिट्टी परीक्षण, मौसम इतिहास और मंडी लाभ का विश्लेषण।' : 'Crop health timeline, soil nutrients, weather log, and market arbitrage report.'}
+              {mr
+                ? 'पीक वाढ टाइमलाइन, मातीतील पोषणद्रव्ये, हवामान नोंदी आणि बाजार नफा विश्लेषण.'
+                : hi
+                ? 'फसल वृद्धि, मिट्टी परीक्षण, मौसम इतिहास और मंडी लाभ का विश्लेषण।'
+                : 'Crop health timeline, soil nutrients, weather log, and market arbitrage report.'}
             </p>
           </div>
         </div>
 
         <div className="mt-5 flex gap-3">
           <button
-            onClick={() => alert(hi ? 'रिपोर्ट डाउनलोड शुरू हुई!' : 'Report downloaded!')}
+            onClick={() => alert(mr ? 'अहवाल डाउनलोड सुरू झाला!' : hi ? 'रिपोर्ट डाउनलोड शुरू हुई!' : 'Report downloaded!')}
             className="rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white hover:bg-primary-dark shadow-sm"
           >
-            {hi ? 'डाउनलोड करें (PDF) 📥' : 'Download PDF Report 📥'}
+            {mr ? 'डाउनलोड करा (PDF) 📥' : hi ? 'डाउनलोड करें (PDF) 📥' : 'Download PDF Report 📥'}
           </button>
         </div>
       </Card>
