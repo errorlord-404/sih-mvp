@@ -6,17 +6,21 @@ from pydantic import BaseModel, ConfigDict, Field
 class FertilizerCreate(BaseModel):
     name: str
     type: str
-    crop_compatibility: List[str] = Field(default_factory=list)
-    recommended_dosage: str
-    price_range: str
+    bag_size: str
+    subsidized_mrp: float
+    govt_subsidy_per_bag: float
+    dosage_per_acre: str
+    suitable_crops: List[str] = Field(default_factory=list)
 
 
 class FertilizerUpdate(BaseModel):
     name: Optional[str] = None
     type: Optional[str] = None
-    crop_compatibility: Optional[List[str]] = None
-    recommended_dosage: Optional[str] = None
-    price_range: Optional[str] = None
+    bag_size: Optional[str] = None
+    subsidized_mrp: Optional[float] = None
+    govt_subsidy_per_bag: Optional[float] = None
+    dosage_per_acre: Optional[str] = None
+    suitable_crops: Optional[List[str]] = None
 
 
 class FertilizerResponse(FertilizerCreate):

@@ -8,6 +8,7 @@ from app.routers.disease import router as disease_router
 from app.routers.fertilizer import router as fertilizer_router
 from app.routers.farmer import router as farmer_router
 from app.routers.gov_scheme import router as gov_scheme_router
+from app.routers.machinery_rental import router as machinery_rental_router
 from app.routers.market_price import router as market_price_router
 from app.routers.msp import router as msp_router
 from app.routers.seed import router as seed_router
@@ -35,6 +36,7 @@ app.include_router(farmer_router)
 app.include_router(crop_router)
 app.include_router(disease_router)
 app.include_router(fertilizer_router)
+app.include_router(machinery_rental_router)
 app.include_router(market_price_router)
 app.include_router(gov_scheme_router)
 app.include_router(msp_router)

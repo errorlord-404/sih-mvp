@@ -13,12 +13,12 @@ router = APIRouter(prefix="/seeds", tags=["seeds"])
 def _to_response(seed: Seed) -> SeedResponse:
     return SeedResponse(
         id=str(seed.id),
-        name=seed.name,
-        crop_name=seed.crop_name,
+        crop=seed.crop,
         variety=seed.variety,
-        price=seed.price,
-        certifications=seed.certifications,
-        supplier_info=seed.supplier_info,
+        duration_days=seed.duration_days,
+        yield_potential=seed.yield_potential,
+        disease_resistance=seed.disease_resistance,
+        recommended_zone=seed.recommended_zone,
     )
 
 

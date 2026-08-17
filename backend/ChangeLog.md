@@ -5,6 +5,34 @@ Format: `### YYYY-MM-DD HH:MM - short title`
 
 ---
 
+### 2026-08-17 - Contract-backed catalog alignment
+**What changed:**
+- Extended `MarketPrice` with `min_price`, `max_price`, and `arrival_today_qtl` to match the frontend mandi contract without adding multilingual or UI-only fields
+- Reworked the existing Fertilizer and Seed resources to use the frontend contract-backed field sets
+- Added a new MachineryRental Beanie document, schemas, and full CRUD router for hosted machinery catalog data
+- Registered the new document and router with FastAPI/Beanie startup
+
+**Files touched:**
+- `app/models/market_price.py`
+- `app/schemas/market_price.py`
+- `app/routers/market_price.py`
+- `app/models/fertilizer.py`
+- `app/schemas/fertilizer.py`
+- `app/routers/fertilizer.py`
+- `app/models/seed.py`
+- `app/schemas/seed.py`
+- `app/routers/seed.py`
+- `app/models/machinery_rental.py`
+- `app/schemas/machinery_rental.py`
+- `app/routers/machinery_rental.py`
+- `app/core/database.py`
+- `app/main.py`
+- `ChangeLog.md`
+
+**Why:** Needed the backend collection shapes and CRUD surfaces to align with the frontend-hosted catalog contracts while preserving the existing service structure.
+
+**Status:** Ready
+
 ### 2026-08-15 - GovScheme eligibility mutator 
 **What changed:**
 - Added a reusable `check_scheme_eligibility()` mutator contract for government scheme eligibility checks

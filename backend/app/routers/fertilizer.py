@@ -19,9 +19,11 @@ def _to_response(fertilizer: Fertilizer) -> FertilizerResponse:
         id=str(fertilizer.id),
         name=fertilizer.name,
         type=fertilizer.type,
-        crop_compatibility=fertilizer.crop_compatibility,
-        recommended_dosage=fertilizer.recommended_dosage,
-        price_range=fertilizer.price_range,
+        bag_size=fertilizer.bag_size,
+        subsidized_mrp=fertilizer.subsidized_mrp,
+        govt_subsidy_per_bag=fertilizer.govt_subsidy_per_bag,
+        dosage_per_acre=fertilizer.dosage_per_acre,
+        suitable_crops=fertilizer.suitable_crops,
     )
 
 
