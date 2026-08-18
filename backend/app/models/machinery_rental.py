@@ -8,8 +8,8 @@ class MachineryRental(Document):
     name: str
     category: str
     description: Optional[str] = None
-    provider_name: str
-    location: str
+    provider_name: Optional[str] = None
+    location: Optional[str] = None
     district: Optional[str] = None
     state: Optional[str] = None
     distance_km: Optional[float] = None
@@ -23,6 +23,14 @@ class MachineryRental(Document):
     image_url: Optional[str] = None
     observed_at: Optional[datetime] = None
     fetched_at: Optional[datetime] = None
+    # Legacy/reference-catalog aliases retained for backend-fastapi clients.
+    hp: Optional[str] = None
+    implements_included: Optional[str] = None
+    owner_name: Optional[str] = None
+    village: Optional[str] = None
+    phone: Optional[str] = None
+    reviews_count: Optional[int] = None
+    available_status: Optional[str] = None
 
     class Settings:
         name = "machinery_rentals"

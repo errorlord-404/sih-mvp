@@ -44,7 +44,7 @@ class MongoFertilizerMutator(FertilizerMutator):
         if not filtered:
             filtered = fertilizers
 
-        def score(fertilizer: Fertilizer) -> tuple[int, int, float, float, str]:
+        def score(fertilizer: Fertilizer) -> tuple[int, int, int, float, float, str]:
             crop_score = int(
                 any(
                     _normalize(suitable_crop) == crop_name_normalized

@@ -30,9 +30,9 @@ class FertilizerResponse(FertilizerCreate):
 
 
 class FertilizerRecommendationRequest(BaseModel):
-    crop_name: str
-    fertilizer_type: Optional[str] = None
-    max_budget_per_bag: Optional[float] = None
+    crop_name: str = Field(min_length=1)
+    fertilizer_type: Optional[str] = Field(default=None, min_length=1)
+    max_budget_per_bag: Optional[float] = Field(default=None, ge=0)
 
 
 class FertilizerRecommendationResponse(BaseModel):
