@@ -57,8 +57,9 @@ export const pageTranslations = {
   'Irrigation schedule': 'सिंचाई कार्यक्रम',
 
   // Market Prices Section
-  'Latest crop prices near Indore.': 'इंदौर के पास के नवीनतम फसल भाव।',
-  'Wheat · Indore Mandi': 'गेहूं · इंदौर मंडी',
+  'Latest crop prices near Pune.': 'पुणे के पास के नवीनतम फसल भाव।',
+  'Wheat · Pune Mandi': 'गेहूं · पुणे मंडी',
+
   'Nearby mandis': 'नजदीकी मंडियां',
   'Price trend': 'भाव रुझान',
 

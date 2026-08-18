@@ -1,11 +1,16 @@
-import { Bell, MapPin, Menu } from 'lucide-react';
-import { farmer } from '../../data/dashboard.js';
+import { MapPin, Menu } from 'lucide-react';
 import { useLanguage } from '../../hooks/useLanguage.jsx';
+import { useFarmData } from '../../context/FarmDataContext.jsx';
+import AlertMenu from './AlertMenu.jsx';
 
 export default function Header({ onMenuClick }) {
   // Extract language context and setup a quick boolean for Hindi checks
   const { language, setLanguage, t } = useLanguage();
+  const { profile } = useFarmData();
   const hi = language === 'hi';
+  const name = profile?.name || (hi ? 'स्थानीय प्रोफ़ाइल सेट करें' : 'Set up local profile');
+  const location = profile?.location || (hi ? 'स्थान उपलब्ध नहीं' : 'Location unavailable');
+  const initials = profile?.name ? profile.name.split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase() : 'KS';
 
   return (
     // Main header container: Hidden on small screens, visible on desktop (lg:flex)
@@ -32,25 +37,26 @@ export default function Header({ onMenuClick }) {
         >
           <option value="en">EN</option>
           <option value="hi">हिंदी</option>
+          <option value="mr">मराठी</option>
         </select>
 
         {/* Farmer Location Indicator */}
         <span className="flex items-center gap-1.5">
           <MapPin size={16} className="text-primary" />
-          {farmer.location}
+          {location}
         </span>
 
         {/* Notification Bell */}
-        <Bell aria-label={hi ? 'सूचनाएं' : 'Notifications'} size={19} />
+        <AlertMenu />
 
         {/* User Avatar (Initials) */}
         <div className="flex size-9 items-center justify-center rounded-full bg-amber-100 text-xs font-bold text-amber-800">
-          RC
+          {initials}
         </div>
         
         {/* User Name */}
         <span className="-ml-4 font-medium text-text-primary">
-          {farmer.name}
+          {name}
         </span>
         
       </div>

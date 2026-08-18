@@ -8,8 +8,24 @@ export function LanguageProvider({ children }) {
 // The hook and provider are intentionally colocated for the app's i18n boundary.
 // eslint-disable-next-line react-refresh/only-export-components
 export function useLanguage() {
-  const { t, i18n: instance } = useTranslation()
-  const language = instance.language === 'hi' ? 'hi' : 'en'
-  const setLanguage = (nextLanguage) => { instance.changeLanguage(nextLanguage); localStorage.setItem('kisansathi-language', nextLanguage); document.documentElement.lang = nextLanguage === 'hi' ? 'hi' : 'en' }
-  return { language, setLanguage, isHindi: language === 'hi', t, formatDate: (value, options = { day: 'numeric', month: 'short', year: 'numeric' }) => new Intl.DateTimeFormat(language === 'hi' ? 'hi-IN' : 'en-IN', options).format(new Date(value)) }
+  const { t, i18n: instance } = useTranslation();
+  const language = instance.language === 'mr' ? 'mr' : instance.language === 'hi' ? 'hi' : 'en';
+  
+  const setLanguage = (nextLanguage) => {
+    instance.changeLanguage(nextLanguage);
+    localStorage.setItem('kisansathi-language', nextLanguage);
+    document.documentElement.lang = nextLanguage;
+  };
+
+  return {
+    language,
+    setLanguage,
+    isHindi: language === 'hi',
+    isMarathi: language === 'mr',
+    isIndic: language === 'hi' || language === 'mr',
+    t,
+    formatDate: (value, options = { day: 'numeric', month: 'short', year: 'numeric' }) =>
+      new Intl.DateTimeFormat(language === 'mr' ? 'mr-IN' : language === 'hi' ? 'hi-IN' : 'en-IN', options).format(new Date(value)),
+  };
 }
+

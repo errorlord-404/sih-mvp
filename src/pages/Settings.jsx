@@ -1,12 +1,14 @@
-import { Bell, ChevronRight, Globe, UserRound } from 'lucide-react';
+import { Bell, ChevronRight, Globe, ShieldCheck } from 'lucide-react';
+import { farmer } from '../data/dashboard.js';
 import { useLanguage } from '../hooks/useLanguage.jsx';
 
 export default function Settings() {
   const { language, setLanguage, t } = useLanguage();
+  const mr = language === 'mr';
+  const hi = language === 'hi';
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
-      
       {/* Page Header */}
       <h1 className="text-2xl font-bold">{t('settings')}</h1>
       <p className="mt-1 text-sm text-text-secondary">
@@ -14,20 +16,30 @@ export default function Settings() {
       </p>
 
       {/* Settings Card Container */}
-      <section className="mt-6 overflow-hidden rounded-card border border-border bg-white shadow-card">
-        
+      <section className="mt-6 overflow-hidden rounded-2xl border border-border bg-white shadow-card">
         {/* User Profile Section */}
-        <div className="flex items-center gap-3 border-b border-border p-5">
-          <span className="grid size-10 place-items-center rounded-xl bg-primary-50 text-primary">
-            <UserRound size={20} />
-          </span>
-          <div>
-            <p className="font-bold">Ramesh Chauhan</p>
-            <p className="text-xs text-text-secondary">
-              Indore, Madhya Pradesh
+        <div className="flex items-center gap-4 border-b border-border p-5">
+          <img
+            src={farmer.avatar}
+            alt="Farmer Profile"
+            className="size-14 rounded-full border-2 border-primary object-cover shadow-sm"
+          />
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <p className="font-bold text-base text-text-primary">
+                {mr ? farmer.nameMr || 'संतोष जाधव' : hi ? farmer.nameHi : farmer.name}
+              </p>
+              <span className="flex items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                <ShieldCheck size={12} />
+                {mr ? 'प्रमाणित शेतकरी' : hi ? 'सत्यापित किसान' : 'Verified'}
+              </span>
+            </div>
+            <p className="text-xs text-text-secondary mt-0.5">
+              {mr ? farmer.locationMr || 'पुणे, महाराष्ट्र' : hi ? farmer.locationHi : farmer.location} · {mr ? '२.५ एकर' : hi ? '2.5 एकड़' : '2.5 Acres'}
             </p>
           </div>
         </div>
+
 
         {/* Language Preferences Section */}
         <div className="flex items-center gap-3 border-b border-border p-5">
@@ -43,11 +55,13 @@ export default function Settings() {
           <select
             value={language}
             onChange={(event) => setLanguage(event.target.value)}
-            className="rounded-lg border border-border bg-white px-3 py-2 text-sm"
+            className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-primary"
           >
-            <option value="en">English</option>
-            <option value="hi">हिंदी</option>
+            <option value="en">English (English)</option>
+            <option value="hi">हिंदी (Hindi)</option>
+            <option value="mr">मराठी (Marathi)</option>
           </select>
+
         </div>
 
         {/* Notifications Button Option */}
