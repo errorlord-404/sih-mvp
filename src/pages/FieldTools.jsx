@@ -739,7 +739,7 @@ export function PestDisease() {
                   </button>
 
                   <Link
-                    to="/ai"
+                    to="/voice"
                     className="inline-flex items-center gap-2 rounded-xl border border-border bg-white px-4 py-2.5 text-xs font-bold text-text-primary hover:bg-surface-muted transition"
                   >
                     <span>{mr ? 'AI मित्राला विचारा' : hi ? 'AI साथी से पूछें' : 'Ask AI Sathi'}</span>

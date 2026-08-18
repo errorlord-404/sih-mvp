@@ -27,8 +27,7 @@ export const navigation = [
   { label: 'Market Prices', key: 'market', to: '/market', icon: Store },
   { label: 'Govt Schemes', key: 'schemes', to: '/schemes', icon: Landmark },
   { label: 'Farm Finance', key: 'finance', to: '/finance', icon: Coins },
-  { label: 'AI Advisor', key: 'ai', to: '/ai', icon: Bot },
-  { label: 'Voice Assistant', key: 'voice', to: '/voice', icon: Mic },
+  { label: 'AI Assistant', key: 'voice', to: '/voice', icon: Bot },
   { label: 'Settings', key: 'settings', to: '/settings', icon: Settings },
 ];
 

@@ -1,4 +1,4 @@
-import { Bell, ChevronDown, CloudSun, MapPin, Menu, Search } from 'lucide-react';
+import { Bell, CloudSun, MapPin, Menu, Search } from 'lucide-react';
 import { farmer } from '../../data/dashboard.js';
 import { useLanguage } from '../../hooks/useLanguage.jsx';
 

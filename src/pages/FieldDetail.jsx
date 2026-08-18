@@ -223,7 +223,7 @@ export default function FieldDetail() {
 
             <div className="mt-5">
               <Link
-                to="/ai"
+                to="/voice"
                 className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary py-2.5 text-xs font-bold text-white hover:bg-primary-dark shadow-sm"
               >
                 <span>{mr ? 'AI मित्राकडून सविस्तर सल्ला घ्या' : hi ? 'AI से विस्तृत सलाह प्राप्त करें' : 'View All Recommendations'}</span>

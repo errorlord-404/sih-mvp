@@ -210,7 +210,7 @@ function Advisor() {
 
 
         <div className="mt-4 flex items-center gap-3">
-          <Go to="/ai">{mr ? 'पूर्ण सल्ला पहा' : hi ? 'पूरी सलाह देखें' : 'Ask KisanSathi'}</Go>
+          <Go to="/voice">{mr ? 'पूर्ण सल्ला पहा' : hi ? 'पूरी सलाह देखें' : 'Ask KisanSathi'}</Go>
           <Link
             to="/voice"
             className="inline-flex items-center gap-1 rounded-lg border border-primary/20 bg-white px-3 py-2 text-xs font-semibold text-primary hover:bg-primary-50"
@@ -348,7 +348,7 @@ function Mobile() {
         </div>
         <div className="mt-3 flex gap-2">
           <Link
-            to="/ai"
+            to="/voice"
             className="flex-1 rounded-xl bg-primary py-2 text-center text-xs font-bold text-white shadow-xs hover:bg-primary-dark"
           >
             {mr ? 'चॅट सुरू करा 💬' : hi ? 'चैट शुरू करें 💬' : 'Start Chat 💬'}
@@ -469,7 +469,7 @@ function Desktop() {
             <span>{mr ? 'व्हॉइस सहाय्यक' : hi ? 'वॉइस असिस्टेंट' : 'Voice Assistant'}</span>
           </Link>
           <Link
-            to="/ai"
+            to="/voice"
             className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-primary-dark"
           >
             <Sparkles size={15} />

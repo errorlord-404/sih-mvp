@@ -1,7 +1,6 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import AppShell from '../components/layout/AppShell.jsx';
 import Dashboard from '../pages/Dashboard.jsx';
-import AIAssistant from '../pages/AIAssistant.jsx';
 import MyFields from '../pages/MyFields.jsx';
 import FieldDetail from '../pages/FieldDetail.jsx';
 import {
@@ -34,7 +33,7 @@ export const router = createBrowserRouter([
       { path: '/market', element: <MarketPrices /> },
       { path: '/schemes', element: <GovtSchemes /> },
       { path: '/finance', element: <FarmFinance /> },
-      { path: '/ai', element: <AIAssistant /> },
+      { path: '/ai', element: <Navigate to="/voice" replace /> },
       { path: '/voice', element: <VoiceAssistant /> },
       { path: '/reports', element: <Reports /> },
       { path: '/settings', element: <Settings /> },

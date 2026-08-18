@@ -1,10 +1,11 @@
 import { RouterProvider } from 'react-router-dom'
 import { router } from './routes/index.jsx'
 import { LanguageProvider } from './hooks/useLanguage.jsx'
+import { AIConversationProvider } from './context/AIConversationContext.jsx'
 
 function App() {
   return <LanguageProvider>
-            <RouterProvider router={router} />
+            <AIConversationProvider><RouterProvider router={router} /></AIConversationProvider>
           </LanguageProvider>
 }
 

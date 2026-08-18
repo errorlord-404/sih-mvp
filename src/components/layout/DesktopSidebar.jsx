@@ -60,7 +60,7 @@ export default function DesktopSidebar({ collapsed }) {
             {mr ? 'कधीही किसानसाथीशी बोला.' : hi ? 'कभी भी किसानसाथी से बात करें।' : 'Talk to KisanSathi anytime.'}
           </p>
           <NavLink
-            to="/ai"
+            to="/voice"
             className="mt-3 flex w-fit items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-primary shadow-xs hover:bg-green-50 transition"
           >
             <MessageCircle size={14} /> {mr ? 'आताच चॅट करा' : hi ? 'अभी चैट करें' : 'Chat Now'}
