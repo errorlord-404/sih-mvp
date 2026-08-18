@@ -15,10 +15,11 @@ from app.schemas.market_price import (
 
 router = APIRouter(prefix="/market-prices", tags=["market-prices"])
 
-TRANSPORT_WITHIN_DISTRICT = 50.0
-TRANSPORT_WITHIN_STATE = 150.0
-TRANSPORT_OTHER_STATE = 300.0
+TRANSPORT_WITHIN_DISTRICT = 500.0
+TRANSPORT_WITHIN_STATE = 1500.0
+TRANSPORT_OTHER_STATE = 3000.0
 LOADING_COST = 200.0
+UNLOADING_COST = 200.0
 MARKET_FEE_RATE = 0.02
 
 
@@ -89,7 +90,7 @@ async def compare_mandis(
         )
         sale_revenue = market_price.price_per_quintal
         loading_cost = LOADING_COST
-        unloading_cost = 0.0
+        unloading_cost = UNLOADING_COST
         market_fees = MARKET_FEE_RATE * market_price.price_per_quintal
         storage_cost = 0.0
         expected_spoilage = 0.0
