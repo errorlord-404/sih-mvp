@@ -1,27 +1,40 @@
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 
 class SeedCreate(BaseModel):
-    name: str
-    crop_name: str
+    crop: str
     variety: str
-    price: float
-    certifications: List[str] = Field(default_factory=list)
-    supplier_info: str
+    duration_days: str
+    yield_potential: str
+    disease_resistance: str
+    recommended_zone: str
 
 
 class SeedUpdate(BaseModel):
-    name: Optional[str] = None
-    crop_name: Optional[str] = None
+    crop: Optional[str] = None
     variety: Optional[str] = None
-    price: Optional[float] = None
-    certifications: Optional[List[str]] = None
-    supplier_info: Optional[str] = None
+    duration_days: Optional[str] = None
+    yield_potential: Optional[str] = None
+    disease_resistance: Optional[str] = None
+    recommended_zone: Optional[str] = None
 
 
 class SeedResponse(SeedCreate):
     id: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class SeedRecommendationRequest(BaseModel):
+    crop: str
+    preferred_zone: Optional[str] = None
+    disease_risk: Optional[str] = None
+
+
+class SeedRecommendationResponse(BaseModel):
+    crop: str
+    preferred_zone: Optional[str] = None
+    disease_risk: Optional[str] = None
+    recommended_seeds: List[SeedResponse]

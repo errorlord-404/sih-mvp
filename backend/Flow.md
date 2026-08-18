@@ -47,7 +47,7 @@ notes: Full CRUD for central disease reference records, pairing crop-specific sy
 router: app/routers/fertilizer.py
 schema: app/schemas/fertilizer.py
 model: app/models/fertilizer.py
-notes: Full CRUD for central fertilizer reference records, including crop compatibility, dosage, and price range metadata.
+notes: Full CRUD for central fertilizer reference records, including crop compatibility, dosage, and price range metadata. Includes a `recommend_fertilizer()` path backed by `app/services/fertilizer_mutator.py` that ranks products using stored crop compatibility, optional type preference, subsidy, and budget fit.
 
 ### MarketPrice
 router: app/routers/market_price.py
@@ -71,7 +71,7 @@ notes: Full CRUD for central MSP reference records. Includes a crop-scoped listi
 router: app/routers/seed.py
 schema: app/schemas/seed.py
 model: app/models/seed.py
-notes: Full CRUD for central seed reference records, including crop-specific variety, certification, pricing, and supplier metadata.
+notes: Full CRUD for central seed reference records, including crop-specific variety, certification, pricing, and supplier metadata. Includes a `recommend_seed()` path backed by `app/services/seed_mutator.py` that ranks varieties using stored crop match, optional zone match, and disease-resistance text matching.
 
 ### Sensor
 router: app/routers/sensor.py

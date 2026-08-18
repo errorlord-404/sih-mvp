@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
+*.egg-info/
 
 # Virtual Environments
 .venv/
@@ -35,6 +36,10 @@ node_modules
 dist
 dist-ssr
 *.local
+
+# Local service runtimes and downloaded database binaries
+.runtime/
+backend/.runtime/
 
 # Editor directories and files
 .vscode/*

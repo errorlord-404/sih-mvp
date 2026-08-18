@@ -11,16 +11,29 @@ from app.routers.gov_scheme import router as gov_scheme_router
 from app.routers.market_price import router as market_price_router
 from app.routers.msp import router as msp_router
 from app.routers.seed import router as seed_router
+from app.routers.farm_state import router as farm_state_router
+from app.routers.weather import router as weather_router
+from app.routers.assistants import router as assistants_router
+from app.routers.ingestion import router as ingestion_router
+from app.routers.machinery_rental import router as machinery_rental_router
 from fastapi.middleware.cors import CORSMiddleware
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    client = await init_db()
+    client = None
+    app.state.reference_db_available = False
+    app.state.reference_db_error = None
     try:
+        try:
+            client = await init_db()
+            app.state.reference_db_available = True
+        except Exception as exc:
+            app.state.reference_db_error = str(exc)
         yield
     finally:
-        client.close()
+        if client is not None:
+            client.close()
 
 
 app = FastAPI(lifespan=lifespan)
@@ -39,3 +52,19 @@ app.include_router(market_price_router)
 app.include_router(gov_scheme_router)
 app.include_router(msp_router)
 app.include_router(seed_router)
+app.include_router(farm_state_router)
+app.include_router(weather_router)
+app.include_router(assistants_router)
+app.include_router(ingestion_router)
+app.include_router(machinery_rental_router)
+
+
+@app.get("/health", tags=["health"])
+async def health():
+    available = getattr(app.state, "reference_db_available", False)
+    return {
+        "status": "ok" if available else "degraded",
+        "service": "kisansathi-backend",
+        "farm_state": "available",
+        "reference_database": "available" if available else "unavailable",
+    }

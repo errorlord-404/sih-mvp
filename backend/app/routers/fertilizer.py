@@ -2,13 +2,19 @@ from typing import List
 
 from bson.errors import InvalidId
 from beanie import PydanticObjectId
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.models.fertilizer import Fertilizer
 from app.schemas.fertilizer import (
     FertilizerCreate,
+    FertilizerRecommendationRequest,
+    FertilizerRecommendationResponse,
     FertilizerResponse,
     FertilizerUpdate,
+)
+from app.services.fertilizer_mutator import (
+    FertilizerMutator,
+    get_fertilizer_mutator,
 )
 
 router = APIRouter(prefix="/fertilizer", tags=["fertilizer"])
@@ -19,9 +25,11 @@ def _to_response(fertilizer: Fertilizer) -> FertilizerResponse:
         id=str(fertilizer.id),
         name=fertilizer.name,
         type=fertilizer.type,
-        crop_compatibility=fertilizer.crop_compatibility,
-        recommended_dosage=fertilizer.recommended_dosage,
-        price_range=fertilizer.price_range,
+        bag_size=fertilizer.bag_size,
+        subsidized_mrp=fertilizer.subsidized_mrp,
+        govt_subsidy_per_bag=fertilizer.govt_subsidy_per_bag,
+        dosage_per_acre=fertilizer.dosage_per_acre,
+        suitable_crops=fertilizer.suitable_crops,
     )
 
 
@@ -45,6 +53,26 @@ async def create_fertilizer(payload: FertilizerCreate):
 async def list_fertilizers():
     fertilizers = await Fertilizer.find_all().to_list()
     return [_to_response(fertilizer) for fertilizer in fertilizers]
+
+
+@router.post("/recommend", response_model=FertilizerRecommendationResponse)
+async def recommend_fertilizer(
+    payload: FertilizerRecommendationRequest,
+    mutator: FertilizerMutator = Depends(get_fertilizer_mutator),
+):
+    fertilizers = await mutator.recommend_fertilizer(
+        crop_name=payload.crop_name,
+        fertilizer_type=payload.fertilizer_type,
+        max_budget_per_bag=payload.max_budget_per_bag,
+    )
+    return FertilizerRecommendationResponse(
+        crop_name=payload.crop_name,
+        fertilizer_type=payload.fertilizer_type,
+        max_budget_per_bag=payload.max_budget_per_bag,
+        recommended_fertilizers=[
+            _to_response(fertilizer) for fertilizer in fertilizers
+        ],
+    )
 
 
 @router.get("/{fertilizer_id}", response_model=FertilizerResponse)

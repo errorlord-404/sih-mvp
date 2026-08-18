@@ -2,10 +2,17 @@ from typing import List
 
 from bson.errors import InvalidId
 from beanie import PydanticObjectId
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.models.seed import Seed
-from app.schemas.seed import SeedCreate, SeedResponse, SeedUpdate
+from app.schemas.seed import (
+    SeedCreate,
+    SeedRecommendationRequest,
+    SeedRecommendationResponse,
+    SeedResponse,
+    SeedUpdate,
+)
+from app.services.seed_mutator import SeedMutator, get_seed_mutator
 
 router = APIRouter(prefix="/seeds", tags=["seeds"])
 
@@ -13,12 +20,12 @@ router = APIRouter(prefix="/seeds", tags=["seeds"])
 def _to_response(seed: Seed) -> SeedResponse:
     return SeedResponse(
         id=str(seed.id),
-        name=seed.name,
-        crop_name=seed.crop_name,
+        crop=seed.crop,
         variety=seed.variety,
-        price=seed.price,
-        certifications=seed.certifications,
-        supplier_info=seed.supplier_info,
+        duration_days=seed.duration_days,
+        yield_potential=seed.yield_potential,
+        disease_resistance=seed.disease_resistance,
+        recommended_zone=seed.recommended_zone,
     )
 
 
@@ -40,6 +47,24 @@ async def create_seed(payload: SeedCreate):
 async def list_seeds():
     seeds = await Seed.find_all().to_list()
     return [_to_response(seed) for seed in seeds]
+
+
+@router.post("/recommend", response_model=SeedRecommendationResponse)
+async def recommend_seed(
+    payload: SeedRecommendationRequest,
+    mutator: SeedMutator = Depends(get_seed_mutator),
+):
+    seeds = await mutator.recommend_seed(
+        crop=payload.crop,
+        preferred_zone=payload.preferred_zone,
+        disease_risk=payload.disease_risk,
+    )
+    return SeedRecommendationResponse(
+        crop=payload.crop,
+        preferred_zone=payload.preferred_zone,
+        disease_risk=payload.disease_risk,
+        recommended_seeds=[_to_response(seed) for seed in seeds],
+    )
 
 
 @router.get("/{seed_id}", response_model=SeedResponse)

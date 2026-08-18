@@ -10,12 +10,17 @@ from app.models.gov_scheme import GovScheme
 from app.models.market_price import MarketPrice
 from app.models.msp import MSP
 from app.models.seed import Seed
+from app.models.ingestion_run import IngestionRun
+from app.models.machinery_rental import MachineryRental
 
 
 async def init_db():
-    client = AsyncIOMotorClient(settings.MONGODB_URL)
+    client = AsyncIOMotorClient(
+        settings.MONGODB_URL,
+        serverSelectionTimeoutMS=settings.MONGODB_CONNECT_TIMEOUT_MS,
+    )
     await init_beanie(
         database=client[settings.DATABASE_NAME],
-        document_models=[Farmer, Crop, Disease, Fertilizer, MarketPrice, GovScheme, MSP, Seed],
+        document_models=[Farmer, Crop, Disease, Fertilizer, MarketPrice, GovScheme, MSP, Seed, IngestionRun, MachineryRental],
     )
     return client
