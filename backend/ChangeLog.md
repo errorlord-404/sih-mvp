@@ -5,6 +5,28 @@ Format: `### YYYY-MM-DD HH:MM - short title`
 
 ---
 
+### 2026-08-18 00:00 - Seed and fertilizer recommendation mutators
+**What changed:**
+- Added a reusable `recommend_seed()` mutator contract and `/seeds/recommend` endpoint
+- Added a reusable `recommend_fertilizer()` mutator contract and `/fertilizer/recommend` endpoint
+- Added request/response schemas for both recommendation flows
+- Ranked recommendations only from stored central reference data, using crop compatibility plus optional user preferences already represented in the current data model
+
+**Files touched:**
+- `app/services/seed_mutator.py`
+- `app/services/fertilizer_mutator.py`
+- `app/schemas/seed.py`
+- `app/schemas/fertilizer.py`
+- `app/routers/seed.py`
+- `app/routers/fertilizer.py`
+- `Flow.md`
+- `Decisions.md`
+- `ChangeLog.md`
+
+**Why:** Needed PRD-aligned `recommend_seed()` and `recommend_fertilizer()` functions that the Harness team can wrap directly without inventing agronomy data the backend does not yet store.
+
+**Status:** Ready
+
 ### 2026-08-17 - Contract-backed catalog alignment
 **What changed:**
 - Extended `MarketPrice` with `min_price`, `max_price`, and `arrival_today_qtl` to match the frontend mandi contract without adding multilingual or UI-only fields

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -25,3 +25,16 @@ class SeedResponse(SeedCreate):
     id: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class SeedRecommendationRequest(BaseModel):
+    crop: str
+    preferred_zone: Optional[str] = None
+    disease_risk: Optional[str] = None
+
+
+class SeedRecommendationResponse(BaseModel):
+    crop: str
+    preferred_zone: Optional[str] = None
+    disease_risk: Optional[str] = None
+    recommended_seeds: List[SeedResponse]

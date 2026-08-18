@@ -2,13 +2,19 @@ from typing import List
 
 from bson.errors import InvalidId
 from beanie import PydanticObjectId
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.models.fertilizer import Fertilizer
 from app.schemas.fertilizer import (
     FertilizerCreate,
+    FertilizerRecommendationRequest,
+    FertilizerRecommendationResponse,
     FertilizerResponse,
     FertilizerUpdate,
+)
+from app.services.fertilizer_mutator import (
+    FertilizerMutator,
+    get_fertilizer_mutator,
 )
 
 router = APIRouter(prefix="/fertilizer", tags=["fertilizer"])
@@ -47,6 +53,26 @@ async def create_fertilizer(payload: FertilizerCreate):
 async def list_fertilizers():
     fertilizers = await Fertilizer.find_all().to_list()
     return [_to_response(fertilizer) for fertilizer in fertilizers]
+
+
+@router.post("/recommend", response_model=FertilizerRecommendationResponse)
+async def recommend_fertilizer(
+    payload: FertilizerRecommendationRequest,
+    mutator: FertilizerMutator = Depends(get_fertilizer_mutator),
+):
+    fertilizers = await mutator.recommend_fertilizer(
+        crop_name=payload.crop_name,
+        fertilizer_type=payload.fertilizer_type,
+        max_budget_per_bag=payload.max_budget_per_bag,
+    )
+    return FertilizerRecommendationResponse(
+        crop_name=payload.crop_name,
+        fertilizer_type=payload.fertilizer_type,
+        max_budget_per_bag=payload.max_budget_per_bag,
+        recommended_fertilizers=[
+            _to_response(fertilizer) for fertilizer in fertilizers
+        ],
+    )
 
 
 @router.get("/{fertilizer_id}", response_model=FertilizerResponse)

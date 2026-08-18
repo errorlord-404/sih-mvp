@@ -5,6 +5,13 @@ only ones where a reasonable person might ask "why did you do it this way?"
 
 ---
  
+## Seed and fertilizer recommendation scope
+**Date:** 2026-08-18
+**Context:** The PRD requires `recommend_seed()` and `recommend_fertilizer()`, but the current central catalog only stores a small set of structured fields for seeds and fertilizers.
+**Decision:** Implement both mutators as deterministic ranking over existing Mongo reference records, using crop compatibility first and only optional preferences that map directly to stored fields.
+**Alternatives considered:** Invent agronomic scoring from unavailable soil/weather data, or block the feature until richer schemas exist.
+**Trade-offs accepted:** The recommendation quality is intentionally narrow for now, but the API stays truthful to stored data and can be upgraded later without changing the function names the Harness team depends on.
+
 ## GovScheme eligibility interface scope
 **Date:** 2026-08-15
 **Context:** PRD section 22 requires `check_scheme_eligibility()` to accept a farmer state and optionally other criteria, but the current filtering rule is state-only plus nationwide schemes.

@@ -27,3 +27,16 @@ class FertilizerResponse(FertilizerCreate):
     id: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class FertilizerRecommendationRequest(BaseModel):
+    crop_name: str
+    fertilizer_type: Optional[str] = None
+    max_budget_per_bag: Optional[float] = None
+
+
+class FertilizerRecommendationResponse(BaseModel):
+    crop_name: str
+    fertilizer_type: Optional[str] = None
+    max_budget_per_bag: Optional[float] = None
+    recommended_fertilizers: List[FertilizerResponse]
