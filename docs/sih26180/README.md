@@ -9,6 +9,7 @@ Read in this order:
 3. [Product requirements](PRD.md) — intended product, scope and acceptance criteria
 4. [Implementation plan](IMPLEMENTATION_PLAN.md) — architecture, contracts, phases and test matrix
 5. [Source ledger](SOURCE_LEDGER.md) — consequential research claims and their sources
-6. [Continuation prompt](CONTINUATION_PROMPT.md) — a copy-paste handoff for the next AI task
+6. [Deep Research source record](report-source.md) — canonical synthesis and research stopping decision
+7. [Continuation prompt](CONTINUATION_PROMPT.md) — a copy-paste handoff for the next AI task
 
 This documentation separates current implemented capabilities from proposed work. It records claims that need field validation and sources that need current official verification.

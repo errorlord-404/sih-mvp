@@ -11,8 +11,10 @@ First read, in order:
 3. docs/sih26180/RESEARCH.md
 4. docs/sih26180/PRD.md
 5. docs/sih26180/IMPLEMENTATION_PLAN.md
-6. git status --short
-7. relevant AGENTS.md files before editing their scope.
+6. docs/sih26180/SOURCE_LEDGER.md
+7. docs/sih26180/report-source.md
+8. git status --short
+9. relevant AGENTS.md files before editing their scope.
 
 The repository is intentionally dirty. Treat existing modified/untracked paths as user-owned. Do not reset, clean, checkout, rebase or stage unrelated changes. Work only on paths needed for the requested task.
 

@@ -11,7 +11,8 @@ Read files in this order:
 3. [Product requirements](PRD.md)
 4. [Implementation plan](IMPLEMENTATION_PLAN.md)
 5. [Source ledger](SOURCE_LEDGER.md)
-6. [Continuation prompt](CONTINUATION_PROMPT.md)
+6. [Deep Research source record](report-source.md)
+7. [Continuation prompt](CONTINUATION_PROMPT.md)
 
 The user asked for a field-deployable farmer assistant covering crop planning, inputs, crop health, irrigation, weather/disaster resilience, harvest/sale/logistics, government support, farm economics, voice and a farm digital twin. The immediate competition target is provisionally SIH26180, “AI-powered Smart Farming Assistant,” attributed to Qualcomm. The exact official SIH statement was unavailable from the official site during this session; community reproductions match the supplied text but should not be treated as authoritative for deadlines/category/judging.
 
@@ -21,9 +22,10 @@ The user asked for a field-deployable farmer assistant covering crop planning, i
 - PRD.md: product scope, user journeys, requirements, acceptance evidence, D0-D3 delivery boundaries and quality targets.
 - IMPLEMENTATION_PLAN.md: concrete architecture, canonical contracts, IoT/control plan, model deployment, service boundaries, test matrix and phases.
 - SOURCE_LEDGER.md: source-to-claim provenance for consequential research conclusions.
+- report-source.md: canonical Deep Research synthesis, assumptions, limitations and search record.
 - This checkpoint and CONTINUATION_PROMPT.md.
 
-These documents are authored in this session and need to be committed together. Do not overwrite the existing August audit report or .planning documents without comparing their assumptions. They are pre-existing uncommitted work.
+These documents were committed as a docs-only checkpoint. The canonical Deep Research source record was added in a follow-up documentation commit. Do not overwrite the existing August audit report or .planning documents without comparing their assumptions. They are pre-existing uncommitted work.
 
 ## Main recommendation
 
@@ -148,3 +150,9 @@ git status --short
 ```
 
 If a later session updates any document in this directory, it should add a new dated checkpoint or update this one with the new commit hash, tests, decisions and next task.
+
+## Follow-up completion on 6 September 2026
+
+The Deep Research skill's canonical `report-source.md` record was added after a final targeted official-SIH search. No official SIH26180 page was returned by searches limited to SIH, Smart India and MIC domains. The result does not disprove the supplied brief; it means the brief remains provisional until an organizer-owned page or document is available.
+
+Documentation structural QA confirmed that all local Markdown links in `docs/sih26180/` resolve and `git diff --check` passed for the documentation update.
