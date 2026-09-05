@@ -7,14 +7,16 @@ Continue the KisanSathi SIH26180 project from the documented checkpoint. Do not 
 
 First read, in order:
 1. docs/sih26180/README.md
-2. docs/sih26180/SESSION_CHECKPOINT_2026_09_05.md
-3. docs/sih26180/RESEARCH.md
-4. docs/sih26180/PRD.md
-5. docs/sih26180/IMPLEMENTATION_PLAN.md
-6. docs/sih26180/SOURCE_LEDGER.md
-7. docs/sih26180/report-source.md
-8. git status --short
-9. relevant AGENTS.md files before editing their scope.
+2. docs/sih26180/SESSION_CHECKPOINT_2026_09_06.md
+3. docs/sih26180/SESSION_CHECKPOINT_2026_09_05.md
+4. docs/sih26180/RESEARCH.md
+5. docs/sih26180/PRD.md
+6. docs/sih26180/IMPLEMENTATION_PLAN.md
+7. docs/sih26180/SOURCE_LEDGER.md
+8. docs/sih26180/report-source.md
+9. docs/sih26180/TEAM_IMPLEMENTATION_PLAN.md
+10. git status --short
+11. relevant AGENTS.md files before editing their scope.
 
 The repository is intentionally dirty. Treat existing modified/untracked paths as user-owned. Do not reset, clean, checkout, rebase or stage unrelated changes. Work only on paths needed for the requested task.
 
@@ -36,6 +38,12 @@ Known current defects to address before expanding features:
 7. Idempotency needs intent-specific keys and atomic persistence/outbox handling.
 8. Diagnosis is upload/storage only: it returns inconclusive because no vision provider/local model exists.
 9. No firmware, controller protocol, Android runtime or phone offline sync exists.
+
+Hardware and team plan (6 September 2026):
+- Treat the supplied Wokwi link/circuit image as a reference, not as a field-verified design. The Wokwi sources are not in the repository; export them first.
+- Resolve the P0 issue before powering hardware: a genuine MAX3485 is a 3.3 V transceiver, while the supplied drawing appears to share a 5 V rail with it. Identify the actual module and protect ESP32 logic levels.
+- Varuna owns electronics/power/calibration; Anwaar owns ESP32/RS485/Wokwi firmware; Prachi owns sensor-status UI; Harshwardhan owns device onboarding/history/demo UX; Aman owns device ingestion/authentication/validation; Pranav owns Codex/MCP integration and the ML/DL baseline.
+- Preserve the separation: dedicated device ingestion is not the existing `record_sensor_reading` MCP tool, and neither the agent nor MVP controls a pump.
 
 Use shared contracts and tests. Keep domain logic out of the Codex Rust fork; preserve the existing FastAPI + Python MCP adapter boundary. Do not give the language agent direct physical control; domain services and the local controller own calculations, authorization and actuation.
 
