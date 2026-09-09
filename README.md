@@ -18,7 +18,7 @@ npm ci
 npm run demo:desktop
 ```
 
-The launcher starts or reuses MongoDB, starts FastAPI on port `8001`, seeds safe demo records, starts Vite, opens Electron, and launches the KisanSathi MCP plugin inside Codex. Close Electron or press `Ctrl+C` in the launcher terminal to stop the processes owned by that run.
+The launcher starts or reuses MongoDB, starts FastAPI on port `8001`, seeds safe offline records, refreshes the approved live MahaDBT/FARMS/APEDA reference sources when reachable, starts Vite, opens Electron, and launches the KisanSathi MCP plugin inside Codex. If a source is unavailable, local records remain visibly labelled as demo data. Close Electron or press `Ctrl+C` in the launcher terminal to stop the processes owned by that run.
 
 ## System architecture
 
@@ -285,6 +285,18 @@ Start MongoDB:
 
 ```powershell
 docker compose -f .\backend\docker-compose.universal-data.yml up -d mongodb
+
+Refresh live government and approved directory data directly:
+
+```powershell
+python .\backend\scripts\refresh_live_reference_data.py
+```
+
+This loads MahaDBT agricultural schemes, Government of India FARMS network
+status, and the configured APEDA public exporter directory into MongoDB. FARMS
+currently publishes state-level custom-hiring counts through its public
+dashboard; those rows are labelled `network_status` and are not individual
+provider quotes or bookings.
 ```
 
 Start FastAPI:
