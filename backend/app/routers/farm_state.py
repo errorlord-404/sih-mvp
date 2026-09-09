@@ -84,6 +84,36 @@ def get_storage_status(
     )
 
 
+@router.post("/demo/load")
+def load_demo_data(request: Request, store: FarmStateStore = Depends(get_farm_store)):
+    """Create the minimal local demo farmer fixture after explicit UI confirmation."""
+    if store.farmer_key != "demo" or request.headers.get("X-Demo-Confirm") != "true":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"code": "demo_confirmation_required", "message": "Demo loading is limited to the demo farmer and requires explicit confirmation.", "retryable": False})
+    now = iso_now()
+    profile = store.one("SELECT id FROM profile WHERE id = ?", (store.farmer_key,))
+    if not profile:
+        store.execute(
+            "INSERT INTO profile(id, name, phone, location, preferred_language, latitude, longitude, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (store.farmer_key, "Demo Farmer", None, "Pune, Maharashtra (local demo)", "en", 18.5204, 73.8567, now, now),
+        )
+        store.execute("INSERT OR IGNORE INTO preferences(profile_id, notifications_enabled, notification_preferences, updated_at) VALUES (?, 1, ?, ?)", (store.farmer_key, json_text({"enabled": True, "channels": ["in_app"]}), now))
+    if not store.one("SELECT id FROM fields WHERE active = 1 LIMIT 1"):
+        for field_id, name, area, coordinates in (
+            ("demo-upper-field", "Upper Field", 2.0, [[[73.8500, 18.5200], [73.8540, 18.5200], [73.8540, 18.5240], [73.8500, 18.5240], [73.8500, 18.5200]]]),
+            ("demo-lower-field", "Lower Field", 1.5, [[[73.8620, 18.5260], [73.8660, 18.5260], [73.8660, 18.5300], [73.8620, 18.5300], [73.8620, 18.5260]]]),
+        ):
+            boundary = {"type": "Polygon", "coordinates": coordinates}
+            ring = coordinates[0]
+            lat = sum(point[1] for point in ring) / len(ring)
+            lon = sum(point[0] for point in ring) / len(ring)
+            store.execute(
+                "INSERT INTO fields(id, name, area_acres, boundary_geojson, centroid_lat, centroid_lon, current_crop, status, active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?)",
+                (field_id, name, area, json_text(boundary), lat, lon, None, "unknown", now, now),
+            )
+    field_count = store.one("SELECT COUNT(*) AS total FROM fields WHERE active = 1")
+    return {"status": "loaded", "farmer_id": store.farmer_key, "fields": int(field_count["total"] if field_count else 0), "message": "Local demo farmer data is ready. Reference records still require the launcher seed."}
+
+
 @router.get("/audit")
 def list_audit_events(limit: int = Query(default=100, ge=1, le=500), store: FarmStateStore = Depends(get_farm_store)):
     """Return an append-only, non-sensitive write history for the active farmer."""

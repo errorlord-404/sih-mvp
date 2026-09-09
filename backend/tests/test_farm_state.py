@@ -86,6 +86,20 @@ def test_export_and_audit_are_farmer_scoped():
         client.close()
 
 
+def test_demo_loader_requires_confirmation_and_is_idempotent():
+    with TemporaryDirectory() as tmp:
+        client = _client(tmp)
+        denied = client.post("/v1/demo/load", headers={"X-Farmer-ID": "demo"})
+        assert denied.status_code == 403
+        first = client.post("/v1/demo/load", headers={"X-Farmer-ID": "demo", "X-Demo-Confirm": "true"})
+        second = client.post("/v1/demo/load", headers={"X-Farmer-ID": "demo", "X-Demo-Confirm": "true"})
+        assert first.status_code == second.status_code == 200
+        assert first.json()["fields"] == second.json()["fields"] == 2
+        other = client.post("/v1/demo/load", headers={"X-Farmer-ID": "other", "X-Demo-Confirm": "true"})
+        assert other.status_code == 403
+        client.close()
+
+
 def test_low_moisture_creates_one_deduplicated_alert_and_plan():
     with TemporaryDirectory() as tmp:
         client = _client(tmp)

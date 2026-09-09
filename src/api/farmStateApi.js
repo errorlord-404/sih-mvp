@@ -5,6 +5,7 @@ const request = (path, options = {}) => apiRequest(FARM_STATE_API_URL, path, { .
 export const farmStateApi = {
   getStorageStatus: () => request('/v1/storage-status'),
   getDiagnostics: () => request('/v1/diagnostics'),
+  loadDemoData: () => request('/v1/demo/load', { method: 'POST', headers: { 'X-Demo-Confirm': 'true' } }),
   listAuditEvents: (limit = 100) => request(`/v1/audit${queryString({ limit })}`),
   exportSnapshot: () => request('/v1/export'),
   getProfile: () => request('/v1/profile'), updateProfile: (body) => request('/v1/profile', { method: 'PUT', body }),
