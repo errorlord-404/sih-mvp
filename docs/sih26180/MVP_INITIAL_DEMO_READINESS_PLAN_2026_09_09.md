@@ -2,7 +2,8 @@
 
 **Date:** 9 September 2026
 
-**Status:** Plan only; this planning pass does not change application code.
+**Status:** Implementation plan with verified MVP readiness slice. The current
+checkpoint records what is complete and what remains intentionally out of scope.
 
 **Target:** A dependable SIH demonstrator that starts locally in Electron, uses identical FastAPI contracts from React and Codex, and clearly distinguishes local demo, cached, unavailable and live/provider-backed data.
 

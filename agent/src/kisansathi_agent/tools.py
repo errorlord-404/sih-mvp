@@ -79,6 +79,12 @@ class KisanSathiTools:
     async def get_farm_overview(self) -> dict[str, Any]:
         return await self._read("Farm overview loaded.", self.client.get("/v1/dashboard"))
 
+    async def get_component_health(self) -> dict[str, Any]:
+        return await self._read(
+            "Farm service component health loaded; degraded providers remain explicit.",
+            self.client.get("/v1/diagnostics"),
+        )
+
     async def get_profile(self) -> dict[str, Any]:
         return await self._read("Farmer profile loaded.", self.client.get("/v1/profile"))
 

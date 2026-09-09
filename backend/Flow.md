@@ -17,6 +17,11 @@ Client request
   -> response serialized back through schema
   -> JSON response to client
 
+## Recovery and diagnostics flow
+`Settings` or the Codex harness -> farmer-scoped diagnostics/audit/export route
+-> validated SQLite store -> bounded JSON/status response with `X-Request-ID`.
+The response never includes database paths or provider credentials.
+
 ## Local shared-reference bootstrap
 `docker-compose.universal-data.yml` MongoDB service
   -> binds the central/reference database to localhost only and persists it in
@@ -40,6 +45,13 @@ Dashboard request with an active field crop
   -> when shared reference storage is available, reads only latest Mongo market
      records for those exact crop names and returns their source with the tile
   -> otherwise returns no market number plus a visible availability warning
+
+Sarvam Settings panel
+  -> `GET /v1/sarvam/runtime-config` returns safe runtime status and defaults
+  -> `PUT /v1/sarvam/runtime-config` accepts an optional key and selected
+     defaults; the key stays in backend process memory and is not echoed
+  -> voice transcription, synthesis and translation use the same runtime
+     settings and return provider-unavailable status until a key is configured
 
 ## TFLite crop-health routing
 `POST /v1/diagnoses` with a confirmed crop
@@ -304,6 +316,11 @@ schema: app/schemas/gov_scheme.py
 model: app/models/gov_scheme.py
 notes: Full CRUD for central government scheme reference records. Includes a state-scoped listing endpoint that returns both state-specific and nationwide schemes, plus a `check_scheme_eligibility()` path backed by `app/services/gov_scheme_mutator.py` for PRD section 22 eligibility checks.
 
+### Nearby reference discovery
+router: app/routers/machinery_rental.py, app/routers/marketplace.py
+service: app/services/geo.py
+notes: React or MCP supplies the selected field/profile coordinates. The routers normalize optional administrative fallback values, calculate bounded Haversine distance for records with verified coordinates, and return source/freshness fields. Mongo models declare sparse 2dsphere indexes for a future native geospatial query path; no provider is booked or contacted automatically.
+
 ### MSP
 router: app/routers/msp.py
 schema: app/schemas/msp.py
@@ -328,3 +345,6 @@ client-side SQLite per PRD section 8/29 - flagged as open question.
   see note above.
 - Auth/JWT - deprioritized per team voice note (2026-08-15), revisit if time
   allows.
+## Diagnostics flow
+
+`Settings` → `GET /v1/diagnostics` with `X-Farmer-ID` → farmer-local SQLite counts + shared Mongo catalog counts → safe component/degraded state → retryable UI messaging. `X-Request-ID` is returned on every response for correlation.

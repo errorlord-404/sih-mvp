@@ -45,6 +45,7 @@ def build_server(client: BackendClient) -> FastMCP:
         server.tool(name=name, description=description, annotations=annotations)(function)
 
     register("get_farm_overview", "Load the current farmer-scoped dashboard, fields, open alerts, and data warnings.", tools.get_farm_overview)
+    register("get_component_health", "Load safe farm-service, reference-catalog, provider, and demo-data health without exposing paths or credentials.", tools.get_component_health)
     register("get_profile", "Load the current farmer profile and preferred language/location settings.", tools.get_profile)
     register("list_fields", "List the farmer's active fields, optionally including inactive fields.", tools.list_fields)
     register("get_farm_map", "Load field boundaries and current map metrics for the farmer's active fields.", tools.get_farm_map)

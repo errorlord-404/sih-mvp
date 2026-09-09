@@ -1,11 +1,45 @@
-import { Bell, ChevronRight, Globe, ShieldCheck } from 'lucide-react';
-import { farmer } from '../data/dashboard.js';
+import { useEffect, useState } from 'react';
+import { Bell, Database, Download, Globe, KeyRound, RefreshCw, Save, SlidersHorizontal, UserRound } from 'lucide-react';
 import { useLanguage } from '../hooks/useLanguage.jsx';
+import { useFarmData } from '../context/FarmDataContext.jsx';
+import HarnessStatusCard from '../components/features/ai/HarnessStatusCard.jsx';
+import { farmStateApi } from '../api/farmStateApi.js';
+import { referenceApi } from '../api/referenceApi.js';
 
 export default function Settings() {
   const { language, setLanguage, t } = useLanguage();
-  const mr = language === 'mr';
-  const hi = language === 'hi';
+  const { profile, saveProfile } = useFarmData();
+  const [saving, setSaving] = useState(false); const [message, setMessage] = useState('');
+  const [storage, setStorage] = useState({ loading: true, farmState: null, health: null, diagnostics: null, error: '' });
+  const [storageRefreshToken, setStorageRefreshToken] = useState(0);
+  const [exportMessage, setExportMessage] = useState('');
+  const [form, setForm] = useState({ name: '', phone: '', location: '', latitude: '', longitude: '', notifications: true });
+  const [sarvam, setSarvam] = useState({ loading: true, error: '', configured: false });
+  const [sarvamSaving, setSarvamSaving] = useState(false);
+  const [sarvamMessage, setSarvamMessage] = useState('');
+  const [sarvamForm, setSarvamForm] = useState({ api_key: '', stt_model: 'saaras:v3', stt_language_code: 'unknown', tts_model: 'bulbul:v3', tts_speaker: 'shubh', tts_pace: 1, translate_model: 'mayura:v1' });
+  // Populate the editable form when the local profile arrives.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { if (profile) setForm({ name: profile.name || '', phone: profile.phone || '', location: profile.location || '', latitude: profile.latitude ?? '', longitude: profile.longitude ?? '', notifications: profile.notification_preferences?.enabled ?? true }); }, [profile]);
+  useEffect(() => {
+    let active = true;
+    Promise.all([farmStateApi.getStorageStatus(), referenceApi.getBackendHealth(), farmStateApi.getDiagnostics()])
+      .then(([farmState, health, diagnostics]) => { if (active) setStorage({ loading: false, farmState, health, diagnostics, error: '' }); })
+      .catch((error) => { if (active) setStorage({ loading: false, farmState: null, health: null, diagnostics: null, error: error.message }); });
+    return () => { active = false; };
+  }, [storageRefreshToken]);
+  useEffect(() => {
+    let active = true;
+    farmStateApi.getSarvamRuntimeConfig()
+      .then((config) => { if (active) { setSarvam({ ...config, loading: false, error: '' }); setSarvamForm((current) => ({ ...current, ...config, api_key: '' })); } })
+      .catch((error) => { if (active) setSarvam({ loading: false, error: error.message, configured: false }); });
+    return () => { active = false; };
+  }, []);
+  const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
+  const updateSarvam = (key, value) => setSarvamForm((current) => ({ ...current, [key]: value }));
+  const submit = async (event) => { event.preventDefault(); setSaving(true); setMessage(''); try { await saveProfile({ name: form.name, phone: form.phone || null, location: form.location || null, preferred_language: language, latitude: form.latitude === '' ? null : Number(form.latitude), longitude: form.longitude === '' ? null : Number(form.longitude), notification_preferences: { enabled: form.notifications, channels: ['in_app'] } }); setMessage('Profile saved locally.'); } catch (error) { setMessage(error.message); } finally { setSaving(false); } };
+  const saveSarvam = async (event) => { event.preventDefault(); setSarvamSaving(true); setSarvamMessage(''); try { const body = { ...sarvamForm, api_key: sarvamForm.api_key || undefined, tts_pace: Number(sarvamForm.tts_pace) }; const config = await farmStateApi.updateSarvamRuntimeConfig(body); setSarvam({ ...config, loading: false, error: '' }); setSarvamForm((current) => ({ ...current, ...config, api_key: '' })); setSarvamMessage(config.configured ? 'Sarvam is configured for this backend session.' : 'Voice settings saved. Add a key to enable Sarvam.'); } catch (error) { setSarvamMessage(error.message); } finally { setSarvamSaving(false); } };
+  const exportFarmData = async () => { setExportMessage('Preparing export…'); try { const payload = await farmStateApi.exportSnapshot(); const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const anchor = document.createElement('a'); anchor.href = url; anchor.download = `kisansathi-farm-export-${new Date().toISOString().slice(0, 10)}.json`; anchor.click(); URL.revokeObjectURL(url); setExportMessage('Farm snapshot downloaded.'); } catch (error) { setExportMessage(error.message); } };
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
@@ -16,30 +50,20 @@ export default function Settings() {
       </p>
 
       {/* Settings Card Container */}
-      <section className="mt-6 overflow-hidden rounded-2xl border border-border bg-white shadow-card">
+      <form onSubmit={submit} className="mt-6 overflow-hidden rounded-card border border-border bg-white shadow-card">
         {/* User Profile Section */}
-        <div className="flex items-center gap-4 border-b border-border p-5">
-          <img
-            src={farmer.avatar}
-            alt="Farmer Profile"
-            className="size-14 rounded-full border-2 border-primary object-cover shadow-sm"
-          />
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <p className="font-bold text-base text-text-primary">
-                {mr ? farmer.nameMr || 'संतोष जाधव' : hi ? farmer.nameHi : farmer.name}
-              </p>
-              <span className="flex items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
-                <ShieldCheck size={12} />
-                {mr ? 'प्रमाणित शेतकरी' : hi ? 'सत्यापित किसान' : 'Verified'}
-              </span>
-            </div>
-            <p className="text-xs text-text-secondary mt-0.5">
-              {mr ? farmer.locationMr || 'पुणे, महाराष्ट्र' : hi ? farmer.locationHi : farmer.location} · {mr ? '२.५ एकर' : hi ? '2.5 एकड़' : '2.5 Acres'}
-            </p>
+        <div className="flex items-center gap-3 border-b border-border p-5">
+          <span className="grid size-10 place-items-center rounded-xl bg-primary-50 text-primary">
+            <UserRound size={20} />
+          </span>
+          <div className="grid flex-1 gap-3 sm:grid-cols-2">
+            <input required value={form.name} onChange={(event) => update('name', event.target.value)} placeholder="Farmer name" className="rounded-lg border border-border px-3 py-2 text-sm" />
+            <input value={form.phone} onChange={(event) => update('phone', event.target.value)} placeholder="Phone (optional)" className="rounded-lg border border-border px-3 py-2 text-sm" />
+            <input value={form.location} onChange={(event) => update('location', event.target.value)} placeholder="Village, district, state" className="rounded-lg border border-border px-3 py-2 text-sm sm:col-span-2" />
+            <input type="number" step="any" min="-90" max="90" value={form.latitude} onChange={(event) => update('latitude', event.target.value)} placeholder="Latitude" className="rounded-lg border border-border px-3 py-2 text-sm" />
+            <input type="number" step="any" min="-180" max="180" value={form.longitude} onChange={(event) => update('longitude', event.target.value)} placeholder="Longitude" className="rounded-lg border border-border px-3 py-2 text-sm" />
           </div>
         </div>
-
 
         {/* Language Preferences Section */}
         <div className="flex items-center gap-3 border-b border-border p-5">
@@ -55,17 +79,16 @@ export default function Settings() {
           <select
             value={language}
             onChange={(event) => setLanguage(event.target.value)}
-            className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-semibold text-primary"
+            className="rounded-lg border border-border bg-white px-3 py-2 text-sm"
           >
-            <option value="en">English (English)</option>
-            <option value="hi">हिंदी (Hindi)</option>
-            <option value="mr">मराठी (Marathi)</option>
+            <option value="en">English</option>
+            <option value="hi">हिंदी</option>
+            <option value="mr">मराठी</option>
           </select>
-
         </div>
 
         {/* Notifications Button Option */}
-        <button className="flex w-full items-center gap-3 p-5 text-left">
+        <label className="flex w-full items-center gap-3 p-5 text-left">
           <span className="grid size-10 place-items-center rounded-xl bg-primary-50 text-primary">
             <Bell size={20} />
           </span>
@@ -77,15 +100,60 @@ export default function Settings() {
               {t('settingsPage.notificationsDescription')}
             </span>
           </span>
-          <ChevronRight size={19} className="text-text-muted" />
-        </button>
+          <input type="checkbox" checked={form.notifications} onChange={(event) => update('notifications', event.target.checked)} className="size-5 accent-primary" />
+        </label>
+        <div className="border-t border-border p-5"><button disabled={saving || !form.name.trim()} className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"><Save size={16} /> {saving ? 'Saving…' : 'Save profile'}</button></div>
 
-      </section>
+      </form>
 
       {/* Footer Saved Status Note */}
       <p className="mt-4 text-xs text-text-muted">
-        {t('settingsPage.saved')}
+        {message || 'Profile data is stored in the selected farmer SQLite store.'}
       </p>
+
+      <section aria-label="Data connection status" className="mt-5 rounded-card border border-border bg-white p-5 shadow-card">
+        <div className="flex items-start gap-3">
+          <span className="grid size-10 place-items-center rounded-xl bg-primary-50 text-primary"><Database size={20} /></span>
+          <div className="min-w-0 flex-1"><h2 className="font-bold">Data connection</h2><p className="text-xs text-text-secondary">Checks the exact farmer database selected by this app.</p></div>
+          <button type="button" onClick={() => setStorageRefreshToken((value) => value + 1)} className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-2 text-xs font-semibold" aria-label="Refresh data connection"><RefreshCw size={14} /> Refresh</button>
+        </div>
+        {storage.loading ? <p className="mt-3 text-sm text-text-secondary">Checking backend connection…</p> : storage.error ? <p role="alert" className="mt-3 text-sm text-red-700">Cannot reach the backend: {storage.error}</p> : (
+          <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+            <p className="rounded-lg bg-primary-50 px-3 py-2 text-primary-900">Farm data: connected ({storage.farmState.farm_state_store.replaceAll('_', ' ')})</p>
+            <p className={`rounded-lg px-3 py-2 ${storage.health.reference_database === 'available' ? 'bg-primary-50 text-primary-900' : 'bg-amber-50 text-amber-900'}`}>Reference data: {storage.health.reference_database}</p>
+          </div>
+        )}
+        {storage.diagnostics && <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
+          <p className="rounded-lg border border-border px-3 py-2">Fields: <b>{storage.diagnostics.farmer_state.fields}</b> · open tasks: <b>{storage.diagnostics.farmer_state.open_tasks}</b> · open alerts: <b>{storage.diagnostics.farmer_state.open_alerts}</b></p>
+          <p className="rounded-lg border border-border px-3 py-2">Reference catalog: <b>{storage.diagnostics.components.reference_database.counts.schemes}</b> schemes · <b>{storage.diagnostics.components.reference_database.counts.machinery}</b> machinery · <b>{storage.diagnostics.components.reference_database.counts.marketplace}</b> listings</p>
+        </div>}
+        {storage.diagnostics?.degraded_components?.length > 0 && <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">Degraded components: {storage.diagnostics.degraded_components.join(', ')}. Local farmer records remain usable; verify reference data before acting.</p>}
+        <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-border pt-4"><button type="button" onClick={exportFarmData} className="inline-flex items-center gap-2 rounded-lg border border-primary/30 bg-primary-50 px-3 py-2 text-xs font-semibold text-primary-dark"><Download size={14} /> Export farm snapshot</button><span className="text-xs text-text-muted">Includes farmer-owned records and an audit trail; no provider credentials.</span>{exportMessage && <span className="text-xs text-primary">{exportMessage}</span>}</div>
+      </section>
+
+      <section aria-label="Sarvam voice configuration" className="mt-5 overflow-hidden rounded-card border border-border bg-white shadow-card">
+        <div className="flex items-start gap-3 border-b border-border bg-primary-50/60 p-5">
+          <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary text-white"><KeyRound size={20} /></span>
+          <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h2 className="font-bold">Sarvam voice & language</h2><span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${sarvam.configured ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900'}`}>{sarvam.configured ? 'Configured' : 'Key required'}</span></div><p className="mt-1 text-xs text-text-secondary">Set the active desktop-session key and defaults for transcription, speech, and translation.</p></div>
+        </div>
+        {sarvam.loading ? <p className="p-5 text-sm text-text-secondary">Reading voice configuration…</p> : sarvam.error ? <p role="alert" className="p-5 text-sm text-red-700">Cannot read Sarvam configuration: {sarvam.error}</p> : (
+          <form onSubmit={saveSarvam} className="p-5">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">Your key is sent only to this local backend and retained in active process memory. It is never shown again, saved in farmer data, or written to this project.</div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <label className="sm:col-span-2"><span className="mb-1 block text-xs font-semibold text-text-secondary">Sarvam API key</span><input type="password" autoComplete="off" value={sarvamForm.api_key} onChange={(event) => updateSarvam('api_key', event.target.value)} placeholder={sarvam.configured ? 'Leave blank to keep the active key' : 'Paste a Sarvam API key'} className="w-full rounded-lg border border-border px-3 py-2 text-sm" /></label>
+              <label><span className="mb-1 block text-xs font-semibold text-text-secondary">Speech-to-text model</span><input value={sarvamForm.stt_model} onChange={(event) => updateSarvam('stt_model', event.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" /></label>
+              <label><span className="mb-1 block text-xs font-semibold text-text-secondary">Default STT language</span><input value={sarvamForm.stt_language_code} onChange={(event) => updateSarvam('stt_language_code', event.target.value)} placeholder="unknown, hi-IN, en-IN" className="w-full rounded-lg border border-border px-3 py-2 text-sm" /></label>
+              <label><span className="mb-1 block text-xs font-semibold text-text-secondary">Text-to-speech model</span><input value={sarvamForm.tts_model} onChange={(event) => updateSarvam('tts_model', event.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" /></label>
+              <label><span className="mb-1 block text-xs font-semibold text-text-secondary">Voice</span><input value={sarvamForm.tts_speaker} onChange={(event) => updateSarvam('tts_speaker', event.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" /></label>
+              <label><span className="mb-1 block text-xs font-semibold text-text-secondary">Speech pace</span><input type="number" min="0.5" max="2" step="0.1" value={sarvamForm.tts_pace} onChange={(event) => updateSarvam('tts_pace', event.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" /></label>
+              <label><span className="mb-1 block text-xs font-semibold text-text-secondary">Translation model</span><input value={sarvamForm.translate_model} onChange={(event) => updateSarvam('translate_model', event.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" /></label>
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-3"><button disabled={sarvamSaving} className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"><SlidersHorizontal size={16} /> {sarvamSaving ? 'Applying…' : 'Apply voice settings'}</button><span className="text-xs text-text-muted">{sarvamMessage || `Storage: ${sarvam.api_key_storage}.`}</span></div>
+          </form>
+        )}
+      </section>
+
+      <HarnessStatusCard />
 
     </div>
   );

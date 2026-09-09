@@ -71,6 +71,7 @@ def test_server_exposes_only_farmer_safe_read_tools() -> None:
     registered = server._tool_manager.list_tools()
     names = {tool.name for tool in registered}
     assert "get_profile" in names
+    assert "get_component_health" in names
     assert "get_weather_for_field" in names
     assert "get_crop_stage_action_proposals" in names
     assert "get_crop_options" in names

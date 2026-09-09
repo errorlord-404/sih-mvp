@@ -3,6 +3,28 @@
 Records WHY a non-obvious choice was made. Not every change needs an entry -
 only ones where a reasonable person might ask "why did you do it this way?"
 
+## Diagnostics, audit, and export stay farmer-scoped
+**Date:** 2026-09-09
+**Context:** A field-deployable demo needs recovery and failure evidence without
+exposing filesystem paths, credentials, or another farmer's records.
+**Decision:** Diagnostics, append-only audit events, and JSON export all use the
+validated `X-Farmer-ID` SQLite boundary. Demo reset is explicit and only removes
+records with the local-demo provenance marker.
+
+## Sarvam keys entered in Settings are runtime-only
+**Date:** 2026-09-09
+**Context:** A desktop settings screen needs to enable voice and translation,
+but storing a provider API key in browser storage, SQLite, MongoDB, a repo file
+or a response body would expand the secret-exposure surface.
+**Decision:** Accept a key only over the local backend configuration route,
+keep it in the active process memory, and expose configuration status plus
+non-secret defaults only. Restarting the backend requires entering the key
+again or configuring it through deployment environment variables.
+**Alternatives considered:** Persist it in localStorage, put it in the farmer
+SQLite store, write `.env` from the UI, or send requests directly from React.
+**Trade-offs accepted:** The user must re-enter a UI-supplied key after restart,
+but the browser bundle and persistent farmer/reference stores never contain it.
+
 ## Local prototype data is explicit demo/reference data
 **Date:** 2026-09-09
 **Context:** Reference-driven screens were empty when MongoDB was not running,
@@ -306,3 +328,13 @@ controlled export before it may join a dataset.
 export stored images on consent, or silently relabel a diagnosis.
 **Trade-offs accepted:** This creates a useful provenance record but needs a
 future governed expert-review/export workflow before any ML use.
+
+# Nearby provider search is bounded and provenance-preserving
+**Date:** 2026-09-09
+**Context:** Machinery and marketplace results were exact-filtered from a display location string, and the MVP needs field-centered discovery.
+**Decision:** Normalize administrative values at the boundary, store optional provider coordinates/provenance, return bounded distance-sorted results, and keep district/list fallback when coordinates are absent. Add a 2dsphere index declaration without making unverified geocoding mandatory.
+**Alternatives considered:** Parse display strings in every client, silently geocode every listing, or expose unbounded all-provider results.
+**Trade-offs accepted:** Existing un-geocoded records remain discoverable only through explicit fallback paths; a later ingestion job may populate verified points.
+## 2026-09-09 — Diagnostics are operational, not domain data
+
+The readiness panel uses a dedicated farmer-scoped diagnostics route. It reports bounded counts and component availability, but never exposes SQLite paths, farmer identifiers, credentials, or claims that demo records are live. This keeps health checks useful to the launcher and judge while preserving the separate private SQLite/shared Mongo boundary.

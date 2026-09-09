@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ExternalLink, Landmark, Search } from 'lucide-react';
-import { referenceApi } from '../api/referenceApi.js';
+import { getReferenceCacheMeta, referenceApi } from '../api/referenceApi.js';
 import { useFarmData } from '../context/FarmDataContext.jsx';
 import { useLanguage } from '../hooks/useLanguage.jsx';
-import { EmptyState, ErrorState, LoadingState, SourceStamp } from '../components/feedback/ApiState.jsx';
+import { EmptyState, ErrorState, LoadingState, SourceStamp, StaleDataNotice } from '../components/feedback/ApiState.jsx';
 import { parseDisplayLocation } from '../lib/location.js';
 
 const Page = ({ children }) => (
@@ -29,6 +29,7 @@ export default function GovtSchemes() {
   const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [cacheMeta, setCacheMeta] = useState(null);
   const state = parseDisplayLocation(profile?.location).state;
   const isHindi = language === 'hi';
 
@@ -38,6 +39,7 @@ export default function GovtSchemes() {
     try {
       const result = await (state ? referenceApi.listSchemesByState(state) : referenceApi.listSchemes());
       setSchemes(Array.isArray(result) ? result : []);
+      setCacheMeta(getReferenceCacheMeta(result));
     } catch (reason) {
       setError(reason);
     } finally {
@@ -64,6 +66,7 @@ export default function GovtSchemes() {
       <h1 className="text-2xl font-bold">{title}</h1>
       <p className="mt-1 text-sm text-text-secondary">{subtitle}</p>
       <div className="mt-6">
+        <StaleDataNotice meta={cacheMeta} />
         {loading && <LoadingState label={isHindi ? 'योजनाओं की जानकारी लोड हो रही है…' : 'Loading reference schemes…'} />}
         {!loading && error && <ErrorState error={error} onRetry={loadSchemes} />}
         {!loading && !error && !schemes.length && (

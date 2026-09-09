@@ -5,7 +5,8 @@ param(
   [ValidateRange(1, 65535)]
   [int]$RendererPort = 5173,
   [switch]$SkipMongo,
-  [switch]$SkipSeed
+  [switch]$SkipSeed,
+  [switch]$ResetDemo
 )
 
 $ErrorActionPreference = 'Stop'
@@ -62,16 +63,30 @@ try {
     }
   }
 
+  $backendPort = ([Uri]$BackendUrl).Port
+  $health = $null
+  try { $health = Invoke-RestMethod -Uri "$BackendUrl/health" -TimeoutSec 2 } catch { }
+  if ($health -and $health.farm_state -eq 'available') {
+    Write-Host "Using existing compatible backend: $BackendUrl/health ($($health.status), reference $($health.reference_database))"
+  } else {
+    $occupied = Get-NetTCPConnection -LocalPort $backendPort -State Listen -ErrorAction SilentlyContinue
+    if ($occupied) { throw "Backend port $backendPort is occupied by an incompatible service. Choose -BackendUrl with a free port." }
+    $backendProcess = Start-Process -FilePath 'python' -ArgumentList @('-m','uvicorn','app.main:app','--host','127.0.0.1','--port',$backendPort) -WorkingDirectory $backendRoot -PassThru -WindowStyle Hidden
+    $health = Wait-Backend -Url $BackendUrl
+    Write-Host "Backend ready: $BackendUrl/health ($($health.status), reference $($health.reference_database))"
+  }
+
+  $env:KISANSATHI_FARM_STATE_API_URL = $BackendUrl
+  if ($ResetDemo) {
+    $env:KISANSATHI_RESET_DEMO = '1'
+    $env:PYTHONPATH = $backendRoot
+    python (Join-Path $backendRoot 'scripts\reset_demo_farmer_state.py') --farmer-id $FarmerId --confirm-demo-reset | Out-Host
+  }
   if (-not $SkipSeed) {
     $env:PYTHONPATH = $backendRoot
     python (Join-Path $backendRoot 'scripts\seed_local_reference_data.py') | Out-Host
     python (Join-Path $backendRoot 'scripts\seed_demo_farmer_state.py') | Out-Host
   }
-
-  $backendPort = ([Uri]$BackendUrl).Port
-  $backendProcess = Start-Process -FilePath 'python' -ArgumentList @('-m','uvicorn','app.main:app','--host','127.0.0.1','--port',$backendPort) -WorkingDirectory $backendRoot -PassThru -WindowStyle Hidden
-  $health = Wait-Backend -Url $BackendUrl
-  Write-Host "Backend ready: $BackendUrl/health ($($health.status), reference $($health.reference_database))"
 
   $RendererPort = Select-RendererPort -Preferred $RendererPort
   $rendererUrl = "http://127.0.0.1:$RendererPort"

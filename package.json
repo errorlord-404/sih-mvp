@@ -9,6 +9,7 @@
     "desktop": "electron .",
     "desktop:dev": "concurrently -k \"npm run dev -- --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && cross-env ELECTRON_RENDERER_URL=http://127.0.0.1:5173 electron .\"",
     "demo:desktop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-demo.ps1",
+    "demo:check": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/demo-check.ps1",
     "desktop:build": "npm run build && electron .",
     "demo:tflite:check": "powershell -NoProfile -ExecutionPolicy Bypass -File backend/scripts/run_local_tflite_demo.ps1 -CheckOnly",
     "demo:tflite": "concurrently -k \"powershell -NoProfile -ExecutionPolicy Bypass -File backend/scripts/run_local_tflite_demo.ps1 -Port 8001\" \"cross-env VITE_FARM_STATE_API_URL=http://127.0.0.1:8001 VITE_REFERENCE_API_URL=http://127.0.0.1:8001 npm run dev -- --host 127.0.0.1\"",

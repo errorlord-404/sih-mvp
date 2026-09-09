@@ -23,6 +23,25 @@ live market, procurement, supplier, or eligibility information.
 **Status:** MongoDB is healthy locally and the seed has been applied. The API
 health endpoint reports `reference_database: available`.
 
+### 2026-09-09 - Diagnostics, export, and deterministic demo reset
+**What changed:**
+- Added farmer-scoped diagnostics and request correlation headers.
+- Added append-only local audit events plus a bounded JSON farm export.
+- Added explicit demo reset and deterministic two-field/reference fixtures.
+- Added `demo:check` for repeatable readiness checks.
+
+### 2026-09-09 - Session-only Sarvam configuration API
+**What changed:**
+- Added safe read/update contracts for Sarvam voice and translation defaults.
+- A supplied API key is applied only to the active backend process and is never
+  returned, logged, persisted in a database, or written to `.env`.
+
+**Why:** The desktop prototype needs a usable configuration surface without
+embedding a provider secret in the frontend bundle or source tree.
+
+**Status:** Configuration still needs a user-provided valid Sarvam key before
+any external speech or translation request can succeed.
+
 ### 2026-09-09 - Higher-accuracy controlled TFLite demo
 **What changed:**
 - The explicit local demo launcher now selects the manifest-bound EfficientNetV2-B0 dynamic TFLite tomato specialist.
@@ -593,6 +612,17 @@ isolation. No export, model update, or treatment action exists.
 **Why:** See Decisions.md entry "Chose Beanie over raw Motor/PyMongo"
 
 **Status:** Working, tested via /docs Swagger UI
+
+### 2026-09-09 - Structured nearby reference discovery
+**What changed:**
+- Added normalized administrative filtering and bounded nearby machinery and marketplace endpoints.
+- Added optional provider coordinates, service radius and geocode/verification metadata to shared records.
+- Added distance calculation and geospatial index declarations for future Mongo `$near` optimization.
+- Fixed the state-scoped scheme query for Beanie versions where list-field `.in_()` is not callable.
+
+**Why:** The MVP demo profile includes a display annotation (`local demo`) that must never become an exact operational state filter, and provider discovery needs to be tied to the selected field location.
+
+**Status:** Backend tests pass; live seeded endpoint smoke checks pass on the dedicated demo port.
 # 2026-09-07 — Guarded local crop-health inference integration
 - Added an opt-in local two-stage crop router/specialist adapter for versioned
   PyTorch fine-tuning checkpoints. It fails closed for unknown crops, missing
@@ -600,3 +630,7 @@ isolation. No export, model update, or treatment action exists.
 - The diagnosis API now accepts `confirmed_crop`, persists the transparent
   inference envelope, and returns model metadata/candidates/limitations.
 - The frontend forwards the farmer-confirmed crop with each crop-health photo.
+## 2026-09-09
+
+- Added farmer-scoped `/v1/diagnostics` with safe SQLite counts, reference catalog counts, degraded component status, and demo-data disclosure.
+- Added `X-Request-ID` response correlation for UI and Codex requests without returning farmer paths or credentials.

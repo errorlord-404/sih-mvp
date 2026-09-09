@@ -13,6 +13,7 @@ Run from ``backend`` after MongoDB is running::
 from __future__ import annotations
 
 import asyncio
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -64,6 +65,14 @@ async def main() -> None:
     client = await init_db()
     try:
         counts: dict[str, int] = {}
+        if os.getenv("KISANSATHI_RESET_DEMO") == "1":
+            # Only records carrying the explicit local-demo provenance marker
+            # are removed. Production/provider records are never touched.
+            for model in (Crop, MarketPrice, MSP, MachineryRental, MarketplaceListing):
+                await model.get_pymongo_collection().delete_many({"source": SOURCE})
+            for model in (Seed, Fertilizer, GovScheme):
+                await model.get_pymongo_collection().delete_many({"name": {"$regex": "local demo|Demo", "$options": "i"}})
+            print("Reset local demo reference records only.")
         counts["crops"] = await upsert_source_records(
             Crop,
             [
@@ -269,31 +278,77 @@ async def main() -> None:
                     "source": SOURCE,
                     "source_url": "https://agrimachinery.nic.in/",
                     "fetched_at": timestamp,
-                }
-            ],
-        )
-        counts["marketplace_listings"] = await upsert_source_records(
-            MarketplaceListing,
-            [
+                },
                 {
-                    "source_record_id": "local-demo-marketplace-machinery-directory",
-                    "listing_type": "machinery",
-                    "title": "Demo machinery discovery record — NOT A BOOKING",
-                    "category": "tractor",
+                    "name": "Demo rotavator directory record — contact verification required",
+                    "category": "rotavator",
                     "description": NOTE,
-                    "location": "Pune, Maharashtra",
+                    "provider_name": "Demo implement directory reference — not a provider",
+                    "location": "Pimpri-Chinchwad, Maharashtra",
                     "district": "Pune",
                     "state": "Maharashtra",
-                    "latitude": 18.5204,
-                    "longitude": 73.8567,
-                    "location_point": {"type": "Point", "coordinates": [73.8567, 18.5204]},
-                    "listing_url": "https://agrimachinery.nic.in/",
+                    "latitude": 18.6298,
+                    "longitude": 73.7997,
+                    "location_point": {"type": "Point", "coordinates": [73.7997, 18.6298]},
+                    "daily_rate": 1800.0,
+                    "availability_status": "unknown",
+                    "source": SOURCE,
+                    "source_url": "https://agrimachinery.nic.in/",
+                    "fetched_at": timestamp,
+                },
+                {
+                    "name": "Demo harvester directory record — contact verification required",
+                    "category": "harvester",
+                    "description": NOTE,
+                    "provider_name": "Demo harvest directory reference — not a provider",
+                    "location": "Baramati, Maharashtra",
+                    "district": "Pune",
+                    "state": "Maharashtra",
+                    "latitude": 18.1517,
+                    "longitude": 74.5777,
+                    "location_point": {"type": "Point", "coordinates": [74.5777, 18.1517]},
+                    "daily_rate": 3500.0,
+                    "availability_status": "unknown",
                     "source": SOURCE,
                     "source_url": "https://agrimachinery.nic.in/",
                     "fetched_at": timestamp,
                 }
             ],
         )
+        marketplace_specs = [
+            ("machinery", "tractor", "Demo tractor discovery record — NOT A BOOKING", 18.5204, 73.8567, "https://agrimachinery.nic.in/"),
+            ("machinery", "rotavator", "Demo rotavator discovery record — NOT A BOOKING", 18.6298, 73.7997, "https://agrimachinery.nic.in/"),
+            ("seed", "paddy seed", "Demo paddy seed directory record — NOT A PRODUCT OFFER", 18.5204, 73.8567, "https://icar.gov.in/"),
+            ("seed", "wheat seed", "Demo wheat seed directory record — NOT A PRODUCT OFFER", 18.6298, 73.7997, "https://icar.gov.in/"),
+            ("fertilizer", "soil test", "Demo fertilizer directory record — NOT A PRODUCT OFFER", 18.5204, 73.8567, "https://soilhealth.dac.gov.in/"),
+            ("fertilizer", "organic input", "Demo organic input directory record — NOT A PRODUCT OFFER", 18.6298, 73.7997, "https://soilhealth.dac.gov.in/"),
+            ("logistics", "truck", "Demo farm logistics directory record — NOT A BOOKING", 18.5204, 73.8567, "https://agrimachinery.nic.in/"),
+            ("logistics", "cold-chain", "Demo cold-chain directory record — NOT A BOOKING", 18.6298, 73.7997, "https://agrimachinery.nic.in/"),
+            ("buyer", "paddy buyer", "Demo paddy buyer directory record — NOT A SALE", 18.5204, 73.8567, "https://apeda.gov.in/"),
+            ("buyer", "wheat buyer", "Demo wheat buyer directory record — NOT A SALE", 18.6298, 73.7997, "https://apeda.gov.in/"),
+            ("exporter", "paddy exporter", "Demo paddy exporter directory record — NOT A SALE", 18.5204, 73.8567, "https://agriexchange.apeda.gov.in/"),
+            ("exporter", "vegetable exporter", "Demo vegetable exporter directory record — NOT A SALE", 18.6298, 73.7997, "https://agriexchange.apeda.gov.in/"),
+        ]
+        marketplace_records = []
+        for index, (listing_type, category, title, latitude, longitude, source_url) in enumerate(marketplace_specs, start=1):
+            marketplace_records.append({
+                "source_record_id": f"local-demo-marketplace-{listing_type}-{index}",
+                "listing_type": listing_type,
+                "title": title,
+                "category": category,
+                "description": NOTE,
+                "location": "Pune, Maharashtra",
+                "district": "Pune",
+                "state": "Maharashtra",
+                "latitude": latitude,
+                "longitude": longitude,
+                "location_point": {"type": "Point", "coordinates": [longitude, latitude]},
+                "listing_url": source_url,
+                "source": SOURCE,
+                "source_url": source_url,
+                "fetched_at": timestamp,
+            })
+        counts["marketplace_listings"] = await upsert_source_records(MarketplaceListing, marketplace_records)
         print("Local MongoDB demo seed complete (all records are NOT LIVE):")
         for collection, count in counts.items():
             print(f"  {collection}: {count} upserted")

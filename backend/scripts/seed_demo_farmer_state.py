@@ -8,13 +8,14 @@ The script uses the public REST contract and can safely be rerun.
 from __future__ import annotations
 
 import json
+import os
 import sys
 from datetime import date
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 
-API = "http://127.0.0.1:8001/v1"
+API = f"{os.getenv('KISANSATHI_FARM_STATE_API_URL', os.getenv('KISANSATHI_BACKEND_URL', 'http://127.0.0.1:8001')).rstrip('/')}/v1"
 FARMER_ID = "demo"
 SOURCE = "local_demo_farmer_seed_not_live"
 OBSERVED_AT = "2026-09-09T08:00:00+00:00"
@@ -41,7 +42,12 @@ def post_once(path: str, payload: dict, key: str):
 
 
 def main() -> None:
-    profile = request("GET", "/profile")
+    try:
+        profile = request("GET", "/profile")
+    except RuntimeError as error:
+        if "(404)" not in str(error):
+            raise
+        profile = {}
     request(
         "PUT", "/profile",
         {
@@ -57,7 +63,24 @@ def main() -> None:
     )
     fields = request("GET", "/fields")
     if not fields:
-        raise RuntimeError("No active demo field exists. Create a field in the UI before seeding farmer fixtures.")
+        fields = [
+            request("POST", "/fields", {
+                "name": "Upper Field", "area_acres": 2.0,
+                "boundary_geojson": {"type": "Polygon", "coordinates": [[[73.8500, 18.5200], [73.8540, 18.5200], [73.8540, 18.5240], [73.8500, 18.5240], [73.8500, 18.5200]]]},
+                "current_crop": None,
+            }),
+            request("POST", "/fields", {
+                "name": "Lower Field", "area_acres": 1.5,
+                "boundary_geojson": {"type": "Polygon", "coordinates": [[[73.8620, 18.5260], [73.8660, 18.5260], [73.8660, 18.5300], [73.8620, 18.5300], [73.8620, 18.5260]]]},
+                "current_crop": None,
+            }),
+        ]
+    elif not any(item.get("name") == "Lower Field" for item in fields):
+        fields.append(request("POST", "/fields", {
+            "name": "Lower Field", "area_acres": 1.5,
+            "boundary_geojson": {"type": "Polygon", "coordinates": [[[73.8620, 18.5260], [73.8660, 18.5260], [73.8660, 18.5300], [73.8620, 18.5300], [73.8620, 18.5260]]] },
+            "current_crop": None,
+        }))
     field = fields[0]
     field_id = field["id"]
     crop = "Paddy (local demo reference)"
