@@ -56,6 +56,13 @@ The universal-data service also supports two source-specific official adapters:
   `record_kind=network_status` and must never be described as a confirmed
   rental or booking.
 
+The official [FARMS API help](https://agrimachinery.nic.in/CHCApp/Help) lists
+individual provider/implement endpoints, but their request body requires an
+`EncryptedRequest`. Empty unauthenticated requests are rejected. Do not
+reverse-engineer the mobile application's encryption; add individual listings
+only after the ministry or an approved provider supplies an integration
+contract and credentials.
+
 Run both along with APEDA using:
 
 ```powershell

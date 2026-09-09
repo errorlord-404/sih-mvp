@@ -15,6 +15,13 @@ invented contact, price, coordinates or booking claim. A future official
 provider-detail endpoint can add `provider_listing` rows without changing the
 farmer-facing contract.
 
+The official FARMS API help lists individual CHC/implement endpoints, but its
+request contract requires an `EncryptedRequest` and the unauthenticated empty
+request is rejected. We do not reverse-engineer that mobile-app encryption or
+send guessed credentials. Until the ministry supplies an approved integration
+credential/contract, aggregate dashboard data is the maximum verifiable live
+machinery evidence.
+
 Records WHY a non-obvious choice was made. Not every change needs an entry -
 only ones where a reasonable person might ask "why did you do it this way?"
 

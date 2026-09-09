@@ -27,6 +27,10 @@ directory; aggregate network rows are never presented as bookings.
 - The Electron demo launcher now attempts this refresh after the labelled seed;
   source failure leaves the offline fixtures intact and visibly labelled.
 
+**Boundary:** The public FARMS provider-detail API requires an encrypted,
+authenticated request. No unauthenticated individual rental listing is
+claimed until an approved integration contract is available.
+
 ### 2026-09-09 - Local MongoDB reference seed for the prototype
 **What changed:**
 - Added a Docker-backed, localhost-only MongoDB setup guide and an idempotent
