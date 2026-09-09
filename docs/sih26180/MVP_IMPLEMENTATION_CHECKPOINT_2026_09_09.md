@@ -26,6 +26,10 @@ from the existing dirty session files so a later agent can resume safely.
 - Added `npm run demo:desktop`, backed by `scripts/start-demo.ps1`, which
   starts/validates Mongo, idempotently seeds demo data, starts FastAPI on 8001,
   starts Vite with matching URLs and launches Electron with Codex context.
+- Added Codex MCP tools `find_nearby_machinery` and
+  `find_nearby_marketplace_listings`. They accept only a farmer-owned
+  `field_id`, read coordinates from backend state and never accept raw model
+  coordinates.
 
 ## Evidence
 
@@ -55,13 +59,13 @@ from the existing dirty session files so a later agent can resume safely.
   prices, availability or verified providers.
 - The Electron launcher has been syntax-checked but has not yet been run as a
   full fresh-machine UAT in this checkpoint.
-- Codex tool parity for the new nearby endpoints is still pending.
+- Full Electron fresh-machine UAT and visual screenshot evidence are still
+  pending; the new Codex nearby tools have unit/contract coverage.
 - Physical actuation, production authentication, offline mobile sync and
   field-released crop-health inference remain out of scope for this MVP slice.
 
 ## Next task
 
-Run a fresh `npm run demo:desktop` UAT, verify the four screenshot workflows in
-Electron, then add MCP read tools for selected-field map/nearby discovery and
-their stdio contract tests. Keep the same structured location and provenance
-contracts; do not reintroduce display-string parsing in a new client.
+Run a fresh `npm run demo:desktop` UAT and verify the four screenshot workflows
+in Electron. Keep the same structured location and provenance contracts; do not
+reintroduce display-string parsing in a new client.
