@@ -19,6 +19,7 @@
 | Codex agent | 12 pytest tests passed |
 | Frontend | 11 Vitest files / 18 tests passed |
 | Desktop harness | 6 Node tests passed |
+| Adapter contract | `npm run demo:contracts`: 53 frontend path shapes matched OpenAPI |
 | Lint | ESLint passed |
 | Build | Vite production build passed; existing >500 kB bundle warning remains |
 | Launcher syntax | PowerShell AST parse passed |

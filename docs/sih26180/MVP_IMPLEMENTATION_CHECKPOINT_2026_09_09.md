@@ -67,6 +67,8 @@ from the existing dirty session files so a later agent can resume safely.
   tree and ports were cleaned on exit.
 - The launcher now attaches to an existing compatible `/health` service and
   refuses to overwrite an occupied incompatible backend port.
+- `npm run demo:contracts`: 53 literal frontend adapter path shapes matched
+  the FastAPI OpenAPI route shapes.
 - Renderer smoke through the app shell: Leaflet farm map loaded; marketplace Map/List mode showed the
   seeded provider and distance; schemes loaded three Maharashtra reference cards.
 - Fresh backend smoke on port 8013 with seeded Mongo:
