@@ -275,6 +275,18 @@ it is sufficient to show the domain-transfer risk. No runtime threshold,
 release status, treatment content or actuation authority was changed. See
 `evaluation/PLANTDOC_EXTERNAL_CHECK_2026_09_09.md`.
 
+### Crop-router experiment rejection (9 September 2026)
+
+A fresh MobileNetV3-Small crop router was fine-tuned from ImageNet features on
+a balanced, bounded four-crop PlantDoc subset (400 source-train and 64 source-
+test images; 16 test images per label). Dynamic TFLite raw held-out accuracy
+was 64.06% (macro-F1 0.6018) and tomato recall was only 12.5%. Under the
+configured 0.80 confidence / 0.15 margin gate it accepted 11/64 images and
+rejected all tomato images. The artifact is rejected for runtime integration;
+the application must keep asking the farmer to confirm the crop before calling
+a crop-specific specialist. Full provenance and metrics are in
+`evaluation/PLANTDOC_CROP_ROUTER_CHECK_2026_09_09.md`.
+
 ## Source ledger
 
 - [PlantVillage Dataset repository](https://github.com/spMohanty/PlantVillage-Dataset) — dataset size/scope and original paper.

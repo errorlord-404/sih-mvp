@@ -180,6 +180,25 @@ battery or latency evidence and cannot change a manifest.
 
 ### External-domain check (PlantDoc, evaluation only)
 
+`materialize_plantdoc_crop_router.py` similarly creates a bounded four-crop
+PlantDoc train/test experiment without checking out Windows-incompatible
+filenames. It is a data-materialization utility, not a claim that PlantDoc is
+representative of Indian farmer-phone images. Keep the crop-router output in
+suggestion/confirmation mode until field-held-out evidence exists:
+
+```powershell
+python ml/training/materialize_plantdoc_crop_router.py `
+  --repository C:\approved\PlantDoc-Dataset `
+  --revision 5467f6012d78d1c446145d5f582da6096f852ae8 `
+  --output C:\approved\plantdoc-crop-router `
+  --per-crop 100 --val-per-crop 16
+```
+
+The first bounded MobileNetV3-Small experiment is deliberately rejected: it
+achieved 64.06% raw held-out accuracy and only 12.5% tomato recall. See
+`../evaluation/PLANTDOC_CROP_ROUTER_CHECK_2026_09_09.md`. Do not configure its
+artifact in the backend.
+
 `materialize_plantdoc_tomato_external_test.py` can fetch a **bounded** subset
 from an immutable local PlantDoc Git revision without checking out its
 Windows-incompatible source filenames. It writes only sanitized evaluation

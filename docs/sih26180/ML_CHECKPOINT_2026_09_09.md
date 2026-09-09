@@ -25,6 +25,10 @@
 11. Added a reusable host-only TFLite latency benchmark utility.
 12. Added a bounded PlantDoc external-evaluation importer and evaluated the
     chosen model on a separate tomato/OOD image source.
+13. Built and evaluated a bounded four-crop PlantDoc router experiment. It is
+    rejected: raw validation accuracy was 64.06% and tomato recall 12.5%; the
+    normal confidence gate rejected every tomato image. The runtime remains
+    farmer-confirmation-first.
 
 ## Verification
 
@@ -55,6 +59,8 @@
   `ml/evaluation/TOMATO_TFHUB_BENCHMARK_2026_09_09.md`
 - External-domain warning:
   `ml/evaluation/PLANTDOC_EXTERNAL_CHECK_2026_09_09.md`
+- Crop-router rejection record:
+  `ml/evaluation/PLANTDOC_CROP_ROUTER_CHECK_2026_09_09.md`
 
 ## What remains before a truthful field release
 
@@ -86,3 +92,6 @@
 > Run ML and backend crop-health tests and update backend ChangeLog, Decisions
 > and Flow for every backend change. Do not claim PlantVillage accuracy as
 > field accuracy and do not allow vision output to trigger treatment or pumps.
+> The evaluated PlantDoc router is rejected; do not set its artifact paths in
+> the backend. Improve crop routing only with consented target-region,
+> field/date/device-disjoint data and a genuine unknown class.
