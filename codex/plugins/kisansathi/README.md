@@ -1,0 +1,29 @@
+# KisanSathi Codex Plugin
+
+This plugin exposes the shared `agent/` Python MCP server through Codex. The
+portable Agent Plugin files are `plugin.json` and `mcp.json`; the hidden
+Codex files remain as compatibility metadata for the current local fork.
+The launcher reads `KISANSATHI_BACKEND_URL` and `KISANSATHI_FARMER_ID` from
+the trusted process environment.
+
+Install the agent package once from the repository root:
+
+```powershell
+python -m pip install -e .\agent
+```
+
+Start the backend, set `KISANSATHI_FARMER_ID`, and enable this plugin from the
+fork's plugin discovery path. Writes should remain approval-gated in Codex.
+
+For direct Codex CLI use during local development, register the same canonical
+server without modifying the plugin source:
+
+```powershell
+$env:KISANSATHI_FARMER_ID = "your-trusted-farmer-id"
+codex mcp add kisansathi --env KISANSATHI_BACKEND_URL=http://127.0.0.1:8000 --env KISANSATHI_FARMER_ID=$env:KISANSATHI_FARMER_ID -- python -m kisansathi_agent
+codex mcp list
+```
+
+This MCP server offers farm reads and approval-gated record writes only. It
+cannot actuate irrigation, book equipment, make payments, or provide CNN/ML
+crop-health inference until those separately gated modules are ready.

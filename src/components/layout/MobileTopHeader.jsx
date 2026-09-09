@@ -1,5 +1,6 @@
-import { Bell, Leaf, Menu } from 'lucide-react';
+import { Leaf, Menu } from 'lucide-react';
 import { useLanguage } from '../../hooks/useLanguage.jsx';
+import AlertMenu from './AlertMenu.jsx';
 
 export default function MobileTopHeader({ onMenuClick }) {
   // Extract language state to conditionally handle accessibility labels
@@ -25,10 +26,7 @@ export default function MobileTopHeader({ onMenuClick }) {
       </span>
 
       {/* Right side: Notification bell icon */}
-      <Bell
-        aria-label={hi ? 'सूचनाएं' : 'Notifications'}
-        size={20}
-      />
+      <AlertMenu mobile />
       
     </header>
   );

@@ -52,10 +52,9 @@ export default function MobileDrawer({ open, onClose }) {
           className="mt-5 rounded-lg border border-[#d9e9db] bg-white px-3 py-2 text-sm font-semibold text-primary"
         >
           <option value="en">English</option>
-          <option value="hi">हिंदी (Hindi)</option>
-          <option value="mr">मराठी (Marathi)</option>
+          <option value="hi">हिंदी</option>
+          <option value="mr">मराठी</option>
         </select>
-
 
         {/* Navigation Links: Automatically closes drawer on click */}
         <nav className="mt-5 space-y-1">

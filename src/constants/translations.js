@@ -3,18 +3,21 @@ export const translations = {
     // Navigation & Menu Items
     dashboard: 'Dashboard',
     fields: 'My Fields',
+    farmMap: 'Farm Map',
     soil: 'Soil Health',
     weather: 'Weather',
     cropGuide: 'Crop Guide',
     irrigation: 'Irrigation',
     pest: 'Pest & Disease',
     market: 'Market Prices',
+    schemes: 'Govt Schemes',
+    finance: 'Farm Finance',
+    machinery: 'Machinery Rentals',
     ai: 'AI Advisor',
     settings: 'Settings',
 
     // Greetings & Subtitles
-    greeting: 'Good Morning, Santosh!',
-
+    greeting: 'Good Morning, Ramesh!',
     greetingMobile: 'Hello Farmer!',
     subtitle: "Here's what's happening on your farm today.",
     smartFarming: 'Smart farming, better tomorrow.',
@@ -50,12 +53,16 @@ export const translations = {
     // Navigation & Menu Items (डैशबोर्ड और मेनू)
     dashboard: 'डैशबोर्ड',
     fields: 'मेरी फसलें',
+    farmMap: 'खेत का नक्शा',
     soil: 'मिट्टी की जांच',
     weather: 'मौसम',
     cropGuide: 'फसल सलाह',
     irrigation: 'सिंचाई सलाह',
     pest: 'कीट रोग पहचान',
     market: 'बाजार भाव',
+    schemes: 'सरकारी योजनाएं',
+    finance: 'कृषि वित्त',
+    machinery: 'कृषि मशीनरी किराया',
     ai: 'AI सलाहकार',
     settings: 'सेटिंग्स',
 
@@ -90,51 +97,5 @@ export const translations = {
     todayTip: 'आज की सलाह',
     learnMore: 'और जानें',
     lowMoistureAdvice: 'आपके गेहूं के खेत में मिट्टी की नमी कम है। अगले 1–2 दिनों में सिंचाई करें और एफिड व गेहूं रतुआ पर नजर रखें।',
-  },
-
-  mr: {
-    // Navigation & Menu Items (डॅशबोर्ड आणि मेनू)
-    dashboard: 'डॅशबोर्ड',
-    fields: 'माझी पिके',
-    soil: 'माती परीक्षण',
-    weather: 'हवामान',
-    cropGuide: 'पीक सल्ला',
-    irrigation: 'सिंचन सल्ला',
-    pest: 'कीड व रोग निदान',
-    market: 'बाजार भाव',
-    ai: 'AI सल्लागार',
-    settings: 'सेटिंग्ज',
-
-    // Greetings & Subtitles (अभिवादन आणि उपशीर्षक)
-    greeting: 'शुभ सकाळ, संतोष!',
-    greetingMobile: 'नमस्कार शेतकरी मित्र!',
-    subtitle: 'तुमच्या शेताची आजची संपूर्ण माहिती आणि स्मार्ट सल्ला एकाच ठिकाणी.',
-    smartFarming: 'स्मार्ट शेती, समृद्ध उद्या.',
-
-    // Widget & Section Labels (विजेट आणि विभाग लेबल्स)
-    quickActions: 'जलद सेवा',
-    weatherLabel: 'हवामान',
-    soilMoisture: 'मातीतील ओलावा',
-    nextIrrigation: 'पुढील पाणी',
-    marketPrice: 'बाजार भाव (गहू)',
-    fieldDetails: 'तपशील पहा',
-    askAi: 'AI मित्राला विचारा',
-    language: 'भाषा',
-
-    // Status & Metadata Tags (स्थिती आणि टॅग्ज)
-    healthy: 'उत्कृष्ट (स्वस्थ)',
-    wheatField: 'गहू शेत',
-    cropProgress: 'पीक वाढ',
-    area: 'क्षेत्रफळ',
-    sowing: 'पेरणी तारीख',
-    weatherForecast: 'हवामान अंदाज',
-    lastTest: 'अंतिम तपासणी: १० मे २०२५',
-    lowNeedsIrrigation: 'कमी · पाणी देणे आवश्यक',
-    inTwoDays: '२ दिवसांनंतर',
-
-    // Tips & Advice Section (सल्ला विभाग)
-    todayTip: 'आजचा सल्ला',
-    learnMore: 'अधिक जाणून घ्या',
-    lowMoistureAdvice: 'तुमच्या गव्हाच्या शेतात मातीतील ओलावा कमी आहे. पुढील १-२ दिवसांत सिंचन करण्याचा सल्ला दिला जातो. तसेच मावा व तांबेरा रोगावर लक्ष ठेवा.',
   },
 };

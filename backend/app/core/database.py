@@ -12,6 +12,7 @@ from app.models.msp import MSP
 from app.models.seed import Seed
 from app.models.ingestion_run import IngestionRun
 from app.models.machinery_rental import MachineryRental
+from app.models.marketplace_listing import MarketplaceListing
 
 
 async def init_db():
@@ -21,6 +22,6 @@ async def init_db():
     )
     await init_beanie(
         database=client[settings.DATABASE_NAME],
-        document_models=[Farmer, Crop, Disease, Fertilizer, MarketPrice, GovScheme, MSP, Seed, IngestionRun, MachineryRental],
+        document_models=[Farmer, Crop, Disease, Fertilizer, MarketPrice, GovScheme, MSP, Seed, IngestionRun, MachineryRental, MarketplaceListing],
     )
     return client

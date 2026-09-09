@@ -5,7 +5,9 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // The repository includes a separately packaged Codex SDK with its own
+  // TypeScript ESLint toolchain; the root app lint should only cover this app.
+  globalIgnores(['dist', 'codex']),
   {
     files: ['**/*.{js,jsx}'],
     extends: [

@@ -1,260 +1,449 @@
 # Codebase Structure
 
-**Analysis Date:** 2026-08-16
+**Analysis Date:** 2026-08-20
 
 ## Directory Layout
 
 ```text
 [project-root]/
-├── src/                              # React farmer application source
-│   ├── components/layout/             # Responsive application shell/navigation
-│   ├── constants/                     # Static translation-related constants
-│   ├── data/                          # Current UI fixture data and navigation
-│   ├── hooks/                         # React context/hook boundaries
-│   ├── i18n/                          # i18next initialization and JSON resources
-│   ├── pages/                         # Route-level screens and grouped page exports
-│   ├── routes/                        # Browser router declaration
-│   ├── App.jsx                        # Provider/router composition
-│   ├── index.css                      # Global styles
-│   └── main.jsx                       # React DOM entry point
-├── public/                            # Static browser assets
-├── backend/                           # Standalone FastAPI central-reference-data service
+├── src/                                  # React/Vite farmer renderer
+│   ├── api/                              # HTTP client and endpoint façades
+│   ├── components/
+│   │   ├── features/ai/                  # Chat, voice, and harness status UI
+│   │   ├── feedback/                     # Loading/error/empty/provenance UI
+│   │   ├── fields/                       # Leaflet field location picker
+│   │   └── layout/                       # Responsive navigation/application shell
+│   ├── constants/                        # Legacy/page translation constants
+│   ├── context/                          # Farm and Codex conversation state
+│   ├── data/                             # Navigation, images, and legacy fixtures
+│   ├── db/                               # Unused IndexedDB/localStorage prototype
+│   ├── features/                         # Live browser-local finance store
+│   ├── hooks/                            # Language provider/hook
+│   ├── i18n/                             # English, Hindi, Marathi resources
+│   ├── pages/                            # Route-level farmer workflows
+│   ├── routes/                           # Browser/hash router declaration
+│   ├── services/                         # Unused hardcoded hosted-catalog prototype
+│   ├── App.jsx                           # Provider composition
+│   ├── main.jsx                          # React DOM entry point
+│   └── index.css                         # Tailwind theme/global styles
+├── desktop/                              # Electron host and Codex JSONL bridge
+│   ├── main.cjs                          # Main-process composition root/IPC
+│   ├── preload.cjs                       # Sandboxed renderer contract
+│   ├── codex-harness.cjs                 # `codex app-server --stdio` client
+│   └── README.md                         # Desktop operation/verification guide
+├── agent/                                # Python farm MCP adapter package
+│   ├── config/                           # Example Codex MCP configuration
+│   ├── skills/kisansathi/                # Standalone farm skill guidance
+│   ├── src/kisansathi_agent/             # FastMCP server/tools/backend boundary
+│   ├── tests/                            # Python adapter unit tests
+│   ├── pyproject.toml                    # Package/dependency configuration
+│   └── README.md                         # Tool inventory and local setup
+├── backend/                              # FastAPI farm/reference application
 │   ├── app/
-│   │   ├── core/                       # Settings and Motor/Beanie startup
-│   │   ├── models/                     # Beanie MongoDB document definitions
-│   │   ├── routers/                    # Domain HTTP endpoints
-│   │   ├── schemas/                    # Pydantic API request/response DTOs
-│   │   ├── services/                   # Domain behavior/replaceable policy seam
-│   │   └── main.py                     # ASGI composition root
-│   ├── docs/                           # SIH Harness product handoff/vision
-│   ├── AGENTS.md                       # Mandatory backend scope and change rules
-│   ├── ChangeLog.md                    # Backend change history
-│   ├── Decisions.md                    # Architectural decisions
-│   ├── Flow.md                         # Backend request/startup-flow map
-│   └── requirements.txt                # Python dependency pins
-├── codex/                              # Bundled OpenAI Codex Rust source tree / harness base
-│   └── codex-rs/core/src/tools/         # Existing general tool runtime and handlers
-├── .planning/codebase/                 # Generated architecture reference documents
-├── package.json                        # Vite frontend scripts/dependencies
-├── vite.config.js                      # Vite configuration
-├── eslint.config.js                    # Frontend lint configuration
-└── README.md                           # SIH-specific Rust handler placement guidance
+│   │   ├── core/                         # Settings and MongoDB/Beanie startup
+│   │   ├── farm_state/                   # Per-farmer SQLite schema/store/rules
+│   │   ├── models/                       # MongoDB reference Beanie documents
+│   │   ├── routers/                      # REST transport by domain
+│   │   ├── schemas/                      # Pydantic request/response contracts
+│   │   ├── scraping/                     # Government-source ingestion pipeline
+│   │   ├── services/                     # Domain/provider adapters
+│   │   └── main.py                       # ASGI composition root
+│   ├── automation/                       # Automation workspace (currently empty)
+│   ├── data/                             # Runtime SQLite/upload artifacts
+│   ├── docs/                             # Backend/product/provider documentation
+│   ├── n8n/                              # Universal-data workflow definition
+│   ├── scripts/                          # Data setup script
+│   ├── tests/                            # Backend pytest suite
+│   ├── AGENTS.md                         # Backend-local contribution constraints
+│   ├── requirements.txt                  # Backend dependency pins
+│   └── docker-compose.universal-data.yml # Ingestion automation stack
+├── codex/                                # Full checked-in OpenAI Codex fork
+│   ├── codex-rs/                         # Multi-crate Rust workspace
+│   │   ├── cli/                          # `codex` command entry point
+│   │   ├── app-server/                   # Desktop-facing JSON-RPC server
+│   │   ├── app-server-protocol/          # Shared/generated protocol types
+│   │   ├── core/                         # Agent loop, sessions, tools, MCP
+│   │   ├── core-plugins/                 # Plugin manifest/marketplace loading
+│   │   ├── plugin/                       # Runtime plugin abstractions
+│   │   └── ...                           # Supporting Codex crates
+│   ├── plugins/kisansathi/               # Farm plugin manifest/skill/launcher
+│   ├── codex-cli/                        # npm distribution wrapper
+│   ├── sdk/                              # Python/TypeScript SDKs
+│   ├── docs/                             # Upstream Codex documentation
+│   └── scripts/, tools/, third_party/    # Upstream development support
+├── tests/desktop/                        # Node tests for Electron/Codex bridge
+├── public/                               # Vite-served static assets
+├── dist/                                 # Generated Vite renderer bundle
+├── .planning/                            # GSD plans, research, and maps
+├── index.html                            # Vite HTML entry
+├── package.json                          # Web/Electron scripts/dependencies
+├── vite.config.js                        # Vite/Tailwind/asset config
+├── vitest.config.js                      # Renderer unit-test config
+├── eslint.config.js                      # Frontend lint config
+├── IMPLEMENTATION_AUDIT.md               # Repository audit artifact
+├── CODEX_AI_HARNESS_MERGE_PLAN.md        # Harness integration plan artifact
+├── MCP_AGENT_IMPLEMENTATION_PLAN.md      # MCP implementation plan artifact
+├── FRONTEND_BACKEND_MERGE_PLAN.md        # UI/backend integration plan artifact
+└── README.md                             # Legacy native-Rust tool guidance
 ```
 
 ## Directory Purposes
 
 **`src/`:**
 
-- Purpose: Browser client for the farmer experience.
-- Contains: JSX components/pages, client routing, localization, static UI state, and CSS.
-- Key files: `src/main.jsx`, `src/App.jsx`, `src/routes/index.jsx`, and `src/index.css`.
+- Purpose: Browser/Electron renderer for all farmer-facing workflows.
+- Contains: React routes/pages, contexts, API clients, responsive components, localization, and device-local finance state.
+- Key files: `src/main.jsx`, `src/App.jsx`, `src/routes/index.jsx`, `src/context/FarmDataContext.jsx`, `src/context/AIConversationContext.jsx`.
+
+**`src/api/`:**
+
+- Purpose: Keep transport mechanics and backend endpoint names out of presentation components.
+- Contains: Common fetch/error/header behavior plus farm-state and reference API method maps.
+- Key files: `src/api/client.js`, `src/api/farmStateApi.js`, `src/api/referenceApi.js`.
+
+**`src/components/features/ai/`:**
+
+- Purpose: Present Codex conversation, voice controls, tool activity, approval/clarification prompts, and harness readiness.
+- Contains: `ConversationView`, `VoiceButton`, `HarnessStatusCard`, and the renderer unit test.
+- Key files: `src/components/features/ai/ConversationView.jsx`, `src/components/features/ai/HarnessStatusCard.jsx`.
+
+**`src/components/feedback/`:**
+
+- Purpose: Standardize live API loading, failure, empty, and provenance states.
+- Contains: Small presentational components.
+- Key files: `src/components/feedback/ApiState.jsx`.
+
+**`src/components/fields/`:**
+
+- Purpose: Select a field point from GPS, OpenStreetMap search, or direct map interaction.
+- Contains: React-Leaflet map and Nominatim lookup logic.
+- Key files: `src/components/fields/LocationPicker.jsx`.
 
 **`src/components/layout/`:**
 
-- Purpose: Shared responsive chrome used by the route tree.
-- Contains: `AppShell.jsx`, desktop/mobile navigation, headers, and mobile drawer components.
-- Key files: `src/components/layout/AppShell.jsx`, `src/components/layout/DesktopSidebar.jsx`, and `src/components/layout/MobileBottomNav.jsx`.
+- Purpose: Provide shared responsive chrome and farmer alerts.
+- Contains: Desktop sidebar/header, mobile header/drawer/bottom navigation, application shell, alert menu.
+- Key files: `src/components/layout/AppShell.jsx`, `src/components/layout/Header.jsx`, `src/components/layout/AlertMenu.jsx`.
 
-**`src/pages/`:**
+**`src/context/`:**
 
-- Purpose: Screens selected by React Router.
-- Contains: Default-exported page components and grouped named exports for closely related screen variants.
-- Key files: `src/pages/Dashboard.jsx`, `src/pages/AIAssistant.jsx`, `src/pages/CorePages.jsx`, and `src/pages/FieldTools.jsx`.
+- Purpose: Own cross-route farm and conversation state.
+- Contains: Backend farm-data synchronization and Electron/Codex conversation orchestration.
+- Key files: `src/context/FarmDataContext.jsx`, `src/context/AIConversationContext.jsx`.
 
 **`src/data/`:**
 
-- Purpose: Current in-bundle display fixtures and navigation metadata.
-- Contains: Plain JavaScript exports for farmer/field/forecast/chat/image/navigation content.
-- Key files: `src/data/dashboard.js`, `src/data/fields.js`, `src/data/chat.js`, and `src/data/navigation.js`.
+- Purpose: Hold navigation/static presentation assets and retained legacy fixture modules.
+- Contains: Navigation definitions, farm image lookup, and older dashboard/chat/field/localized content modules.
+- Key files: `src/data/navigation.js`, `src/data/images.js`; `src/data/dashboard.js`, `src/data/chat.js`, and `src/data/fields.js` are not live data authorities.
 
-**`src/hooks/`:**
+**`src/features/`:**
 
-- Purpose: Shared React behavior boundaries.
-- Contains: Language provider and `useLanguage` hook.
-- Key files: `src/hooks/useLanguage.jsx`.
+- Purpose: Hold feature-specific client logic that is not a generic context or component.
+- Contains: The current farmer-keyed browser `localStorage` finance ledger.
+- Key files: `src/features/financeStore.js`.
 
-**`src/i18n/`:**
+**`src/db/`:**
 
-- Purpose: Configure i18next and hold language resources.
-- Contains: i18next initialization and English/Hindi JSON translation files.
-- Key files: `src/i18n/index.js`, `src/i18n/en.json`, and `src/i18n/hi.json`.
+- Purpose: Retain an IndexedDB prototype for finance, soil logs, and weather cache.
+- Contains: Database initialization, demo seeding, CRUD, and localStorage fallback.
+- Key files: `src/db/localDatabase.js`; no current application module imports this singleton.
 
-**`src/routes/`:**
+**`src/i18n/` and `src/hooks/`:**
 
-- Purpose: Single declaration of browser URL-to-page mappings.
-- Contains: The `createBrowserRouter` configuration.
-- Key files: `src/routes/index.jsx`.
+- Purpose: Configure UI localization and expose the selected language.
+- Contains: i18next setup, English/Hindi/Marathi JSON resources, and `LanguageProvider`/`useLanguage`.
+- Key files: `src/i18n/index.js`, `src/i18n/en.json`, `src/i18n/hi.json`, `src/i18n/mr.json`, `src/hooks/useLanguage.jsx`.
 
-**`public/`:**
+**`src/pages/`:**
 
-- Purpose: Serve static assets without bundling them through JSX imports.
-- Contains: Application icons.
-- Key files: `public/favicon.svg` and `public/icons.svg`.
+- Purpose: Implement each navigable farmer workflow.
+- Contains: Dashboard, fields/detail/map, crop guide, soil, weather, irrigation, pest/disease upload, market, schemes, finance, machinery, AI/voice, reports, and settings.
+- Key files: `src/pages/Dashboard.jsx`, `src/pages/CorePages.jsx`, `src/pages/FieldTools.jsx`, `src/pages/AIAssistant.jsx`, `src/pages/FarmFinance.jsx`.
 
-**`backend/app/`:**
+**`desktop/`:**
 
-- Purpose: FastAPI service for shared agricultural reference information only.
-- Contains: ASGI composition, persistence startup, domain CRUD endpoints, DTOs, documents, and domain services.
-- Key files: `backend/app/main.py`, `backend/app/core/database.py`, and `backend/app/core/config.py`.
+- Purpose: Add a privileged local host around the web renderer without exposing Node or the Codex child process to React.
+- Contains: Electron lifecycle, sandboxed IPC contract, backend health/media proxy, and private Codex app-server client.
+- Key files: `desktop/main.cjs`, `desktop/preload.cjs`, `desktop/codex-harness.cjs`, `desktop/README.md`.
+
+**`agent/`:**
+
+- Purpose: Translate stable, task-oriented KisanSathi MCP calls into backend HTTP operations.
+- Contains: Python package, 47 read/write tool registrations, backend client, result envelope, tool implementations, tests, skill guidance, and example configuration.
+- Key files: `agent/src/kisansathi_agent/server.py`, `agent/src/kisansathi_agent/tools.py`, `agent/src/kisansathi_agent/backend_client.py`, `agent/src/kisansathi_agent/result.py`, `agent/pyproject.toml`.
 
 **`backend/app/core/`:**
 
-- Purpose: Backend-wide infrastructure setup.
-- Contains: Settings loaded from the environment and Mongo/Beanie initialization.
-- Key files: `backend/app/core/config.py` and `backend/app/core/database.py`.
+- Purpose: Hold process-wide backend infrastructure configuration.
+- Contains: Pydantic settings and Mongo/Beanie initialization.
+- Key files: `backend/app/core/config.py`, `backend/app/core/database.py`.
+
+**`backend/app/farm_state/`:**
+
+- Purpose: Implement the current farmer-scoped digital-twin persistence and deterministic soil/irrigation screening.
+- Contains: SQLite schema/store, request dependency, idempotency utilities, and farm rules.
+- Key files: `backend/app/farm_state/store.py`, `backend/app/farm_state/dependencies.py`, `backend/app/farm_state/rules.py`.
 
 **`backend/app/models/`:**
 
-- Purpose: MongoDB persistence definitions.
-- Contains: One Beanie `Document` per registered central collection.
-- Key files: `backend/app/models/crop.py`, `backend/app/models/market_price.py`, `backend/app/models/gov_scheme.py`, and `backend/app/models/msp.py`.
+- Purpose: Define shared MongoDB catalog and ingestion documents.
+- Contains: Beanie models for farmer, crop, disease, fertilizer, government scheme, market price, MSP, seed, machinery rental, and ingestion run.
+- Key files: `backend/app/models/crop.py`, `backend/app/models/market_price.py`, `backend/app/models/msp.py`, `backend/app/models/ingestion_run.py`.
 
 **`backend/app/schemas/`:**
 
-- Purpose: HTTP contract models and non-persisted request/response shapes.
-- Contains: Per-domain Pydantic create/update/response classes and calculation/eligibility DTOs.
-- Key files: `backend/app/schemas/market_price.py`, `backend/app/schemas/gov_scheme.py`, and `backend/app/schemas/sensors.py`.
+- Purpose: Define public HTTP contracts independently from storage implementation.
+- Contains: Domain create/update/response DTOs and the complete farm-state/provider response family.
+- Key files: `backend/app/schemas/farm_state.py`, `backend/app/schemas/market_price.py`, `backend/app/schemas/ingestion.py`.
 
 **`backend/app/routers/`:**
 
-- Purpose: REST endpoint modules, one per central reference-data domain.
-- Contains: CRUD endpoints, market filtering/comparison, and scheme state/eligibility endpoints.
-- Key files: `backend/app/routers/market_price.py`, `backend/app/routers/gov_scheme.py`, `backend/app/routers/crop.py`, and `backend/app/routers/farmer.py`.
+- Purpose: Expose HTTP transport endpoints by domain.
+- Contains: Farm-state, assistant/voice/diagnosis, weather, ingestion, and MongoDB reference/catalog endpoints.
+- Key files: `backend/app/routers/farm_state.py`, `backend/app/routers/assistants.py`, `backend/app/routers/weather.py`, `backend/app/routers/ingestion.py`, `backend/app/routers/market_price.py`.
 
 **`backend/app/services/`:**
 
-- Purpose: Domain behavior that benefits from a replaceable implementation.
-- Contains: The current government-scheme eligibility abstraction and Mongo implementation.
-- Key files: `backend/app/services/gov_scheme_mutator.py`.
+- Purpose: Hold reusable provider/domain policies behind routers.
+- Contains: Weather and Sarvam adapters, market net-realisation calculation, and seed/fertilizer/scheme mutators.
+- Key files: `backend/app/services/weather.py`, `backend/app/services/sarvam.py`, `backend/app/services/market.py`, `backend/app/services/seed_mutator.py`.
 
-**`backend/docs/`:**
+**`backend/app/scraping/`:**
 
-- Purpose: Project vision and handoff documentation for the SIH Harness.
-- Contains: Product requirements, system boundaries, planned tool functions, and demo scope.
-- Key files: `backend/docs/PRD.md`.
+- Purpose: Own universal reference-data acquisition and normalization.
+- Contains: data.gov.in/PIB source adapters, HTML table parsing, stable source IDs, bulk upsert orchestration, and a CLI entry point.
+- Key files: `backend/app/scraping/sources.py`, `backend/app/scraping/service.py`, `backend/app/scraping/__main__.py`.
 
-**`codex/`:**
+**`backend/data/`:**
 
-- Purpose: Separate checked-in Codex source tree used as the intended SIH Harness base, not part of the FastAPI service package or Vite source tree.
-- Contains: Rust workspace, CLI, SDKs, and tooling.
-- Key files: `codex/codex-rs/core/src/tools/registry.rs` and `codex/codex-rs/core/src/tools/handlers/mod.rs`.
+- Purpose: Store runtime farmer SQLite databases and uploaded diagnosis images.
+- Contains: `backend/data/farm_state/<farmer>.sqlite3` and `backend/data/farm_uploads/<farmer>/...`.
+- Key files: `backend/data/farm_state/demo.sqlite3`; contents are runtime state, not source definitions.
 
-**`.planning/codebase/`:**
+**`backend/n8n/` and `backend/scripts/`:**
 
-- Purpose: Generated repository maps consumed by planning and execution workflows.
-- Contains: Analysis documents such as `ARCHITECTURE.md` and `STRUCTURE.md`.
-- Key files: `.planning/codebase/ARCHITECTURE.md` and `.planning/codebase/STRUCTURE.md`.
+- Purpose: Configure and bootstrap universal-data synchronization outside the request application.
+- Contains: n8n workflow JSON and a PowerShell setup script.
+- Key files: `backend/n8n/universal-data-sync.json`, `backend/scripts/setup_universal_data.ps1`, `backend/docker-compose.universal-data.yml`.
+
+**`backend/tests/`:**
+
+- Purpose: Verify farm-state behavior, market rules, Sarvam adapters, and universal-data parsing.
+- Contains: Pytest modules.
+- Key files: `backend/tests/test_farm_state.py`, `backend/tests/test_market_rules.py`, `backend/tests/test_sarvam.py`, `backend/tests/test_universal_data_sources.py`.
+
+**`codex/plugins/kisansathi/`:**
+
+- Purpose: Package the farm skill and Python MCP launcher for the Codex plugin model.
+- Contains: Plugin manifest, MCP server declaration, skill text, launcher, and usage README.
+- Key files: `codex/plugins/kisansathi/.codex-plugin/plugin.json`, `codex/plugins/kisansathi/.mcp.json`, `codex/plugins/kisansathi/run_server.py`, `codex/plugins/kisansathi/skills/kisansathi/SKILL.md`.
+
+**`codex/codex-rs/`:**
+
+- Purpose: Provide the full general-purpose Codex runtime that the desktop harness launches.
+- Contains: More than one hundred Rust workspace members for CLI, app server/protocol/transport, core agent behavior, tools, MCP, plugins, models, state, sandboxing, TUI, and supporting infrastructure.
+- Key files: `codex/codex-rs/Cargo.toml`, `codex/codex-rs/cli/src/main.rs`, `codex/codex-rs/app-server/src/lib.rs`, `codex/codex-rs/core/src/lib.rs`, `codex/codex-rs/core/src/tools/registry.rs`, `codex/codex-rs/plugin/src/lib.rs`.
+
+**`.planning/`:**
+
+- Purpose: Hold GSD project definition, requirements, roadmap/state, research, notes, and generated codebase maps.
+- Contains: Planning artifacts only; it is not loaded by production application code.
+- Key files: `.planning/PROJECT.md`, `.planning/REQUIREMENTS.md`, `.planning/ROADMAP.md`, `.planning/STATE.md`, `.planning/codebase/ARCHITECTURE.md`.
 
 ## Key File Locations
 
 **Entry Points:**
 
-- `index.html`: HTML document that supplies the browser root element for Vite.
-- `src/main.jsx`: React DOM client bootstrap.
-- `src/App.jsx`: Wraps routing with the language provider.
-- `src/routes/index.jsx`: Client route configuration.
-- `backend/app/main.py`: FastAPI ASGI application and router registration.
-- `codex/codex-rs/core/src/tools/registry.rs`: General Codex tool-execution registry.
+- `index.html`: Vite HTML shell.
+- `src/main.jsx`: React DOM bootstrap.
+- `src/App.jsx`: Provider and router composition.
+- `src/routes/index.jsx`: Web/hash route tree.
+- `desktop/main.cjs`: Electron main process selected by `package.json`.
+- `desktop/codex-harness.cjs`: Child Codex app-server lifecycle and JSONL client.
+- `backend/app/main.py`: FastAPI ASGI application.
+- `backend/app/scraping/__main__.py`: Universal-data ingestion CLI.
+- `agent/src/kisansathi_agent/__main__.py`: Python MCP stdio entry.
+- `codex/plugins/kisansathi/run_server.py`: Plugin-owned MCP launcher.
+- `codex/codex-rs/cli/src/main.rs`: Rust Codex CLI/app-server entry.
 
 **Configuration:**
 
-- `package.json`: Frontend scripts and npm dependencies.
-- `vite.config.js`: Vite + React plugin configuration.
-- `eslint.config.js`: ESLint flat configuration.
-- `backend/requirements.txt`: Python runtime dependency pins.
-- `backend/app/core/config.py`: Environment-backed MongoDB settings; `.env` is supported but its contents are not tracked/read by this map.
-- `backend/AGENTS.md`: Backend scope, database ownership, naming, and maintenance rules.
+- `package.json`: Vite, Electron, lint, build, and test commands.
+- `vite.config.js`: React/Tailwind plugins and relative production asset base.
+- `vitest.config.js`: Renderer unit-test environment/configuration.
+- `eslint.config.js`: Frontend lint rules.
+- `backend/requirements.txt`: FastAPI/Beanie/provider/test dependencies.
+- `backend/app/core/config.py`: Backend environment-backed settings; environment values are never stored in these maps.
+- `backend/pytest.ini`: Backend pytest configuration.
+- `agent/pyproject.toml`: MCP adapter packaging, runtime dependencies, and development extras.
+- `agent/config/codex.mcp.example.toml`: Example standalone MCP configuration.
+- `codex/plugins/kisansathi/.codex-plugin/plugin.json`: Plugin identity/interface/skill declaration.
+- `codex/plugins/kisansathi/.mcp.json`: Plugin MCP command declaration.
+- `codex/codex-rs/Cargo.toml`: Codex Rust workspace membership and shared dependencies.
 
 **Core Logic:**
 
-- `backend/app/routers/market_price.py`: Market-price CRUD, crop filtering, and mandi net-realisation comparison.
-- `backend/app/routers/gov_scheme.py`: Government-scheme CRUD, state filter, and eligibility endpoint.
-- `backend/app/services/gov_scheme_mutator.py`: Scheme eligibility policy interface/implementation.
-- `backend/app/core/database.py`: Motor client and Beanie document registration.
-- `src/pages/AIAssistant.jsx`: Farmer-facing assistant UI flow using fixture content.
-- `src/pages/CorePages.jsx`: Grouped soil, weather, irrigation, market, and report page implementations.
+- `backend/app/farm_state/store.py`: Digital-twin SQLite schema, farmer file selection, idempotency, and query wrapper.
+- `backend/app/routers/farm_state.py`: Farmer profile, field, crop stage, soil, sensor, irrigation, reminder, alert, dashboard, and report API.
+- `backend/app/farm_state/rules.py`: Soil and irrigation screening rules.
+- `backend/app/routers/assistants.py`: Diagnosis/media persistence and Sarvam/deprecated-advisor endpoints.
+- `backend/app/services/weather.py`: Open-Meteo fetch/normalization.
+- `backend/app/scraping/service.py`: Government-reference ingestion orchestration.
+- `agent/src/kisansathi_agent/server.py`: Model-visible farm tool registry and read/write annotations.
+- `agent/src/kisansathi_agent/tools.py`: Tool-to-HTTP mappings and local profit calculation.
+- `desktop/codex-harness.cjs`: Codex thread/turn/tool-event integration.
+- `src/context/AIConversationContext.jsx`: Renderer-side conversation, media, approval, translation, and speech workflow.
 
 **Testing:**
 
-- No application test directory, test configuration, or frontend/backend test files were detected under `src/` or `backend/`.
-- The bundled upstream Codex source tree has its own tests under `codex/codex-rs/`; treat those as harness-source tests, not SIH application test coverage.
+- `src/components/features/ai/ConversationView.test.jsx`: Chat component behavior.
+- `tests/desktop/codex-harness.test.cjs`: JSONL session/turn/approval/recovery behavior.
+- `tests/desktop/preload-contract.test.cjs`: Renderer exposure and BrowserWindow security contract.
+- `agent/tests/test_backend_client.py`: MCP HTTP-boundary behavior.
+- `agent/tests/test_tools.py`: Tool mappings/envelopes/safety behavior.
+- `backend/tests/test_farm_state.py`: SQLite farm-state API behavior.
+- `backend/tests/test_market_rules.py`: Market calculations.
+- `backend/tests/test_sarvam.py`: Sarvam adapter behavior.
+- `backend/tests/test_universal_data_sources.py`: Government-data parsing/normalization.
+- `codex/codex-rs/*/tests/`: Upstream/fork Rust coverage; keep it separate from KisanSathi application test scope.
 
 ## Naming Conventions
 
 **Files:**
 
-- React components and route pages use PascalCase `.jsx` filenames, for example `src/pages/VoiceAssistant.jsx` and `src/components/layout/AppShell.jsx`.
-- Frontend hooks use a `use` prefix and camelCase `.jsx` filename, for example `src/hooks/useLanguage.jsx`.
-- Frontend fixture and configuration modules use camelCase `.js` filenames, for example `src/data/localizedContent.js` and `src/constants/pageTranslations.js`.
-- Python backend domain modules use lowercase snake_case filenames, for example `backend/app/routers/market_price.py` and `backend/app/services/gov_scheme_mutator.py`.
-- A backend domain uses the same basename across model/schema/router directories: `backend/app/models/gov_scheme.py`, `backend/app/schemas/gov_scheme.py`, and `backend/app/routers/gov_scheme.py`.
+- React components and pages use PascalCase `.jsx`: `src/pages/MyFields.jsx`, `src/components/layout/AppShell.jsx`.
+- React hooks use the `use` prefix: `src/hooks/useLanguage.jsx`.
+- Frontend transport/data/feature modules use camelCase `.js`: `src/api/farmStateApi.js`, `src/features/financeStore.js`.
+- Electron/CommonJS modules use kebab-case or role names with `.cjs`: `desktop/codex-harness.cjs`, `desktop/preload.cjs`.
+- Python modules use lowercase snake_case: `backend/app/routers/market_price.py`, `agent/src/kisansathi_agent/backend_client.py`.
+- Backend reference domains repeat the basename across model/schema/router layers: `backend/app/models/msp.py`, `backend/app/schemas/msp.py`, `backend/app/routers/msp.py`.
+- Rust crates use kebab-case directories and snake_case source modules: `codex/codex-rs/app-server/`, `codex/codex-rs/core/src/codex_thread.rs`.
+- Tests match their runtime convention: `*.test.jsx`, `*.test.cjs`, or `test_*.py`.
 
 **Directories:**
 
-- Frontend directories group by technical role (`components`, `pages`, `data`, `hooks`, `routes`) rather than by backend domain.
-- Backend directories enforce the layered names `core`, `models`, `schemas`, `routers`, and `services`.
-- Custom SIH Rust tool directories must be grouped under `codex/codex-rs/core/src/tools/handlers/kisansathi/`, per `README.md`; that folder must be created only as part of authorized harness work.
+- Frontend groups primarily by technical role (`api`, `components`, `context`, `pages`) with small feature-specific seams under `features/`.
+- Backend groups by application layer (`models`, `schemas`, `routers`, `services`) and isolates the operational store/domain under `farm_state/`.
+- Python package code follows `src/<package_name>/` layout under `agent/`.
+- Codex application extensions live under `codex/plugins/<plugin_name>/`; shared farm adapter code remains under `agent/`.
 
 ## Where to Add New Code
 
-**New Feature:**
+**New farmer-facing feature:**
 
-- Primary browser screen: add a PascalCase page in `src/pages/`, then add its URL in `src/routes/index.jsx` and navigation metadata in `src/data/navigation.js` when it is navigable.
-- Shared layout or navigation element: add it under `src/components/layout/` and compose it through `src/components/layout/AppShell.jsx`.
-- Frontend language strings: add i18next resources in both `src/i18n/en.json` and `src/i18n/hi.json`; use `src/hooks/useLanguage.jsx` in components.
-- Tests: no SIH application test location currently exists. Establish an explicit test configuration and co-located or dedicated test convention before adding tests.
+- Route page: `src/pages/<FeatureName>.jsx`.
+- Route registration: `src/routes/index.jsx`.
+- Navigation entry: `src/data/navigation.js` when globally navigable.
+- Shared feature UI: `src/components/features/<feature>/` for multiple components; colocate a one-off component with its page.
+- Backend calls: add named methods to `src/api/farmStateApi.js` or `src/api/referenceApi.js`; do not place raw `fetch()` calls in pages except provider-specific map search in `src/components/fields/LocationPicker.jsx`.
+- Shared state: extend `src/context/FarmDataContext.jsx` only for cross-route farm state; keep route-local state in the route component.
+- UI translations: update all of `src/i18n/en.json`, `src/i18n/hi.json`, and `src/i18n/mr.json` through the current i18next path.
+- Tests: colocate renderer tests as `*.test.jsx` near the component, matching `src/components/features/ai/ConversationView.test.jsx`.
 
-**New Backend Reference-Data Domain:**
+**New farmer operational entity:**
 
-- Implementation: create the matching document at `backend/app/models/<domain>.py`, DTOs at `backend/app/schemas/<domain>.py`, and `APIRouter` at `backend/app/routers/<domain>.py`.
-- Registration: add the document to `document_models` in `backend/app/core/database.py` and include the router in `backend/app/main.py`.
-- Required documentation: update `backend/ChangeLog.md`, and update `backend/Decisions.md` / `backend/Flow.md` when the change introduces a non-obvious decision or a new connection, as required by `backend/AGENTS.md`.
+- Schema/storage: add the table/index/migration behavior in `backend/app/farm_state/store.py`.
+- HTTP DTO: add Pydantic types to `backend/app/schemas/farm_state.py` or a focused schema module when the domain becomes large.
+- HTTP transport: add handlers to `backend/app/routers/farm_state.py` or a focused `/v1` router and register it in `backend/app/main.py`.
+- Domain decisions: add deterministic rules in `backend/app/farm_state/` or `backend/app/services/`, not in the router or MCP tool.
+- Tests: extend `backend/tests/test_farm_state.py` or add `backend/tests/test_<domain>.py`.
+- Preserve farmer selection through `backend/app/farm_state/dependencies.py`; never accept farmer ID as a model-controlled MCP tool argument.
 
-**Apify+n8n Ingestion Pipeline (planned, no implementation exists):**
+**New shared reference/catalog domain:**
 
-- Inbound HTTP boundary: create a dedicated ingestion router under `backend/app/routers/`, not under `src/` or `codex/`.
-- Payload validation: place n8n-originated normalized payload DTOs under `backend/app/schemas/`.
-- Mapping, deduplication, source attribution, and persistence orchestration: place this in an ingestion-specific service under `backend/app/services/`.
-- Storage target: map only validated shared reference records to the relevant models in `backend/app/models/`—initially market prices, schemes, and MSP records—not farmer-private SQLite data.
-- Harness consumption: after the ingestion-backed REST domain exists, create a tool wrapper within the intended `codex/codex-rs/core/src/tools/handlers/kisansathi/` seam and register it through the existing Codex tool system.
+- Persistence: `backend/app/models/<domain>.py`.
+- HTTP contract: `backend/app/schemas/<domain>.py`.
+- Router: `backend/app/routers/<domain>.py`.
+- Registration: `backend/app/core/database.py` and `backend/app/main.py`.
+- Source ingestion: `backend/app/scraping/sources.py` for source parsing and `backend/app/scraping/service.py` for normalized upsert orchestration.
+- Tests: `backend/tests/test_<domain>.py` and/or `backend/tests/test_universal_data_sources.py`.
+- Required backend memory updates: `backend/ChangeLog.md`, plus `backend/Decisions.md` and `backend/Flow.md` when applicable, per `backend/AGENTS.md`.
 
-**New Harness Tool:**
+**New KisanSathi agent tool:**
 
-- Rust implementation: one focused capability module under `codex/codex-rs/core/src/tools/handlers/kisansathi/`.
-- HTTP capability consumed: use a backend REST endpoint in `backend/app/routers/`; do not embed Mongo access, Apify crawling, or n8n orchestration in the handler.
-- Registration: follow the existing Rust handler and registry patterns in `codex/codex-rs/core/src/tools/handlers/mod.rs` and `codex/codex-rs/core/src/tools/registry.rs`.
+- Backend capability first: expose a typed endpoint under `backend/app/routers/` backed by storage/service logic.
+- Tool implementation: add one method to `agent/src/kisansathi_agent/tools.py`.
+- Model-visible registration and safety metadata: add one registration to `agent/src/kisansathi_agent/server.py` with `_READ_ONLY` or `_WRITE`.
+- Result shape: return helpers from `agent/src/kisansathi_agent/result.py`; preserve source, freshness, warnings, request ID, bounded data, and write action hints.
+- Tests: add endpoint/mapping/error/idempotency cases under `agent/tests/test_tools.py` and `agent/tests/test_backend_client.py`.
+- Plugin guidance: update `codex/plugins/kisansathi/skills/kisansathi/SKILL.md` only when the behavioral safety contract changes.
+- Do not add native farm business logic under `codex/codex-rs/core/src/tools/handlers/`; the current integration boundary is MCP.
+
+**New desktop/Codex interaction:**
+
+- Privileged operation: implement in `desktop/main.cjs`.
+- Minimal renderer surface: expose through `desktop/preload.cjs` and update `tests/desktop/preload-contract.test.cjs`.
+- App-server protocol/session behavior: implement in `desktop/codex-harness.cjs` and test in `tests/desktop/codex-harness.test.cjs`.
+- Renderer consumption: coordinate through `src/context/AIConversationContext.jsx`, not direct Node access.
+- Modify `codex/codex-rs/` only when the existing app-server/MCP/plugin protocol cannot express the capability and add targeted Rust tests in the owning crate.
+
+**New external provider:**
+
+- Settings: declare names/timeouts in `backend/app/core/config.py` without committing values.
+- Provider adapter: `backend/app/services/<provider_or_domain>.py`.
+- Public transport: a typed backend router/schema contract under `backend/app/routers/` and `backend/app/schemas/`.
+- Provider errors: map to explicit unavailable/degraded responses; never silently replace missing agricultural data with fixtures.
+- Tests: use injected/mocked transport in a focused `backend/tests/test_<provider>.py`.
 
 **Utilities:**
 
-- Frontend display-only helpers: colocate next to the small fixture/content module in `src/data/` or the consuming component if not broadly reusable.
-- Backend domain helpers: keep a router-local helper only when it is strictly transport/computation-specific (such as `_transport_cost()` in `backend/app/routers/market_price.py`); create a service module under `backend/app/services/` for policy or an implementation that needs swapping/testing.
+- Frontend transport utilities: `src/api/`.
+- Frontend presentational state components: `src/components/feedback/`.
+- Backend cross-router provider/domain utilities: `backend/app/services/`.
+- Farmer-store-specific helpers: `backend/app/farm_state/`.
+- MCP transport/result utilities: `agent/src/kisansathi_agent/backend_client.py` and `agent/src/kisansathi_agent/result.py`.
 
 ## Special Directories
 
-**`backend/docs/`:**
-
-- Purpose: SIH product and architecture handoff documentation.
-- Generated: No.
-- Committed: Yes.
-
 **`codex/`:**
 
-- Purpose: Large embedded/upstream Codex source tree that provides the planned agent harness substrate.
-- Generated: No.
-- Committed: Yes.
+- Purpose: Full forked upstream Codex source plus the local KisanSathi plugin.
+- Generated: No (generated schemas/vendor/build outputs exist inside the wider tree).
+- Committed: Yes for source; `codex/codex-rs/target/` is a build artifact and should not be treated as source.
 
-**`.planning/codebase/`:**
+**`backend/data/`:**
 
-- Purpose: Generated current-state codebase reference documents.
+- Purpose: Local runtime farmer databases and uploaded diagnosis media.
 - Generated: Yes.
-- Committed: Repository workflow dependent; files are currently present in the working tree.
+- Committed: Runtime artifacts are present in the worktree; do not treat them as schema definitions or test fixtures unless explicitly designated.
 
-**`public/`:**
+**`dist/`:**
 
-- Purpose: Static web assets served by Vite.
+- Purpose: Production renderer bundle loaded by Electron.
+- Generated: Yes, by `npm run build`.
+- Committed: Present in the current worktree; edit `src/`, never hand-edit `dist/`.
+
+**`node_modules/`:**
+
+- Purpose: Installed npm dependency tree.
+- Generated: Yes.
+- Committed: No; never inspect it as application architecture or edit it.
+
+**`.planning/`:**
+
+- Purpose: GSD planning, research, state, notes, and generated repository maps.
+- Generated: Mixed; codebase maps/state are workflow-generated, project requirements/roadmap are planning artifacts.
+- Committed: Workflow dependent; current files are part of the working project context, not runtime code.
+
+**`codex/plugins/kisansathi/`:**
+
+- Purpose: Local Codex plugin packaging for the shared `agent/` implementation.
 - Generated: No.
-- Committed: Yes.
+- Committed: Currently untracked in the live worktree; it is nevertheless the active path hard-coded by `desktop/main.cjs`.
+
+**`src/data/` and `src/services/hostedCatalogService.js`:**
+
+- Purpose: Navigation/assets plus retained fixture/prototype data.
+- Generated: No.
+- Committed: Yes/current; do not use the hardcoded catalog modules as authoritative farm/reference state.
+
+**`.pytest_cache/`, `.playwright-cli/`, and `codex/codex-rs/target/`:**
+
+- Purpose: Local test/browser/build caches.
+- Generated: Yes.
+- Committed: No; exclude from architecture and production changes.
 
 ---
 
-*Structure analysis: 2026-08-16*
+*Structure analysis: 2026-08-20*

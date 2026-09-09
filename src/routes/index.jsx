@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, createHashRouter } from 'react-router-dom';
 import AppShell from '../components/layout/AppShell.jsx';
 import Dashboard from '../pages/Dashboard.jsx';
 import AIAssistant from '../pages/AIAssistant.jsx';
@@ -15,10 +15,15 @@ import { CropGuide, FarmMap, PestDisease } from '../pages/FieldTools.jsx';
 import GovtSchemes from '../pages/GovtSchemes.jsx';
 import FarmFinance from '../pages/FarmFinance.jsx';
 import MachineryRentals from '../pages/MachineryRentals.jsx';
+import Marketplace from '../pages/Marketplace.jsx';
 import VoiceAssistant from '../pages/VoiceAssistant.jsx';
 import Settings from '../pages/Settings.jsx';
+import DeviceOnboarding from '../pages/DeviceOnboarding.jsx';
+import FieldTasks from '../pages/FieldTasks.jsx';
 
-export const router = createBrowserRouter([
+const createAppRouter = window.location.protocol === 'file:' ? createHashRouter : createBrowserRouter;
+
+export const router = createAppRouter([
   {
     // Main App Layout Shell wrapper route
     element: <AppShell />,
@@ -31,15 +36,18 @@ export const router = createBrowserRouter([
       { path: '/soil', element: <SoilHealth /> },
       { path: '/weather', element: <Weather /> },
       { path: '/irrigation', element: <Irrigation /> },
+      { path: '/tasks', element: <FieldTasks /> },
       { path: '/pest', element: <PestDisease /> },
       { path: '/market', element: <MarketPrices /> },
       { path: '/schemes', element: <GovtSchemes /> },
       { path: '/finance', element: <FarmFinance /> },
       { path: '/machinery', element: <MachineryRentals /> },
+      { path: '/marketplace', element: <Marketplace /> },
       { path: '/ai', element: <AIAssistant /> },
       { path: '/voice', element: <VoiceAssistant /> },
       { path: '/reports', element: <Reports /> },
       { path: '/settings', element: <Settings /> },
+      { path: '/device-setup', element: <DeviceOnboarding /> },
     ],
   },
 ]);

@@ -53,6 +53,7 @@ dist-ssr/
 coverage/
 test-results/
 playwright-report/
+.playwright-cli/
 
 # Electron build artifacts
 out/
@@ -79,3 +80,7 @@ backend/.runtime/
 *.njsproj
 *.sln
 *.sw?
+# Local, non-release ML weights and downloaded datasets are reproducible via manifests.
+ml/demo_artifacts/*.pt
+ml/private-data/
+ml/private-artifacts/

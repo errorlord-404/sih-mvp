@@ -2,10 +2,12 @@ from typing import List
 
 from bson.errors import InvalidId
 from beanie import PydanticObjectId
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Query, status
 
+from app.models.market_price import MarketPrice
 from app.models.msp import MSP
-from app.schemas.msp import MSPCreate, MSPResponse, MSPUpdate
+from app.schemas.msp import MSPCreate, MSPMarketComparisonResponse, MSPResponse, MSPUpdate
+from app.services.msp_comparison import select_msp_market_comparison
 
 router = APIRouter(prefix="/msp", tags=["msp"])
 
@@ -18,6 +20,11 @@ def _to_response(msp: MSP) -> MSPResponse:
         season=msp.season,
         marketing_year=msp.marketing_year,
         procurement_centres=msp.procurement_centres,
+        variety=msp.variety,
+        source=msp.source,
+        source_url=msp.source_url,
+        source_record_id=msp.source_record_id,
+        fetched_at=msp.fetched_at,
     )
 
 
@@ -45,6 +52,12 @@ async def list_msps():
 async def list_msps_by_crop(crop_name: str):
     msps = await MSP.find(MSP.crop_name == crop_name).to_list()
     return [_to_response(msp) for msp in msps]
+
+
+@router.get("/compare-market", response_model=MSPMarketComparisonResponse)
+async def compare_msp_with_market(crop: str = Query(..., min_length=1)):
+    """Compare sourced MSP and newest observation per mandi; no procurement promise."""
+    return select_msp_market_comparison(crop, await MSP.find_all().to_list(), await MarketPrice.find_all().to_list())
 
 
 @router.get("/{msp_id}", response_model=MSPResponse)

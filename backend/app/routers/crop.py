@@ -20,6 +20,10 @@ def _to_response(crop: Crop) -> CropResponse:
         previous_crop_compatibility=crop.previous_crop_compatibility,
         avg_yield_per_acre=crop.avg_yield_per_acre,
         avg_price_per_quintal=crop.avg_price_per_quintal,
+        source=crop.source,
+        source_url=crop.source_url,
+        source_record_id=crop.source_record_id,
+        fetched_at=crop.fetched_at,
     )
 
 

@@ -1,4 +1,4 @@
-import { Bot, Bug, CloudSun, Coins, Droplets, FileText, Landmark, LayoutDashboard, Map, Sprout, Store, TestTube2, Wheat, Mic, Settings, Wrench } from 'lucide-react'
+import { Bot, Bug, CloudSun, Coins, Droplets, FileText, Landmark, LayoutDashboard, ListTodo, Map, PackageSearch, Sprout, Store, TestTube2, Wheat, Mic, Settings, Wrench } from 'lucide-react'
 
 export const navigation = [
   { label: 'Dashboard', key: 'dashboard', to: '/', icon: LayoutDashboard },
@@ -8,11 +8,13 @@ export const navigation = [
   { label: 'Weather', key: 'weather', to: '/weather', icon: CloudSun },
   { label: 'Crop Guide', key: 'cropGuide', to: '/crop-guide', icon: Sprout },
   { label: 'Irrigation', key: 'irrigation', to: '/irrigation', icon: Droplets },
+  { label: 'Field Actions', key: 'tasks', to: '/tasks', icon: ListTodo },
   { label: 'Pest & Disease', key: 'pest', to: '/pest', icon: Bug },
   { label: 'Market Prices', key: 'market', to: '/market', icon: Store },
   { label: 'Govt Schemes', key: 'schemes', to: '/schemes', icon: Landmark },
   { label: 'Farm Finance', key: 'finance', to: '/finance', icon: Coins },
   { label: 'Machinery Rentals', key: 'machinery', to: '/machinery', icon: Wrench },
+  { label: 'Marketplace', to: '/marketplace', icon: PackageSearch },
   { label: 'AI Advisor', key: 'ai', to: '/ai', icon: Bot },
   { label: 'Reports', key: 'reports', to: '/reports', icon: FileText },
   { label: 'Voice Assistant', to: '/voice', icon: Mic },
