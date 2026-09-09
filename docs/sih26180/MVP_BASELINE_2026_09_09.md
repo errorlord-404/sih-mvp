@@ -15,7 +15,7 @@
 
 | Gate | Evidence |
 |---|---|
-| Backend | 50 pytest tests passed |
+| Backend | 51 pytest tests passed |
 | Codex agent | 12 pytest tests passed |
 | Frontend | 11 Vitest files / 18 tests passed |
 | Desktop harness | 6 Node tests passed |

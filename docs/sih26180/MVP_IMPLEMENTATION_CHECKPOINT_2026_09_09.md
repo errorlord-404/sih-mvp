@@ -33,6 +33,8 @@ from the existing dirty session files so a later agent can resume safely.
 - Added farmer-scoped `/v1/diagnostics`, safe `X-Request-ID` response
   correlation, and a Settings readiness panel with SQLite/reference counts and
   degraded-component disclosure.
+- Added a confirmation-gated, demo-identity-only Settings action that can load
+  or repair the local farmer fixture without touching shared reference data.
 - Added append-only local audit events, a bounded farmer JSON export, and a
   Settings download action for recovery evidence.
 - Added bounded browser-side last-known reference caching. Stale catalog data
@@ -53,7 +55,7 @@ from the existing dirty session files so a later agent can resume safely.
 - `npm run build`: passed; existing Vite bundle-size warning remains.
 - `npm run test:ui -- --run`: 11 files, 18 tests passed.
 - `npm run test:desktop`: 6 tests passed.
-- `python -m pytest backend/tests -q`: 50 passed after the geo, diagnostics, audit/export contract tests; only existing dependency
+- `python -m pytest backend/tests -q`: 51 passed after the geo, diagnostics, audit/export and demo-loader contract tests; only existing dependency
   deprecation warning.
 - `python -m pytest agent/tests -q`: 12 passed; only existing settings/deprecation warnings.
 - PowerShell AST parse of `scripts/start-demo.ps1`: passed.
