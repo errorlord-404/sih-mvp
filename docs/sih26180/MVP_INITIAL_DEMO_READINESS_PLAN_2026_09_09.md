@@ -241,3 +241,16 @@ Initial-demo must-have: Waves 0–4, scheme state correction, existing Codex han
 The MVP is done when the farmer, field, coordinates, source records, screen and AI tool all refer to the same entities and failure states. A screen silently emptied by parsing a display string is a release blocker. A map without a list/offline fallback is incomplete. A Codex answer that cannot reproduce the UI’s source semantics is unacceptable.
 
 Begin implementation with Wave 0 and Wave 1. Do not start new model training or physical-control work during this slice.
+
+## 9. Current implementation status
+
+The initial-demo must-have slice is implemented through the launcher, map,
+nearby discovery, schemes, Codex parity, diagnostics, bounded reference cache,
+audit/export, deterministic fixtures, reset, and contract/test gates. The
+remaining items are pilot/production work rather than blockers for the local
+SIH demonstrator: live provider ingestion operations, production identity and
+authentication, full offline sync, calibrated hardware actuation, and
+field-evaluated crop-health release evidence. Native Electron screenshot
+capture was unavailable in the current desktop automation environment and is
+called out in the checkpoint rather than being represented as completed visual
+evidence.
