@@ -3,6 +3,21 @@
 Records WHY a non-obvious choice was made. Not every change needs an entry -
 only ones where a reasonable person might ask "why did you do it this way?"
 
+## Local prototype data is explicit demo/reference data
+**Date:** 2026-09-09
+**Context:** Reference-driven screens were empty when MongoDB was not running,
+but quietly fabricated market prices, MSP values, supplier availability, or
+scheme eligibility would be unsafe and misleading.
+**Decision:** Run MongoDB locally in a named Docker volume bound only to
+`127.0.0.1` and populate it through an idempotent script. All local records
+are tagged `local_demo_seed_not_live` or carry equivalent visible wording and
+link to official portals only as verification destinations.
+**Alternatives considered:** Hard-code values in the frontend, leave all
+screens empty, or present static figures as live data.
+**Trade-offs accepted:** The UI becomes demonstrable offline, but these entries
+cannot drive recommendations, purchases, claims, bookings, or field decisions;
+a source-attributed ingestion path is required before deployment.
+
 ## Controlled demo prefers EfficientNetV2-B0 without expanding authority
 **Date:** 2026-09-09
 **Context:** On the same deterministic 400-image controlled tomato split, dynamic TFLite accuracy was 95.50% for the previous MobileNetV3-Small artifact, 96.50% for MobileNetV3-Large and 97.75% for EfficientNetV2-B0. No candidate has Indian field, unknown/OOD, agronomist or target-device evidence.

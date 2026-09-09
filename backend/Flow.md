@@ -17,6 +17,19 @@ Client request
   -> response serialized back through schema
   -> JSON response to client
 
+## Local shared-reference bootstrap
+`docker-compose.universal-data.yml` MongoDB service
+  -> binds the central/reference database to localhost only and persists it in
+     the named `mongodb_data` volume
+  -> `scripts/seed_local_reference_data.py` upserts visibly marked
+     `local_demo_seed_not_live` records
+  -> backend starts `init_db()` and exposes those records through existing
+     shared-reference routers (such as `/gov-schemes` and market routes)
+  -> machinery filters form a plain Mongo query document before the listing is
+     serialized, avoiding ODM class-field compatibility differences
+  -> farmer-owned field, sensor, ledger and diagnosis requests remain on the
+     independent per-farmer SQLite Farm State path
+
 ## TFLite crop-health routing
 `POST /v1/diagnoses` with a confirmed crop
   -> validates image and stores immutable upload metadata in the farmer SQLite database

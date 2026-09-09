@@ -59,14 +59,14 @@ async def list_machinery_rentals(
     district: str | None = Query(default=None, min_length=1),
     state: str | None = Query(default=None, min_length=1),
 ):
-    criteria = []
+    criteria: dict[str, str] = {}
     if category:
-        criteria.append(MachineryRental.category == category)
+        criteria["category"] = category
     if district:
-        criteria.append(MachineryRental.district == district)
+        criteria["district"] = district
     if state:
-        criteria.append(MachineryRental.state == state)
-    records = await MachineryRental.find(*criteria).to_list()
+        criteria["state"] = state
+    records = await (MachineryRental.find(criteria) if criteria else MachineryRental.find_all()).to_list()
     records.sort(key=lambda item: item.distance_km if item.distance_km is not None else float("inf"))
     return [_to_response(record) for record in records]
 

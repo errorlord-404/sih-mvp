@@ -3,6 +3,22 @@
 All notable changes to this service. Newest entry on top.
 Format: `### YYYY-MM-DD HH:MM - short title`
 
+### 2026-09-09 - Local MongoDB reference seed for the prototype
+**What changed:**
+- Added a Docker-backed, localhost-only MongoDB setup guide and an idempotent
+  seed script for the shared reference database.
+- The seed includes labelled local demo records for crops, market/MSP rows,
+  schemes, seed/fertilizer references, machinery, and marketplace discovery.
+- Corrected the machinery-list filter to use a stable query document rather
+  than an unavailable ODM field expression, so seeded directory rows render.
+
+**Why:** The prototype needs populated shared-reference screens while keeping
+farmer-specific information in SQLite and never presenting illustrative data as
+live market, procurement, supplier, or eligibility information.
+
+**Status:** MongoDB is healthy locally and the seed has been applied. The API
+health endpoint reports `reference_database: available`.
+
 ### 2026-09-09 - Higher-accuracy controlled TFLite demo
 **What changed:**
 - The explicit local demo launcher now selects the manifest-bound EfficientNetV2-B0 dynamic TFLite tomato specialist.
