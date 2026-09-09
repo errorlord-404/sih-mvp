@@ -29,6 +29,10 @@
     rejected: raw validation accuracy was 64.06% and tomato recall 12.5%; the
     normal confidence gate rejected every tomato image. The runtime remains
     farmer-confirmation-first.
+14. Built a source-split PlantDoc external-domain tomato adaptation experiment
+    with EfficientNetV2-B0. It is rejected: 55.00% development validation and
+    29.17% raw accuracy on the reserved external source-test subset; the
+    normal gate accepted none of 24 images.
 
 ## Verification
 
@@ -61,6 +65,8 @@
   `ml/evaluation/PLANTDOC_EXTERNAL_CHECK_2026_09_09.md`
 - Crop-router rejection record:
   `ml/evaluation/PLANTDOC_CROP_ROUTER_CHECK_2026_09_09.md`
+- Tomato adaptation rejection record:
+  `ml/evaluation/PLANTDOC_TOMATO_ADAPTATION_CHECK_2026_09_09.md`
 
 ## What remains before a truthful field release
 
@@ -95,3 +101,6 @@
 > The evaluated PlantDoc router is rejected; do not set its artifact paths in
 > the backend. Improve crop routing only with consented target-region,
 > field/date/device-disjoint data and a genuine unknown class.
+> The PlantDoc tomato-adaptation model is also rejected. Do not refer to its
+> source-test folder as a field test and do not use public-image fine-tuning as
+> a substitute for target-region farmer-phone data.

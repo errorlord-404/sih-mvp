@@ -132,10 +132,18 @@ def main() -> None:
     report["acceptance_policy"] = {"minimum_score": args.minimum_score, "minimum_margin": args.minimum_margin}
     report["model"] = str(args.model)
     report["labels"] = str(args.labels)
+    # Persist split provenance so a saved report cannot be reused as evidence
+    # for a different validation, external, or field partition.
+    report["dataset"] = str(args.dataset)
     if args.unknown_dataset:
         outcomes = [predict(path) for path in image_files(args.unknown_dataset)]
         rejected = sum(prediction is None for prediction, _, _ in outcomes)
-        report["unknown_ood"] = {"samples": len(outcomes), "rejected": rejected, "true_rejection_rate": rejected / len(outcomes) if outcomes else 0.0}
+        report["unknown_ood"] = {
+            "dataset": str(args.unknown_dataset),
+            "samples": len(outcomes),
+            "rejected": rejected,
+            "true_rejection_rate": rejected / len(outcomes) if outcomes else 0.0,
+        }
     else:
         report["unknown_ood"] = {"status": "not_evaluated"}
     encoded = json.dumps(report, indent=2)

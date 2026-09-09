@@ -199,6 +199,21 @@ achieved 64.06% raw held-out accuracy and only 12.5% tomato recall. See
 `../evaluation/PLANTDOC_CROP_ROUTER_CHECK_2026_09_09.md`. Do not configure its
 artifact in the backend.
 
+For a clearly scoped external-domain **tomato specialist** experiment,
+PlantDoc's source `train/` folder is split into development train/validation
+sets, while its source `test/` folder is reserved as `external_test`. This is
+useful to measure whether an ImageNet-pretrained TF Hub model can adapt to more
+varied web imagery; it cannot replace farmer-phone release evidence or be mixed
+with the separate PlantDoc external check:
+
+```powershell
+python ml/training/materialize_plantdoc_tomato_specialist.py `
+  --repository C:\approved\PlantDoc-Dataset `
+  --revision 5467f6012d78d1c446145d5f582da6096f852ae8 `
+  --output C:\approved\plantdoc-tomato-specialist `
+  --train-per-label 45 --val-per-label 10 --field-test-per-label 6
+```
+
 `materialize_plantdoc_tomato_external_test.py` can fetch a **bounded** subset
 from an immutable local PlantDoc Git revision without checking out its
 Windows-incompatible source filenames. It writes only sanitized evaluation

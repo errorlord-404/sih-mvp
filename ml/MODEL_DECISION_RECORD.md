@@ -287,6 +287,18 @@ the application must keep asking the farmer to confirm the crop before calling
 a crop-specific specialist. Full provenance and metrics are in
 `evaluation/PLANTDOC_CROP_ROUTER_CHECK_2026_09_09.md`.
 
+### PlantDoc tomato adaptation experiment rejection (9 September 2026)
+
+An ImageNet-pretrained TF Hub EfficientNetV2-B0 specialist was trained on 180
+PlantDoc source-`train` tomato images (45 per supported label), tuned on 40
+disjoint source-`train` validation images, and checked on 24 reserved
+source-`test` images. It achieved 55.00% development validation accuracy but
+only 29.17% raw external-test accuracy (macro-F1 0.2530); at the normal
+0.70/0.15 confidence gate, it accepted no image. This artifact is rejected and
+is not a runtime candidate. The source-test subset is public web imagery, not
+a farmer-phone field test. See
+`evaluation/PLANTDOC_TOMATO_ADAPTATION_CHECK_2026_09_09.md`.
+
 ## Source ledger
 
 - [PlantVillage Dataset repository](https://github.com/spMohanty/PlantVillage-Dataset) — dataset size/scope and original paper.
