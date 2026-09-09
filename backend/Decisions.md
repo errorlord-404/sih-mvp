@@ -7,20 +7,16 @@ MahaDBT is used for Maharashtra agricultural scheme detail pages because it
 publishes the catalogue and eligibility/documents on public HTTPS pages. The
 source URL, stable source ID and fetch time are retained.
 
-The FARMS dashboard is used for machinery-network evidence only. Its public
-JSON endpoints expose state-level custom-hiring provider and booking counts,
-not a complete individual provider/rate/availability catalogue. Those rows
-are stored as `record_kind=network_status` marketplace records with no
-invented contact, price, coordinates or booking claim. A future official
-provider-detail endpoint can add `provider_listing` rows without changing the
-farmer-facing contract.
+The FARMS dashboard is used for machinery-network evidence, and its public
+KisanRath CHC feed is used for provider/vehicle discovery. Provider rows keep
+the published agency, address, coordinates, phone, vehicle and cost fields;
+dashboard counts remain `record_kind=network_status` rows. Neither path claims
+live availability or creates a booking.
 
-The official FARMS API help lists individual CHC/implement endpoints, but its
-request contract requires an `EncryptedRequest` and the unauthenticated empty
-request is rejected. We do not reverse-engineer that mobile-app encryption or
-send guessed credentials. Until the ministry supplies an approved integration
-credential/contract, aggregate dashboard data is the maximum verifiable live
-machinery evidence.
+The official FARMS API help also lists individual CHC/implement endpoints that
+require an `EncryptedRequest`; we do not reverse-engineer those private flows.
+The public KisanRath CHC feed is sufficient for the current read-only provider
+directory and is bounded by a date window and stable transaction/vehicle IDs.
 
 Records WHY a non-obvious choice was made. Not every change needs an entry -
 only ones where a reasonable person might ask "why did you do it this way?"

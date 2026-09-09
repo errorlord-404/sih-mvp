@@ -292,11 +292,10 @@ Refresh live government and approved directory data directly:
 python .\backend\scripts\refresh_live_reference_data.py
 ```
 
-This loads MahaDBT agricultural schemes, Government of India FARMS network
-status, and the configured APEDA public exporter directory into MongoDB. FARMS
-currently publishes state-level custom-hiring counts through its public
-dashboard; those rows are labelled `network_status` and are not individual
-provider quotes or bookings.
+This loads MahaDBT agricultural schemes, real Government of India FARMS CHC
+provider/vehicle records plus network status, and the configured APEDA public
+exporter directory into MongoDB. FARMS provider rows retain source-published
+contact and cost fields, but still require direct verification before booking.
 ```
 
 Start FastAPI:

@@ -68,7 +68,7 @@ async def list_machinery_rentals(
     if state:
         criteria["state"] = normalize_admin(state)
     records = await (MachineryRental.find(criteria) if criteria else MachineryRental.find_all()).to_list()
-    records.sort(key=lambda item: item.distance_km if item.distance_km is not None else float("inf"))
+    records.sort(key=lambda item: (item.record_kind != "provider_listing", item.distance_km if item.distance_km is not None else float("inf")))
     return [_to_response(record) for record in records]
 
 

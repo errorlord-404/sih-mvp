@@ -30,6 +30,7 @@ class MachineryRental(Document):
     rating: Optional[float] = None
     source: str = "manual"
     source_url: Optional[str] = None
+    source_status: str = "active"
     image_url: Optional[str] = None
     observed_at: Optional[datetime] = None
     fetched_at: Optional[datetime] = None

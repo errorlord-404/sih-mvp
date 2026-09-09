@@ -28,11 +28,14 @@ class MarketplaceListing(Document):
     price_amount: Optional[float] = Field(default=None, ge=0)
     price_currency: str = "INR"
     price_unit: Optional[str] = None
+    availability_status: Optional[str] = None
     contact_phone: Optional[str] = None
     contact_email: Optional[str] = None
+    image_url: Optional[str] = None
     listing_url: Optional[str] = None
     source: str
     source_url: str
+    source_status: str = "active"
     observed_at: Optional[datetime] = None
     fetched_at: datetime
     metadata: Optional[dict[str, Any]] = None

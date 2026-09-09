@@ -51,17 +51,16 @@ The universal-data service also supports two source-specific official adapters:
   page's eligibility/documents with a stable source ID.
 - `machinery` reads the public [Government of India FARMS
   dashboard](https://agrimachinery.nic.in/Index/farmsapp). Its current public
-  endpoints expose state-level custom-hiring provider and booking counts, not
-  individual centres, rates or availability. Those rows are stored as
-  `record_kind=network_status` and must never be described as a confirmed
-  rental or booking.
+  dashboard endpoints expose state-level custom-hiring provider and booking
+  counts, stored as `record_kind=network_status`. The public KisanRath CHC feed
+  additionally exposes provider/vehicle rows; those are stored as
+  `record_kind=provider_listing` with the source-published contact, coordinates
+  and cost fields.
 
-The official [FARMS API help](https://agrimachinery.nic.in/CHCApp/Help) lists
-individual provider/implement endpoints, but their request body requires an
-`EncryptedRequest`. Empty unauthenticated requests are rejected. Do not
-reverse-engineer the mobile application's encryption; add individual listings
-only after the ministry or an approved provider supplies an integration
-contract and credentials.
+The official [FARMS API help](https://agrimachinery.nic.in/CHCApp/Help) also lists
+private provider/implement endpoints whose request body requires an
+`EncryptedRequest`. We do not reverse-engineer those flows; the public CHC feed
+is the approved read-only provider source currently used here.
 
 Run both along with APEDA using:
 
@@ -95,7 +94,7 @@ review its terms, robots/access policy, rate limit and field mapping. Current
 research candidates are:
 
 - APEDA's public [Agri Exchange registered-exporter directory](https://agriexchange.apeda.gov.in/AgriDirectory/Exporter/Exporters). It publishes exporter name, address, commodity and state in a public directory, but its HTML layout is not the JSON-LD contract used by this importer.
-- The Ministry of Agriculture's [FARMS/custom-hiring information](https://agrimachinery.nic.in/Index/farmsapp). Its public dashboard endpoints are now supported for aggregate network status; obtaining individual live centres or availability still needs its documented integration or explicit permission, not screen scraping.
+- The Ministry of Agriculture's [FARMS/custom-hiring information](https://agrimachinery.nic.in/Index/farmsapp) and its public [CHC KisanRath feed](https://agrimachinery.nic.in/CHCApp/Help). The dashboard provides aggregate status, while the CHC feed provides source-published provider/vehicle discovery records. Current availability still requires direct provider verification.
 
 Do not add an individual commercial directory until its terms, source approval
 and adapter test fixture have been committed.

@@ -23,11 +23,14 @@ class MarketplaceListingResponse(BaseModel):
     price_amount: float | None = Field(default=None, ge=0)
     price_currency: str = "INR"
     price_unit: str | None = None
+    availability_status: str | None = None
     contact_phone: str | None = None
     contact_email: str | None = None
+    image_url: str | None = None
     listing_url: str | None = None
     source: str
     source_url: str
+    source_status: str = "active"
     observed_at: datetime | None = None
     fetched_at: datetime
     metadata: dict | None = None

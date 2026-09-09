@@ -3,6 +3,21 @@
 All notable changes to this service. Newest entry on top.
 Format: `### YYYY-MM-DD HH:MM - short title`
 
+### 2026-09-09 - Live FARMS CHC provider and vehicle listings
+**What changed:**
+- Added the official public `KisanRath/getChcData` adapter for real CHC/service
+  provider and vehicle records, including source-published coordinates, phone,
+  vehicle photo, hourly/acre costs, and provider timestamps.
+- Upserted provider rows into both `machinery_rentals` and
+  `marketplace_listings` with stable transaction/vehicle IDs and
+  `record_kind=provider_listing`.
+- Added bounded date-window refresh, stale-source marking, and parser tests;
+  dashboard count rows remain separately labelled `network_status`.
+
+**Status:** Live Mongo refresh verified with 93 provider/vehicle rows and 33
+network snapshots. Prices and availability remain source-published evidence,
+not guarantees or bookings.
+
 ### 2026-09-09 - Official MahaDBT schemes and FARMS network ingestion
 **What changed:**
 - Added bounded MahaDBT Farmer Portal ingestion for published agricultural

@@ -19,7 +19,7 @@ from app.scraping.sources import MARKET_DATASET_URL, SourceFetchError, fetch_mar
 from app.scraping.marketplace import ALLOWED_LISTING_TYPES, fetch_apeda_exporter_records, fetch_marketplace_records
 from app.models.gov_scheme import GovScheme
 from app.models.machinery_rental import MachineryRental
-from app.scraping.government import fetch_farms_network_records, fetch_mahadbt_scheme_records
+from app.scraping.government import FARMS_CHC_DATA_URL, FARMS_HIRING_STATUS_URL, FARMS_PROVIDER_COUNTS_URL, fetch_farms_chc_records, fetch_farms_network_records, fetch_mahadbt_scheme_records
 
 
 SUPPORTED_SOURCES = {"market_prices", "msp", "crops", "marketplace", "gov_schemes", "machinery"}
@@ -257,38 +257,64 @@ async def _execute_sync(
             errors.append("machinery: FARMS network status ingestion is disabled")
         else:
             try:
-                network_records, fetched = await asyncio.to_thread(
+                provider_records, provider_fetched = await asyncio.to_thread(
+                    fetch_farms_chc_records,
+                    timeout=settings.UNIVERSAL_DATA_HTTP_TIMEOUT_SECONDS,
+                    lookback_days=settings.FARMS_CHC_LOOKBACK_DAYS,
+                    max_records=settings.FARMS_CHC_MAX_RECORDS,
+                )
+                network_records, network_fetched = await asyncio.to_thread(
                     fetch_farms_network_records,
                     timeout=settings.UNIVERSAL_DATA_HTTP_TIMEOUT_SECONDS,
                 )
-                stats["machinery_fetch"] = fetched
+                stats["machinery_fetch"] = {"provider": provider_fetched, "network": network_fetched}
                 source_urls.extend([
                     "https://agrimachinery.nic.in/Index/farmsapp",
-                    "https://agrimachinery.nic.in/GraphReport/SMAMFmtti/ServiceData2.asmx/GetCHCAppServiceProviders",
-                    "https://agrimachinery.nic.in/GraphReport/SMAMFmtti/ServiceData2.asmx/GetStatusofImplementHiring",
+                    FARMS_CHC_DATA_URL,
+                    FARMS_PROVIDER_COUNTS_URL,
+                    FARMS_HIRING_STATUS_URL,
                 ])
-                if network_records:
-                    stats["machinery"] = await _bulk_upsert(MarketplaceListing, network_records)
+                all_records = provider_records + network_records
+                if all_records:
+                    stats["machinery"] = await _bulk_upsert(MarketplaceListing, all_records)
                     rental_records = []
-                    for record in network_records:
+                    for record in all_records:
                         rental_records.append({
                             "source_record_id": record["source_record_id"],
-                            "record_kind": "network_status",
+                            "record_kind": record.get("record_kind", "provider_listing"),
                             "name": record["title"],
                             "category": record["category"],
                             "description": record["description"],
                             "provider_name": record["provider_name"],
                             "location": record["location"],
+                            "district": record.get("district"),
                             "state": record["state"],
-                            "availability_status": "network_status",
+                            "latitude": record.get("latitude"),
+                            "longitude": record.get("longitude"),
+                            "location_point": record.get("location_point"),
+                            "availability_status": record.get("availability_status", "network_status"),
+                            "hourly_rate": record.get("hourly_rate"),
+                            "contact_phone": record.get("contact_phone"),
                             "source": record["source"],
                             "source_url": record["source_url"],
+                            "source_status": record.get("source_status", "active"),
+                            "image_url": record.get("image_url"),
+                            "observed_at": record.get("observed_at"),
                             "fetched_at": record["fetched_at"],
-                            "metadata": record["metadata"],
+                            "metadata": record.get("metadata"),
                         })
                     stats["machinery_rentals"] = await _bulk_upsert(MachineryRental, rental_records)
+                    provider_ids = [record["source_record_id"] for record in provider_records]
+                    await MarketplaceListing.get_pymongo_collection().update_many(
+                        {"source": "Government of India FARMS CHC public feed", "source_record_id": {"$nin": provider_ids}},
+                        {"$set": {"source_status": "stale"}},
+                    )
+                    await MachineryRental.get_pymongo_collection().update_many(
+                        {"source": "Government of India FARMS CHC public feed", "source_record_id": {"$nin": provider_ids}},
+                        {"$set": {"source_status": "stale"}},
+                    )
                 else:
-                    errors.append("machinery: official FARMS endpoints returned no state snapshots")
+                    errors.append("machinery: official FARMS endpoints returned no provider or network records")
             except SourceFetchError as exc:
                 errors.append(f"machinery: {exc}")
 

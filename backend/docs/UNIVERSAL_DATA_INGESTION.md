@@ -15,7 +15,7 @@ Every imported document stores a stable `source_record_id`, `source`, `source_ur
 
 Seeds, fertilizer dosage/pricing, disease treatment, and scheme eligibility are not auto-filled by this job: the researched government pages do not provide stable structured feeds matching the existing schemas. Those collections remain available through CRUD and must be populated only from approved domain-specific sources.
 
-Marketplace discovery is deliberately separate from those recommendation catalogs. Configure approved HTTPS directory sources in `MARKETPLACE_DIRECTORY_SOURCES_JSON`, then run `--sources marketplace`. The `gov_schemes` source refreshes the public MahaDBT Farmer Portal catalogue, and `machinery` refreshes Government of India FARMS network-status counts. FARMS does not expose an unauthenticated individual provider/rate catalogue, so those records are explicitly labelled network status and never imply a booking or price. See [MARKETPLACE_DIRECTORY.md](MARKETPLACE_DIRECTORY.md) for the source policy and configuration shape.
+Marketplace discovery is deliberately separate from those recommendation catalogs. Configure approved HTTPS directory sources in `MARKETPLACE_DIRECTORY_SOURCES_JSON`, then run `--sources marketplace`. The `gov_schemes` source refreshes the public MahaDBT Farmer Portal catalogue, and `machinery` refreshes both the public Government of India FARMS KisanRath CHC provider feed and dashboard network counts. Provider rows retain source-published contact/cost fields but never imply a booking or current availability. See [MARKETPLACE_DIRECTORY.md](MARKETPLACE_DIRECTORY.md) for the source policy and configuration shape.
 
 ## Run locally
 

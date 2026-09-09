@@ -27,6 +27,7 @@ class MachineryRentalPayload(BaseModel):
     rating: Optional[float] = Field(default=None, ge=0, le=5)
     source: str = "manual"
     source_url: Optional[str] = None
+    source_status: str = "active"
     image_url: Optional[str] = None
     observed_at: Optional[datetime] = None
     fetched_at: Optional[datetime] = None
@@ -75,6 +76,7 @@ class MachineryRentalUpdate(BaseModel):
     rating: Optional[float] = Field(default=None, ge=0, le=5)
     source: Optional[str] = None
     source_url: Optional[str] = None
+    source_status: Optional[str] = None
     image_url: Optional[str] = None
     observed_at: Optional[datetime] = None
     fetched_at: Optional[datetime] = None

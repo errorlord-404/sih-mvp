@@ -8,11 +8,13 @@ scheme pages and public Government of India FARMS JSON endpoints -> parser
 validation -> stable source IDs -> Mongo `gov_schemes` and
 `marketplace_listings` -> `/gov-schemes` and `/marketplace/listings`.
 
-MahaDBT rows are scheme details. FARMS rows are state-level
-`record_kind=network_status` snapshots and carry no individual rental
-price/contact/availability. Source URLs and fetched timestamps make freshness
-inspectable; failed refreshes are recorded in `ingestion_runs` and do not
-delete the last known row.
+MahaDBT rows are scheme details. FARMS produces both provider/vehicle
+`record_kind=provider_listing` rows from the public KisanRath CHC feed and
+state-level `record_kind=network_status` snapshots from dashboard endpoints.
+Source URLs and fetched timestamps make freshness inspectable; provider rows
+retain published rates/contacts without claiming availability or booking.
+Failed refreshes are recorded in `ingestion_runs` and do not delete the last
+known row; records absent from a successful provider refresh become `stale`.
 
 The desktop bootstrap first creates optional local fixtures for offline
 continuity, then runs `scripts/refresh_live_reference_data.py`. Only a fully

@@ -81,6 +81,7 @@ async def list_marketplace_listings(
             item for item in records
             if matcher.search(" ".join(filter(None, [item.title, item.category, item.provider_name, item.description, item.location])))
         ]
+    records.sort(key=lambda item: (item.record_kind != "provider_listing", -(item.fetched_at.timestamp() if item.fetched_at else 0)))
     return [_response(item) for item in records[:limit]]
 
 

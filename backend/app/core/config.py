@@ -63,5 +63,7 @@ class Settings(BaseSettings):
     MAHADBT_SCHEME_INDEX_URL: str = "https://mahadbt.maharashtra.gov.in/Farmer/SchemeData/SchemeData?str=E9DDFA703C38E51A23C0254248DAFF28"
     MAHADBT_MAX_SCHEMES: int = 30
     FARMS_NETWORK_STATUS_ENABLED: bool = True
+    FARMS_CHC_LOOKBACK_DAYS: int = 365
+    FARMS_CHC_MAX_RECORDS: int = 5000
 
 settings = Settings()

@@ -1,16 +1,17 @@
 """Adapters for bounded, official government agriculture sources.
 
 The adapters intentionally ingest only public pages/endpoints published by the
-government.  They preserve the source URL and fetch time, and never turn an
-aggregate dashboard count into a provider, price, booking, or availability
-claim.
+government. They preserve source URLs and fetch times. The FARMS KisanRath CHC
+feed contains provider/vehicle records and published cost fields; the separate
+dashboard count feed remains an explicitly labelled aggregate health signal.
+Neither source is treated as a booking or a guarantee of current availability.
 """
 
 from __future__ import annotations
 
 import json
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from html import unescape
 from html.parser import HTMLParser
 from urllib.parse import urljoin
@@ -24,6 +25,7 @@ from app.scraping.sources import SourceFetchError, USER_AGENT, _fetch_text, stab
 MAHADBT_FARMER_SCHEME_INDEX = "https://mahadbt.maharashtra.gov.in/Farmer/SchemeData/SchemeData?str=E9DDFA703C38E51A23C0254248DAFF28"
 FARMS_PROVIDER_COUNTS_URL = "https://agrimachinery.nic.in/GraphReport/SMAMFmtti/ServiceData2.asmx/GetCHCAppServiceProviders"
 FARMS_HIRING_STATUS_URL = "https://agrimachinery.nic.in/GraphReport/SMAMFmtti/ServiceData2.asmx/GetStatusofImplementHiring"
+FARMS_CHC_DATA_URL = "https://agrimachinery.nic.in/CHCApp/KisanRath/getChcData"
 
 
 def _clean_html(value: str) -> str:
@@ -123,6 +125,120 @@ def _post_json(url: str, timeout: float) -> Any:
         return outer
     except json.JSONDecodeError as exc:
         raise SourceFetchError("Official FARMS endpoint returned invalid JSON") from exc
+
+
+def _number(value: Any) -> float | None:
+    if value is None or value == "":
+        return None
+    try:
+        return float(str(value).replace(",", "").strip())
+    except (TypeError, ValueError):
+        return None
+
+
+def _observed_at(value: Any) -> datetime | None:
+    raw = str(value or "").strip()
+    for fmt in ("%m/%d/%Y %I:%M:%S %p", "%d/%m/%Y %H:%M:%S", "%d/%m/%Y %H:%M"):
+        try:
+            return datetime.strptime(raw, fmt).replace(tzinfo=timezone.utc)
+        except ValueError:
+            continue
+    return None
+
+
+def _address_parts(value: Any) -> tuple[str | None, str | None, str | None]:
+    address = re.sub(r"\s+", " ", str(value or "")).strip(" ,") or None
+    if not address:
+        return None, None, None
+    parts = [part.strip() for part in address.split(",") if part.strip()]
+    state = parts[-1].title() if parts else None
+    district = parts[-2].title() if len(parts) > 1 else None
+    return address, district, state
+
+
+def _farms_chc_rows(payload: Any) -> list[dict[str, Any]]:
+    if not isinstance(payload, dict) or payload.get("status") != "S" or not isinstance(payload.get("listCHC"), list):
+        raise SourceFetchError("Official FARMS CHC endpoint returned no usable provider data")
+    return [row for row in payload["listCHC"] if isinstance(row, dict)]
+
+
+def parse_farms_chc_records(
+    payload: dict[str, Any], *, source_url: str = FARMS_CHC_DATA_URL, fetched_at: datetime | None = None,
+    max_records: int = 5000,
+) -> list[dict[str, Any]]:
+    """Map the official public KisanRath CHC feed to source-attributed rentals."""
+    timestamp = fetched_at or datetime.now(timezone.utc)
+    records: dict[str, dict[str, Any]] = {}
+    for provider in _farms_chc_rows(payload):
+        transaction_id = str(provider.get("CHCTransactionId") or "").strip()
+        agency = str(provider.get("agency_name") or provider.get("contact_person_name") or "").strip()
+        if not transaction_id or not agency:
+            continue
+        location, district, state = _address_parts(provider.get("address"))
+        latitude = _number(provider.get("lat"))
+        longitude = _number(provider.get("lng"))
+        observed_at = _observed_at(provider.get("CHC_LastModifiedDate")) or _observed_at(provider.get("CHC_AddedDate"))
+        vehicles = provider.get("chcVehicles") if isinstance(provider.get("chcVehicles"), list) else []
+        if not vehicles:
+            vehicles = [{}]
+        for vehicle in vehicles:
+            if not isinstance(vehicle, dict):
+                vehicle = {}
+            vehicle_id = str(vehicle.get("vehicle_unique_id") or "provider")
+            vehicle_type = str(vehicle.get("vehicleType") or "custom hiring equipment").strip()
+            record_id = stable_source_id("farms-chc", transaction_id, vehicle_id)
+            cost_per_hour = _number(vehicle.get("cost_per_hour"))
+            cost_per_acre = _number(vehicle.get("cost_per_acre"))
+            records[record_id] = {
+                "source_record_id": record_id,
+                "record_kind": "provider_listing",
+                "listing_type": "machinery",
+                "title": f"{vehicle_type} — {agency}",
+                "category": vehicle_type.casefold(),
+                "provider_name": agency,
+                "description": "Official FARMS custom-hiring provider record. Confirm current quote, scope, timing and availability directly before relying on it.",
+                "location": location,
+                "district": district,
+                "state": state,
+                "latitude": latitude,
+                "longitude": longitude,
+                "location_point": {"type": "Point", "coordinates": [longitude, latitude]} if latitude is not None and longitude is not None else None,
+                "price_amount": cost_per_hour,
+                "price_currency": "INR",
+                "price_unit": "per hour" if cost_per_hour is not None else None,
+                "contact_phone": str(provider.get("mobile") or "").strip() or None,
+                "contact_email": None,
+                "listing_url": "https://agrimachinery.nic.in/Index/farmsapp",
+                "source": "Government of India FARMS CHC public feed",
+                "source_url": source_url,
+                "observed_at": observed_at,
+                "fetched_at": timestamp,
+                "source_status": "active",
+                "image_url": str(vehicle.get("vehiclePhotograph") or "").strip() or None,
+                "hourly_rate": cost_per_hour,
+                "availability_status": "published",
+                "metadata": {
+                    "chc_transaction_id": transaction_id,
+                    "vehicle_unique_id": vehicle_id,
+                    "vehicle_count": vehicle.get("numberOfVehicles"),
+                    "cost_per_acre": cost_per_acre,
+                    "vehicle_status": vehicle.get("vehicle_status"),
+                    "user_type": provider.get("UserType"),
+                    "state_lgdcode": provider.get("state_lgdcode"),
+                    "district_lgdcode": provider.get("district_lgdcode"),
+                },
+            }
+            if len(records) >= max_records:
+                return list(records.values())
+    return list(records.values())
+
+
+def fetch_farms_chc_records(*, timeout: float = 30.0, lookback_days: int = 365, max_records: int = 5000) -> tuple[list[dict[str, Any]], dict[str, int]]:
+    today = datetime.now(timezone.utc).date()
+    from_date = today - timedelta(days=max(1, lookback_days))
+    url = f"{FARMS_CHC_DATA_URL}?fromdate={from_date.strftime('%d/%m/%Y')}&toDate={today.strftime('%d/%m/%Y')}"
+    records = parse_farms_chc_records(_post_json(url, timeout), source_url=FARMS_CHC_DATA_URL, max_records=max_records)
+    return records, {"accepted": len(records), "from_date": from_date.isoformat(), "to_date": today.isoformat()}
 
 
 def _farms_rows(payload: Any) -> list[dict[str, Any]]:
