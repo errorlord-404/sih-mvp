@@ -240,6 +240,10 @@ tomato subset. That is a warning against deployment, not a new release metric.
 
 ## Field-data review queue (no automatic export)
 
+Read [`../data/DATASHEET.md`](../data/DATASHEET.md) before collection. It defines
+the private per-capture metadata, consent boundary, capture groups and expert
+review needed for the commands below.
+
 The farmer app can record consented diagnosis feedback, but it is not a
 training label. An authorised data steward may create a local reviewer queue
 from explicitly named farmer SQLite files; the command copies no images and

@@ -8,6 +8,10 @@ The current technical decision and implementation sequence are in
 [`MODEL_DECISION_RECORD.md`](MODEL_DECISION_RECORD.md). The first release
 contract is in [`contracts/crop-health-result.schema.json`](contracts/crop-health-result.schema.json).
 
+Before any farmer-photo collection, use [the field-data datasheet](data/DATASHEET.md).
+It defines consent, anonymised grouping, agronomist review and field-disjoint
+requirements for the review-queue and split tooling.
+
 `orchestration/hierarchical_inference.py` is the executable local chain:
 router checkpoint → farmer confirmation when needed → only a released
 crop-specific checkpoint. It fails closed when a specialist is absent.

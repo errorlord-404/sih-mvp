@@ -33,6 +33,9 @@
     with EfficientNetV2-B0. It is rejected: 55.00% development validation and
     29.17% raw accuracy on the reserved external source-test subset; the
     normal gate accepted none of 24 images.
+15. Added the versioned field-data datasheet/capture protocol that connects
+    farmer consent and metadata to the existing expert-review and
+    field-disjoint split tooling.
 
 ## Verification
 
@@ -67,6 +70,8 @@
   `ml/evaluation/PLANTDOC_CROP_ROUTER_CHECK_2026_09_09.md`
 - Tomato adaptation rejection record:
   `ml/evaluation/PLANTDOC_TOMATO_ADAPTATION_CHECK_2026_09_09.md`
+- Data-collection protocol:
+  `ml/data/DATASHEET.md`
 
 ## What remains before a truthful field release
 
