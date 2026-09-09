@@ -10,20 +10,239 @@ change how existing ones connect.
 Client request
   -> FastAPI router (app/routers/*.py)
     -> validates against schema (app/schemas/*.py)
-  -> Beanie Document method (app/models/*.py)
-    -> Motor driver
-  -> MongoDB (central, shared reference DB)
+  -> shared reference router -> Beanie Document method (app/models/*.py)
+    -> Motor driver -> MongoDB (central, shared reference DB)
+  -> Farm State router -> per-farmer FarmStateStore (app/farm_state/*)
+    -> SQLite file selected from validated X-Farmer-ID
   -> response serialized back through schema
   -> JSON response to client
+
+## TFLite crop-health routing
+`POST /v1/diagnoses` with a confirmed crop
+  -> validates image and stores immutable upload metadata in the farmer SQLite database
+  -> `local_tflite_demo` runs only the configured crop specialist
+  -> confidence and top-one/top-two margin gates reject uncertain candidates
+  -> a mounted manifest must bind the exact model/labels to passed field, OOD,
+     and agronomist gates before `completed`; otherwise return `needs_expert_review`
+
+`POST /v1/diagnoses` with no/unknown crop
+  -> optional configured crop-router returns ranked `crop_candidates`
+  -> response remains `needs_crop_confirmation`; no disease specialist runs
+  -> frontend/agent must send a later request with farmer-confirmed crop
+
+### Field-scoped irrigation screening
+`GET /v1/fields/{field_id}/irrigation-plan`
+  -> reads the requested field's moisture and active crop stage
+  -> uses moisture only when its stored unit is canonical `%`; raw/legacy values become insufficient data
+  -> selects only the latest cached weather snapshot near that field's centroid
+  -> critical dryness overrides a rain-probability-only deferral; a recent recorded irrigation requests reassessment
+  -> applies a read-only screening rule and states whether rain evidence was location-matched
+  -> never starts a pump or valve
+
+`POST /v1/irrigation-events` after farmer confirmation
+  -> writes the event into the farmer's SQLite store with idempotency
+  -> `GET /v1/irrigation-events?field_id=...` returns bounded farmer-owned history
+  -> UI/MCP use the same history; no value is inferred for an unrecorded volume
+
+### Crop-stage lifecycle writes
+`POST /v1/fields/{field_id}/crop-cycles` or `PATCH /v1/crop-cycles/{cycle_id}/stage`
+  -> validates and canonicalizes the lifecycle stage before it is persisted
+  -> stage-aware rules consume stable keys such as `flowering` and `grain_filling`
+
+### Farmer-confirmed task lifecycle
+Farmer UI or Codex/MCP agent after confirmation
+  -> `POST /v1/tasks` stores a field, title, optional due time, and source in farmer SQLite
+  -> `GET /v1/tasks` returns status/field-filtered action history
+  -> `PATCH /v1/tasks/{task_id}` marks the task completed or cancelled
+  -> task state records intent and outcome; it never authorizes transactions or hardware action
+
+### Controlled TFLite demo launch
+`backend/scripts/run_local_tflite_demo.ps1`
+  -> verifies the ignored EfficientNetV2-B0 dynamic-range tomato artifact and labels against the controlled-demo manifest
+  -> supplies `local_tflite_demo` model, labels and manifest settings to the launched FastAPI process only
+  -> frontend or MCP sends a farmer-confirmed tomato image to `/v1/diagnoses`
+  -> API persists transparent model/candidate/limitation evidence in farmer SQLite
+  -> because the supplied manifest is explicitly rejected for field release, output remains review-only
+  -> Uvicorn reload watches backend source but excludes ignored `.runtime` service installs
 
 ## Startup flow
 app/main.py lifespan()
   -> creates AsyncIOMotorClient (app/core/database.py)
   -> reads connection string from app/core/config.py (.env)
-  -> init_beanie(document_models=[...]) registers every model
+  -> attempts init_beanie(document_models=[...]) with a bounded server-selection timeout
+  -> records reference database availability and lets Farm State continue in degraded mode if MongoDB is unavailable
   -> app becomes ready to serve requests
 
+### Windows universal-data bootstrap
+`backend/scripts/setup_universal_data.ps1`
+  -> downloads/extracts MongoDB only under ignored `backend/.runtime`
+  -> starts `mongod` with explicitly quoted db/log paths so workspace names may contain spaces
+  -> validates backend, ingests source data, then starts the optional API/n8n services
+
+## Scheduled universal-data flow
+n8n Schedule Trigger (daily 06:30 Asia/Kolkata)
+  -> POST `/internal/universal-data/sync` with `X-Ingestion-Token`
+  -> `app/scraping/service.py` creates an `ingestion_runs` record
+  -> source adapters fetch paginated AGMARKNET/data.gov.in JSON and configured PIB MSP HTML
+  -> parsers validate and normalize source-owned fields; missing fields stay null/empty
+  -> bulk upserts use stable `source_record_id` keys for idempotency
+  -> MongoDB receives `market_prices`, `msps`, and derived `crops`
+  -> the ingestion run stores counts, source URLs, errors, and completed/partial/failed status
+
+The same service can be invoked directly with `python -m app.scraping`; n8n schedules but does not contain parsing or database credentials.
+
+### Marketplace directory flow
+Approved HTTPS source registry in `MARKETPLACE_DIRECTORY_SOURCES_JSON`
+  -> protected `POST /internal/universal-data/sync?sources=marketplace`
+  -> `app/scraping/marketplace.py` extracts publisher-provided JSON-LD only
+  -> stable source-record IDs bulk-upsert `marketplace_listings`
+  -> `GET /marketplace/listings` supplies the React directory and MCP `search_marketplace_listings`
+  -> `GET /marketplace/status` exposes configuration state without exposing stock or transacting
+
+### Marketplace quote comparison flow
+Farmer/supplier quote line items
+  -> `POST /marketplace/compare-quotes`
+  -> deterministic disclosed-cost total and per-currency rank
+  -> MCP `compare_marketplace_quotes` / machinery / logistics helpers
+
+### MSP versus mandi reference flow
+PIB MSP ingestion + AGMARKNET mandi ingestion
+  -> `GET /msp/compare-market?crop=...`
+  -> newest MSP plus newest record per mandi, with source and procurement warning
+  -> MCP `compare_msp_with_market`
+
+### Device onboarding history flow
+Field selector -> bounded `GET /v1/fields/{field_id}/observations/history`
+  -> source-preserving moisture trend in `/device-setup`
+  -> no-record state remains unknown
+
+Listings carry source/fetch metadata and are discovery-only. The backend never creates a booking, purchase, sale, export filing or external contact action from this flow.
+
 ## Per-domain flow (fill in as each is built)
+
+### Farm State
+router: `app/routers/farm_state.py`
+schema: `app/schemas/farm_state.py`
+store: `app/farm_state/store.py`
+notes: Profile, fields, crop cycles/stage events, soil tests, sensor readings, irrigation events, reminders, alerts, dashboards, and snapshot-backed reports are stored in the farmer's local SQLite file. Measurements and stage changes are inserted as history records; map and dashboard responses derive current state from the latest valid records.
+
+### Farm finance ledger
+Frontend Finance page or confirmation-gated MCP tool
+  -> `POST /v1/ledger/entries` with a farmer-entered INR income/expense record
+  -> FastAPI verifies optional field ownership and idempotency
+  -> farmer-scoped SQLite `ledger_entries` persists the active record
+  -> `GET /v1/ledger/entries` and `/v1/ledger/summary` return source-preserving records and active-only totals
+  -> `PATCH /v1/ledger/entries/{id}` can void/reinstate a record without deleting history
+
+This flow is bookkeeping only: it never triggers a payment, purchase, transfer, credit decision, tax calculation, or forecast.
+
+### Device telemetry ingestion
+Provisioned soil node
+  -> `POST /v1/device-ingestion/observations` with bearer token, device/boot/sequence metadata, Modbus sample address and CRC state
+  -> backend validates device-to-farmer/field scope and detects duplicate sequence
+  -> farmer SQLite retains every packet/sample evidence record
+  -> only CRC-valid samples with canonical units are copied into `sensor_readings`
+  -> frontend/agent reads `/v1/device-ingestion/devices` for fresh/stale/rejected status
+
+The gateway cannot use the farmer/agent write endpoint, the MCP agent never receives a device secret, and neither path controls a pump or valve.
+
+### Crop-stage action proposal
+Active crop cycle + canonical stage
+  -> `GET /v1/fields/{field_id}/action-proposals`
+  -> deterministic generic lifecycle rule creates a read-only proposal
+  -> open task with matching title suppresses duplicate proposal
+  -> farmer reviews proposal in UI or through agent explanation
+  -> only an explicit `POST /v1/tasks` creates an auditable action record
+
+Stage proposals never order inputs, prescribe chemicals, make a payment, or authorize irrigation/actuation.
+
+### Controlled vision review flow
+Farmer-confirmed crop photo
+  -> local TF Hub/TFLite controlled-demo specialist
+  -> image quality, score, and margin gates
+  -> ranked disease candidates are persisted
+  -> default OOD/field release gate returns `needs_expert_review`
+  -> agent/UI shows limitations and requests a qualified review or better evidence
+
+The controlled model cannot return a completed diagnosis by default because it has no approved unknown/OOD or farmer-phone field evaluation.
+
+### Weather
+router: `app/routers/weather.py`
+service: `app/services/weather.py`
+notes: The router calls the configured provider adapter, records normalized snapshots with source and freshness, and derives field weather alerts from stored provider data. Provider failures return an explicit 503 instead of synthetic weather.
+
+### Diagnosis, advisor, and voice
+router: `app/routers/assistants.py`
+notes: Image uploads are validated, checksummed, and stored privately per farmer. `confirmed_crop` flows to `app/services/crop_health.py`; an explicitly enabled local router runs only a matching specialist. Its model/candidate envelope is persisted in SQLite. Missing models, unknown crops and low-confidence outputs fail closed to a review status; no treatment is generated by the vision model.
+
+When `DIAGNOSIS_PROVIDER=local_tflite_demo`, the same route forwards only a
+farmer-confirmed configured crop to `app/services/tflite_crop_health.py`. The
+optional local dynamic-TFLite specialist returns evidence and limitations into
+the SQLite diagnosis envelope; it cannot route crops or trigger action.
+Before TFLite inference, the adapter rejects visibly unusable captures (small,
+very dark, overexposed, or near-blank) into a retake/review state.
+After a candidate clears score/margin gates, completion requires a deployment-
+controlled release manifest with matching model/label checksums and explicit
+passed independent-field, unknown/OOD, and agronomist-review evidence. A
+missing/rejected/mismatched manifest remains `needs_expert_review`.
+
+### Frontend merge flow
+`src/api/client.js`
+  -> attaches request ID, timeout, and `X-Farmer-ID` for Farm State calls
+  -> normalizes HTTP, timeout, and offline failures into `ApiError`
+`src/context/FarmDataContext.jsx`
+  -> loads profile, fields, map summaries, and open alerts with independent settled results
+  -> exposes refresh and mutation helpers to route components
+`src/pages/*`
+  -> renders backend values only when returned
+  -> shows loading, empty, stale/source, error, or provider-unavailable state when a value is absent
+
+### MCP agent write flow
+Trusted launcher farmer ID + approved conversational tool call
+  -> MCP server attaches `X-Farmer-ID`, request ID, and deterministic `Idempotency-Key`
+  -> FastAPI validates the payload and checks the per-farmer SQLite idempotency record
+  -> first request persists state and response; replay returns the original response; payload conflict returns 409
+  -> MCP server returns a bounded result envelope with the backend request ID
+
+Personal farm, sensor, diagnosis, advisor, reminder, alert, and report data stays within the SQLite file selected by the farmer identity boundary. Shared market/crop reference calls remain separate from Farm State calls.
+
+### Storage connection check
+Frontend Settings
+  -> `GET /v1/storage-status` with `X-Farmer-ID`
+  -> FastAPI opens the selected farmer SQLite store and returns its safe identity plus Mongo reference availability
+ -> Settings also reads `GET /health` to surface a central-reference outage independently of farmer data
+
+### Local TensorFlow Lite demonstration launch
+`backend/scripts/run_local_tflite_demo.ps1`
+  -> validates the model/label release manifest before setting process-local inference paths
+  -> starts Uvicorn with source reload, passing `.runtime` exclusions as
+     literal `--reload-exclude=<glob>` option values
+  -> runtime MongoDB/n8n installation writes cannot become either watched
+     source changes or expanded positional arguments
+
+### Crop option evidence screen
+Farmer-owned field + supplied season / prior crop / soil type
+  -> `GET /v1/fields/{field_id}/crop-options` verifies field ownership in the
+     farmer SQLite store
+  -> reads central Mongo crop metadata only when reference storage is available
+  -> evaluates visible compatibility checks, conflicts and absent evidence
+  -> returns reviewable candidates to the frontend or MCP `get_crop_options`
+     tool; no crop selection, input order or profitability claim is executed
+
+### Diagnosis-feedback data-quality loop
+Farmer receives a stored diagnosis result
+  -> explicitly submits confirmation, correction or unknown feedback with
+     optional sharing consent to `POST /v1/diagnoses/{id}/feedback`
+  -> FastAPI verifies that diagnosis exists only in that farmer's SQLite store
+  -> append-only feedback is stored with `reviewer_type=farmer`
+  -> response marks it `requires_expert_review_and_separate_export`; no image
+     transfer, dataset export, model retraining or treatment action occurs
+
+### Market view models
+router: `app/routers/market_price.py`
+schema: `app/schemas/market_price.py`
+model: `app/models/market_price.py`
+notes: Dated Mongo reference records power latest-per-mandi summary, historical series, trends, and cost-assumption-aware mandi comparison. Net realisation is sale revenue minus transport, loading, unloading, market fees, storage, and expected spoilage, with assumptions returned in every comparison result.
 
 ### Farmer
 router: app/routers/farmer.py

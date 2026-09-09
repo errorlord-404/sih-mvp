@@ -3,14 +3,85 @@
 Records WHY a non-obvious choice was made. Not every change needs an entry -
 only ones where a reasonable person might ask "why did you do it this way?"
 
+## Controlled demo prefers EfficientNetV2-B0 without expanding authority
+**Date:** 2026-09-09
+**Context:** On the same deterministic 400-image controlled tomato split, dynamic TFLite accuracy was 95.50% for the previous MobileNetV3-Small artifact, 96.50% for MobileNetV3-Large and 97.75% for EfficientNetV2-B0. No candidate has Indian field, unknown/OOD, agronomist or target-device evidence.
+**Decision:** Point only the explicit demo launcher at the checksum-bound EfficientNetV2-B0 dynamic artifact and pass its rejected-for-field-release manifest to runtime. Keep normal deployment unconfigured and all results review-only.
+**Alternatives considered:** Promote the smaller full-INT8 export immediately, keep the less accurate prior demo, or label the controlled winner field-ready.
+**Trade-offs accepted:** The dynamic model is larger (6.58 MB) and device performance is unknown, but it has the strongest balanced controlled metrics. No treatment or actuation authority is added.
+
+## Marketplace discovery uses an approved-source registry
+**Date:** 2026-09-06
+**Context:** The project needs vendors, machinery, logistics, buyers and export contacts, but unrestricted scraping produces unverifiable listings and can violate provider terms.
+**Decision:** Store source-attributed JSON-LD records only from operator-configured HTTPS public pages. Use one typed directory collection/API/MCP tool; it supports discovery only and does not create transactions.
+**Alternatives considered:** Scrape Google Maps/general marketplaces, hard-code demo vendors, or make separate unverified scrapers per category.
+**Trade-offs accepted:** The directory begins empty until approved sources are configured and many real services will need partnership/API integration later, but every displayed item stays traceable and the product does not promise bookings or prices it cannot verify.
+
+## Marketplace quote comparison is explicit-input only
+**Date:** 2026-09-06
+**Context:** Farmers need to compare machinery and logistics providers after directory discovery, but sources rarely publish comparable all-in quotes.
+**Decision:** Accept supplier/farmer-provided line items and calculate a transparent total, ranking only inside each currency group.
+**Alternatives considered:** Estimate freight from distance, convert currencies automatically, or publish a lowest-price recommendation from incomplete listings.
+**Trade-offs accepted:** The user must obtain quotes and verify identical units; the service will not fabricate distance, tax, insurance, exchange-rate, or any unpublished charge.
+
+## MSP comparison keeps procurement uncertainty visible
+**Date:** 2026-09-06
+**Context:** Comparing MSP with a mandi price can help explain a distress-sale decision, but it cannot establish procurement eligibility or centre availability.
+**Decision:** Compare only the newest source records and return the source/observation metadata with a procurement verification warning.
+**Alternatives considered:** Recommend a sale path from the price difference alone, or omit MSP comparison entirely.
+**Trade-offs accepted:** The result is a decision-support reference, not a promise that the farmer can sell at MSP.
+
+## APEDA exporter ingestion is bounded to its public directory page
+**Date:** 2026-09-06
+**Context:** APEDA's Agri Exchange exporter page contains public directory cards but its contact workflow uses client-side protected identifiers.
+**Decision:** Parse only the first public page's name, address, commodity and state using a named adapter; do not use contact controls, decrypt identifiers or expand pagination.
+**Trade-offs accepted:** Discovery is incomplete by design, but it avoids collecting protected contact information or imposing load on an official portal.
+
 ---
- 
+
+## Agent-facing writes use per-farmer idempotency records
+**Date:** 2026-08-18
+**Context:** A Codex/MCP client can retry an approved write after a transport timeout, while farmer state is stored in SQLite files selected by the farmer identity boundary.
+**Decision:** Store a request hash and serialized response under an `Idempotency-Key` in each farmer's SQLite database. Replaying the same key returns the original response; reusing it with a different payload returns a conflict.
+**Alternatives considered:** Trust the MCP client to avoid retries, or deduplicate only in the in-memory agent process. Both fail across process restarts or backend timeouts.
+**Trade-offs accepted:** Records require eventual retention/cleanup policy, and deterministic client-generated keys mean an identical payload represents the same logical operation until an explicit operation identity is added.
+
+---
+
 ## Seed and fertilizer recommendation scope
 **Date:** 2026-08-18
-**Context:** The PRD requires `recommend_seed()` and `recommend_fertilizer()`, but the current central catalog only stores a small set of structured fields for seeds and fertilizers.
-**Decision:** Implement both mutators as deterministic ranking over existing Mongo reference records, using crop compatibility first and only optional preferences that map directly to stored fields.
-**Alternatives considered:** Invent agronomic scoring from unavailable soil/weather data, or block the feature until richer schemas exist.
-**Trade-offs accepted:** The recommendation quality is intentionally narrow for now, but the API stays truthful to stored data and can be upgraded later without changing the function names the Harness team depends on.
+**Context:** The PRD requires `recommend_seed()` and `recommend_fertilizer()`, while the central catalogs currently contain only a limited set of structured fields.
+**Decision:** Rank only stored reference records using crop compatibility and optional preferences that map directly to existing fields; do not infer unsupported agronomy.
+**Alternatives considered:** Invent soil/weather scoring or block the feature until richer schemas exist.
+**Trade-offs accepted:** Recommendations are intentionally narrow now, but the mutator contracts remain stable for later enrichment.
+
+## Official-source ingestion is provenance-first and schema-bounded
+**Date:** 2026-08-18
+**Context:** The central database needs broad crop/market reference coverage, but government sources expose different fields and update mechanisms. AGMARKNET has a structured daily feed; current MSPs are authoritative PIB HTML tables; fertilizer, disease, seed-supplier, and scheme pages do not provide stable structured records matching the existing models.
+**Decision:** Ingest every valid current AGMARKNET row, parse the configured official PIB MSP releases, and derive only commodity name/current mean modal price plus an MSP-matched season for crop catalog entries. Store stable source IDs, URLs, and timestamps on every imported document. Leave unavailable fields null/empty and leave unsupported collections manual until approved source adapters exist.
+**Alternatives considered:** Fill missing values with defaults, treat produce varieties as commercial seed inventory, scrape arbitrary third-party aggregators, or allow n8n to write directly to MongoDB.
+**Trade-offs accepted:** Crop imports are intentionally incomplete agronomy records and some reference collections remain unpopulated, but every stored fact is traceable and the backend owns validation/idempotency while n8n remains a scheduler only.
+
+## Protected backend sync boundary for n8n
+**Date:** 2026-08-18
+**Context:** A scheduled workflow must trigger large paginated fetches without duplicating source logic or exposing an unauthenticated mutation endpoint.
+**Decision:** n8n calls a token-protected internal FastAPI endpoint; the backend fetches, validates, normalizes, bulk-upserts, and records run telemetry. The workflow runs daily at 06:30 Asia/Kolkata and retries transient failures three times.
+**Alternatives considered:** Put scraping and MongoDB credentials directly in n8n nodes, or schedule an in-process FastAPI background task.
+**Trade-offs accepted:** FastAPI must be reachable when the schedule fires and the shared webhook token must be rotated like any other secret, but source logic stays tested and reusable from both CLI and n8n.
+
+## Farm State is local SQLite within the existing FastAPI process
+**Date:** 2026-08-18
+**Context:** The frontend parity plan requires fields, observations, crop lifecycles, alerts, and other farmer-owned state, while the existing service already owns the FastAPI boundary and MongoDB reference APIs.
+**Decision:** Keep one SQLite file per temporary `X-Farmer-ID` under `FARM_STATE_DB_DIR`, open it through a FastAPI dependency, and leave shared crops, inputs, schemes, MSP, and market reference data in MongoDB. The header is a development identity boundary, not authentication.
+**Alternatives considered:** Put personal state in MongoDB, add a separate service, or use one shared SQLite file. These were rejected because they violate offline/tenant isolation or the request to expand the existing backend only.
+**Trade-offs accepted:** The current identity mechanism must be replaced or wrapped by authentication before multi-user deployment, and SQLite operations are intentionally local to the application instance.
+
+## Provider-unavailable responses are explicit
+**Date:** 2026-08-18
+**Context:** Vision, advisor, and voice providers are not configured in the current repository.
+**Decision:** Persist uploads/session messages where appropriate but return `inconclusive` or `provider_unavailable` with no fabricated label, transcript, or recommendation. Weather uses Open-Meteo by default and only uses the empty, explicitly labelled fixture when configured.
+**Alternatives considered:** Return demo values to keep screens populated, or fail with an opaque 500. Both obscure provenance or make the client unable to present a safe recovery state.
+**Trade-offs accepted:** Some UI workflows remain incomplete until approved providers are configured.
 
 ## GovScheme eligibility interface scope
 **Date:** 2026-08-15
@@ -62,3 +133,161 @@ another part of the team.
 **Decision:** Keep `/by-crop/{crop_name}` above `/{market_price_id}` in the router so the static prefix resolves before the dynamic ID route.
 **Alternatives considered:** Rely on route ordering implicitly or place only the ID route in this router.
 **Trade-offs accepted:** Slightly more route definition clutter, but avoids accidental path matching ambiguity.
+
+## Degraded startup for the dual-database service
+**Date:** 2026-08-18
+**Context:** Farm State is intentionally local and must remain usable when MongoDB is unavailable, while the existing reference-data routers still depend on MongoDB.
+**Decision:** Bound the MongoDB server-selection timeout and let application lifespan complete in degraded mode when reference initialization fails. Expose the state through `/health`; Farm State requests continue to use the per-farmer SQLite store.
+**Alternatives considered:** Block all startup until MongoDB is healthy, or silently return reference-data placeholders.
+**Trade-offs accepted:** Reference-data requests can still fail while the database is offline, but the service does not fabricate shared data and local farmer workflows remain available.
+
+## Frontend farmer identity boundary
+**Date:** 2026-08-18
+**Context:** The frontend needs a temporary identity until the product's authentication contract is finalized.
+**Decision:** Send `X-Farmer-ID` on every Farm State request, sourced from browser local storage with an explicit demo fallback. The API client keeps reference-data requests separate and never sends personal Farm State records to MongoDB routes.
+**Alternatives considered:** Reuse the central Farmer document, or put farmer identity in URL paths.
+**Trade-offs accepted:** This is not an authentication system; production must replace the temporary header with the approved identity provider before multi-user release.
+# Crop-health demo models remain opt-in and fail closed
+**Date:** 2026-09-07
+**Context:** A controlled-image crop router and tomato specialist have been fine-tuned for the SIH prototype, but neither is field validated.
+**Decision:** Enable them only through explicit environment paths and `DIAGNOSIS_PROVIDER=local_hierarchical_demo`. Require farmer crop confirmation, persist model evidence, use a confidence gate, and return review states without treatment advice.
+**Trade-offs accepted:** The demo can be shown end-to-end locally, but it cannot silently become a production diagnosis or recommendation engine.
+
+# TensorFlow Lite specialist is crop-confirmed and demo-only
+**Date:** 2026-09-07
+**Context:** The TensorFlow Hub MobileNetV3 controlled benchmark exports a compact dynamic-range TFLite file, but it has no released crop router, unknown class or field validation.
+**Decision:** Add it only as `local_tflite_demo`, require a farmer-confirmed configured crop, and return candidate/model limitations through the diagnosis envelope. Do not use it for unsupported crops or full-INT8 deployment.
+**Trade-offs accepted:** The prototype gains an actual TensorFlow inference path while crop routing and field-release responsibilities remain explicit.
+
+# Crop-health acceptance needs confidence and margin
+**Date:** 2026-09-07
+**Context:** A classifier can report a large top probability while two disease candidates remain too close for safe screening.
+**Decision:** TFLite results require both a configurable minimum top score and top-one/top-two margin; failures are persisted as `needs_expert_review`.
+**Trade-offs accepted:** More photos enter review, but the model does not hide its ambiguity behind a single label.
+
+# Crop router can suggest but not select a specialist
+**Date:** 2026-09-07
+**Context:** The proposed vision design identifies a crop before using a crop-specific disease model, but an incorrect router result would select the wrong disease label space.
+**Decision:** Keep the router as an optional TFLite component with separate conservative score and margin gates. Persist its ranked candidates and always return `needs_crop_confirmation`; only a subsequent farmer-confirmed request may invoke a specialist.
+**Trade-offs accepted:** The UX can require a second confirmation/upload step, but a controlled-data router never silently becomes an agronomic decision.
+
+# TFLite demonstration enablement is explicit and process-local
+**Date:** 2026-09-07
+**Context:** A local demo must be easy to run for SIH judging, but persisting its paths/provider in a checked-in `.env` would make a controlled-data artifact look like a deployment default.
+**Decision:** Provide a launcher that verifies the versioned dynamic-range artifact and supplies environment settings only to the launched backend process.
+**Trade-offs accepted:** Operators must deliberately start the demo script, but ordinary backend startup cannot accidentally claim local field-ready diagnosis.
+
+# Irrigation forecast selection is field-scoped
+**Date:** 2026-09-07
+**Context:** Weather snapshots are cached per farmer store and a farmer may have fields in different microclimates. Selecting the newest snapshot globally could defer water based on another field's forecast.
+**Decision:** Select a snapshot only when its latitude/longitude falls within the same 0.01-degree tolerance already used by the field-weather route. If none exists, state that rain was not used in the screening decision.
+**Trade-offs accepted:** A plan can have lower confidence without a matched forecast, but it cannot silently use weather for the wrong field.
+
+# Sensor units must be interpretable before deterministic rules use them
+**Date:** 2026-09-07
+**Context:** Sensor readings previously accepted arbitrary unit text while irrigation compared raw moisture values with percentage thresholds.
+**Decision:** Normalize only approved unit aliases at API ingestion and make legacy/unrecognized moisture values insufficient data for irrigation planning.
+**Trade-offs accepted:** Some device payloads require a gateway update, but the system avoids treating uncalibrated raw values as agronomic percentages.
+
+# Crop-stage writes use a canonical lifecycle vocabulary
+**Date:** 2026-09-07
+**Context:** Crop stages were arbitrary free text, making stage-aware irrigation and calendar behavior sensitive to spelling, capitalization, and localization.
+**Decision:** Normalize a defined lifecycle vocabulary on new writes and reject unsupported stage names. Existing historic rows remain readable; later crop-specific calendars can map additional stages explicitly.
+**Trade-offs accepted:** Some crop-specific wording needs an explicit future mapping, but the rules no longer silently miss a stage due to text variation.
+
+# Action engine records farmer-confirmed tasks only
+**Date:** 2026-09-07
+**Context:** The project contains recommendations and reminders, but the existing `field_tasks` state had no operational API or agent workflow.
+**Decision:** Expose idempotent task creation/listing/status updates; agent task writes are confirmation-gated and labelled by source. Tasks are records, not authorization to purchase, book, apply chemicals, or control hardware.
+**Trade-offs accepted:** This establishes an auditable action loop without overclaiming transactional or physical-control capability.
+
+# Finance ledger is farmer-entered, INR-only, and audit-preserving
+**Date:** 2026-09-07
+**Context:** Finance records were only in browser storage, so they could not participate in the farmer-scoped digital twin or agent workflow.
+**Decision:** Store confirmed income/expense entries in the existing per-farmer SQLite database. Limit the first contract to INR; void entries rather than deleting them; return only record-keeping totals. The API cannot make payments, transfers, credit decisions, tax statements, or forecasts.
+**Alternatives considered:** Continue localStorage-only finance, create a central Mongo financial database, or permit destructive deletes.
+**Trade-offs accepted:** This is durable within the current farmer-scoped backend store but is not yet an offline mobile-sync implementation or an accounting system.
+
+# Device telemetry uses a dedicated provisioned gateway boundary
+**Date:** 2026-09-07
+**Context:** The existing sensor-reading endpoint is a farmer/agent write record and cannot safely be used as an unrestricted ESP32 ingress point.
+**Decision:** Authenticate gateway packets with a provisioned environment-held token, scope each device to a farmer and optional fields, make `(device_id, boot_id, sequence)` idempotent, preserve packet/sample Modbus and CRC evidence, and persist only CRC-valid normalized samples as field readings. Provide device health as a read-only farmer API.
+**Alternatives considered:** Allow the device to use `X-Farmer-ID`, expose a device credential to the MCP agent, or discard CRC-failed packets entirely.
+**Trade-offs accepted:** Credential provisioning is currently deployment configuration rather than a staff enrollment UI; raw rejected evidence is retained, but neither the gateway nor agent gains pump/actuator control.
+
+# Crop-stage rules may propose actions but never create them
+**Date:** 2026-09-08
+**Context:** Crop stages were persisted and the task API existed, but farmers still had to infer the next action from disconnected records.
+**Decision:** Return a small, generic, read-only stage-action proposal set only for the active cycle. Suppress a proposal when an open task already has the same title. The farmer must explicitly accept it through the UI or a confirmation-gated MCP task write.
+**Alternatives considered:** Automatically create lifecycle tasks, let an LLM invent crop-specific actions, or issue crop-input/chemical recommendations from stage alone.
+**Trade-offs accepted:** The MVP gives less automation but avoids silently committing work or prescribing inputs without crop-pack/agronomist context.
+
+# Completed local TFLite results must be bound to an evaluated release manifest
+**Date:** 2026-09-08
+**Context:** A non-crop project image received a high-confidence tomato disease label from the controlled PlantVillage specialist despite score and top-two margin gates.
+**Decision:** Remove the mutable completion boolean. Return ranked candidates with `needs_expert_review` unless an operator-mounted versioned manifest has `approved_for_field_release`, matches the configured model and label SHA-256 values, covers the farmer-confirmed crop, and explicitly marks independent-field, unknown/OOD, and agronomist-review gates as passed.
+**Alternatives considered:** Keep the completed label with a disclaimer, use a mutable environment boolean, invent a visual non-crop heuristic, or hide candidate evidence entirely.
+**Trade-offs accepted:** The demo no longer presents a completed disease result, and a future release requires deliberate manifest maintenance. This is auditable but not cryptographic signing; the approved bundle must still be deployment-controlled.
+
+# Irrigation forecast deferral cannot override critical dryness
+**Date:** 2026-09-08
+**Context:** The read-only irrigation screen could defer any below-target moisture value when a location-matched forecast probability was high, including a substantially dry reading.
+**Decision:** Reserve rain deferral for a small below-target deficit. Below a transparent critical screening bound, recommend an earlier farmer-reviewed irrigation window and keep monitoring the forecast. When an irrigation event is less than 12 hours old and moisture is not critical, request a fresh observation before another application.
+**Alternatives considered:** Defer whenever rain probability is high, ignore recent irrigation history, or claim a volume-derived water balance without field capacity/root depth/flow evidence.
+**Trade-offs accepted:** The thresholds are still generic screening values, not a crop/soil-specific water balance. The endpoint stays advisory and read-only until calibrated field parameters and actuator safeguards exist.
+
+# Irrigation history records only farmer-confirmed events
+**Date:** 2026-09-08
+**Context:** The irrigation plan can use a recent event to avoid duplicate advice, but the client and agent had no read contract for the resulting event history.
+**Decision:** Expose a farmer-scoped bounded event list with an optional field filter. Preserve entered volume/duration/method/note exactly; do not infer absent values from sensor changes, pump capability, or the plan.
+**Alternatives considered:** Keep history write-only, estimate volume from duration, or use a global shared log.
+**Trade-offs accepted:** The history is useful for review and future calibrated balances but is not verified flow telemetry or a pump audit.
+
+# Windows runtime launch paths must be explicitly quoted
+**Date:** 2026-09-08
+**Context:** The workspace-local MongoDB setup failed on a repository path containing a space because `Start-Process` joined a Mongo argument array without preserving embedded path quoting.
+**Decision:** Pass a deliberately quoted Mongo command argument string for filesystem-valued flags.
+**Trade-offs accepted:** The launch string is less structurally elegant than a simple array but works reliably for the Windows process API and prevents path splitting.
+
+# Development reload watches source, not mutable runtime installs
+**Date:** 2026-09-08
+**Context:** The local TFLite demo's Uvicorn watcher detected files written while n8n installed under ignored `backend/.runtime`, then shut down the concurrently paired frontend/backend process.
+**Decision:** Exclude `.runtime` from development reload globs while retaining source-code reload.
+**Trade-offs accepted:** Runtime-only configuration changes need an explicit restart, but package installation cannot interrupt a demo.
+
+# PowerShell reload globs are passed as option values
+**Date:** 2026-09-08
+**Context:** Passing a reload-exclude glob as a separate native-command argument
+allowed PowerShell to expand it into every file below `.runtime`, preventing
+Uvicorn from starting.
+**Decision:** Supply the glob in the same argument as `--reload-exclude=`.
+**Trade-offs accepted:** The launcher is slightly more platform-specific, but
+the local Windows demo keeps source reload without treating runtime files as
+command-line arguments.
+
+# Crop option output is evidence screening, not a crop optimizer
+**Date:** 2026-09-08
+**Context:** The product needs crop-rotation support, but the current shared
+catalogue has compatibility metadata and sparse reference prices, not a
+validated local yield, nutrient, weather or profitability model.
+**Decision:** Return transparent candidate checks for farmer-supplied season,
+previous crop and soil type. Mark missing evidence and conflicts; never label a
+crop “best,” estimate profit, or initiate an input purchase.
+**Alternatives considered:** Rank crops by incomplete reference prices, let an
+LLM invent agronomic fit, or block the interface until a full recommendation
+model exists.
+**Trade-offs accepted:** The first workflow requires farmer/agronomist review,
+but it is explainable and cannot overstate what current data supports.
+
+# Farmer diagnosis feedback is a review lead, not a training label
+**Date:** 2026-09-08
+**Context:** The project needs target-region field data to evaluate and
+fine-tune TF Hub candidates, but model output and an unverified correction are
+not ground truth.
+**Decision:** Persist append-only farmer feedback only with explicit sharing
+consent. Return a fixed boundary that it requires expert review and a separate
+controlled export before it may join a dataset.
+**Alternatives considered:** Automatically add feedback to training folders,
+export stored images on consent, or silently relabel a diagnosis.
+**Trade-offs accepted:** This creates a useful provenance record but needs a
+future governed expert-review/export workflow before any ML use.
