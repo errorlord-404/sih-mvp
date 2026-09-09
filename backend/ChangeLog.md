@@ -11,6 +11,10 @@ Format: `### YYYY-MM-DD HH:MM - short title`
   schemes, seed/fertilizer references, machinery, and marketplace discovery.
 - Corrected the machinery-list filter to use a stable query document rather
   than an unavailable ODM field expression, so seeded directory rows render.
+- Added an idempotent local SQLite demo-farmer seed that exercises the personal
+  field, crop-stage, soil, sensor, task, reminder and ledger views.
+- Connected dashboard market snapshots to the available shared reference
+  records, retaining each record's source instead of inventing a price.
 
 **Why:** The prototype needs populated shared-reference screens while keeping
 farmer-specific information in SQLite and never presenting illustrative data as

@@ -25,6 +25,7 @@ Desktop and wait until its engine reads **Running**, then rerun the commands.
 
 ```powershell
 python scripts/seed_local_reference_data.py
+python scripts/seed_demo_farmer_state.py
 ```
 
 The script is idempotent. It inserts/updates records marked
@@ -32,6 +33,11 @@ The script is idempotent. It inserts/updates records marked
 not a live feed or official value. Scheme records link to official portals but
 do not determine eligibility. Replace these records through a source-attributed
 ingestion pipeline before a field deployment.
+
+`seed_demo_farmer_state.py` separately populates the local SQLite store of the
+`demo` farmer with clearly labelled field, soil, sensor, task, reminder and
+ledger fixtures. It does not change any other farmer store and must never be
+used with a real farmer identity.
 
 ## Start or restart the backend
 

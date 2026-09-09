@@ -30,6 +30,17 @@ Client request
   -> farmer-owned field, sensor, ledger and diagnosis requests remain on the
      independent per-farmer SQLite Farm State path
 
+`scripts/seed_demo_farmer_state.py`
+  -> calls only the farmer-scoped `/v1` REST APIs with `X-Farmer-ID: demo`
+  -> creates labelled demonstration fixtures for one local SQLite store
+  -> never writes shared MongoDB reference records or another farmer's data
+
+Dashboard request with an active field crop
+  -> reads farmer fields and local SQLite observations
+  -> when shared reference storage is available, reads only latest Mongo market
+     records for those exact crop names and returns their source with the tile
+  -> otherwise returns no market number plus a visible availability warning
+
 ## TFLite crop-health routing
 `POST /v1/diagnoses` with a confirmed crop
   -> validates image and stores immutable upload metadata in the farmer SQLite database
