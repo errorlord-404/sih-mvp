@@ -27,3 +27,10 @@ codex mcp list
 This MCP server offers farm reads and approval-gated record writes only. It
 cannot actuate irrigation, book equipment, make payments, or provide CNN/ML
 crop-health inference until those separately gated modules are ready.
+
+For prompt-only discovery, the server registers `query_support_catalog`, which
+queries the live scheme, machinery, and marketplace reference APIs in one
+bounded read. Codex should call it for questions such as “find tractor rentals
+and farm-support schemes in Maharashtra,” then answer with the returned source
+and freshness metadata. Use the nearby tools when a selected field is needed;
+all directory results remain discovery-only.

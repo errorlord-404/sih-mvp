@@ -84,6 +84,7 @@ def build_server(client: BackendClient) -> FastMCP:
     register("recommend_fertilizers", "Load fertilizer recommendations from the reference backend; do not invent products.", tools.recommend_fertilizers)
     register("check_scheme_eligibility", "Check government-scheme eligibility using explicit state and criteria inputs.", tools.check_scheme_eligibility)
     register("get_scheme_details", "Load one government scheme reference record by its exact ID.", tools.get_scheme_details)
+    register("query_support_catalog", "Answer one farmer support prompt with bounded, source-attributed government schemes, machinery rentals, and marketplace directory records. This is read-only discovery; it never books, buys, sells, or guarantees eligibility, stock, price, or availability.", tools.query_support_catalog)
     register("list_machinery_rentals", "Load machinery rental listings with optional category and location filters.", tools.list_machinery_rentals)
     register("find_machinery", "Find nearby machinery-rental records with optional category and location filters.", tools.find_machinery)
     register("find_nearby_machinery", "Find source-attributed machinery near a farmer-owned field. The field coordinates are read from backend state and cannot be supplied by the model.", tools.find_nearby_machinery)

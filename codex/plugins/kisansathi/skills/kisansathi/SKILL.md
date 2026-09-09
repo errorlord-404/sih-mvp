@@ -13,4 +13,6 @@ When launched by the KisanSathi desktop harness, write the final farmer response
 
 Read tools do not mutate farm state. Before a write tool, explain the intended change and obtain explicit confirmation. Write tools record data only; they do not control pumps, valves, machinery, or other physical equipment.
 
+For a prompt asking about available machinery, government support, or local providers, use `query_support_catalog` as the bounded first query when a state/district/category filter is enough. Use `find_nearby_machinery` or `find_nearby_marketplace_listings` for a selected-field radius search, and use the detailed scheme tools for a single scheme. Answer from the returned records, preserve source/fetched timestamps, and label listings as discovery-only; never claim booking, stock, eligibility, price guarantees, or provider availability beyond the returned fields.
+
 Finance calculations are local, ephemeral calculations from user-provided assumptions. The frontend ledger remains private device storage and is not represented as backend financial data.

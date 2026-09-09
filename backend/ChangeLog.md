@@ -666,6 +666,15 @@ isolation. No export, model update, or treatment action exists.
 **Why:** The MVP demo profile includes a display annotation (`local demo`) that must never become an exact operational state filter, and provider discovery needs to be tied to the selected field location.
 
 **Status:** Backend tests pass; live seeded endpoint smoke checks pass on the dedicated demo port.
+
+### 2026-09-09 - Robust source rows for agent support queries
+**What changed:**
+- Preserved official FARMS provider rows that omit an address by returning an explicit `Location not provided by FARMS` label and provenance metadata.
+- Normalized older Mongo rows at the machinery response boundary so broad rental queries cannot fail validation with HTTP 500.
+
+**Why:** The Codex support-query tool must be able to query the full live catalog and report missing location evidence honestly rather than silently dropping a provider or crashing.
+
+**Status:** Parser regression coverage added; live endpoint smoke verified on the demo backend.
 # 2026-09-07 — Guarded local crop-health inference integration
 - Added an opt-in local two-stage crop router/specialist adapter for versioned
   PyTorch fine-tuning checkpoints. It fails closed for unknown crops, missing

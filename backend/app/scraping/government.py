@@ -175,6 +175,11 @@ def parse_farms_chc_records(
         if not transaction_id or not agency:
             continue
         location, district, state = _address_parts(provider.get("address"))
+        # FARMS sometimes publishes a provider without an address. Preserve
+        # that fact instead of dropping the source row, while satisfying the
+        # legacy response contract with an explicit non-location label.
+        location_missing = not bool(location or district or state)
+        location = location or district or state or "Location not provided by FARMS"
         latitude = _number(provider.get("lat"))
         longitude = _number(provider.get("lng"))
         observed_at = _observed_at(provider.get("CHC_LastModifiedDate")) or _observed_at(provider.get("CHC_AddedDate"))
@@ -226,6 +231,7 @@ def parse_farms_chc_records(
                     "user_type": provider.get("UserType"),
                     "state_lgdcode": provider.get("state_lgdcode"),
                     "district_lgdcode": provider.get("district_lgdcode"),
+                    "location_missing": location_missing,
                 },
             }
             if len(records) >= max_records:

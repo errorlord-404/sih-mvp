@@ -370,3 +370,11 @@ client-side SQLite per PRD section 8/29 - flagged as open question.
 ## Diagnostics flow
 
 `Settings` → `GET /v1/diagnostics` with `X-Farmer-ID` → farmer-local SQLite counts + shared Mongo catalog counts → safe component/degraded state → retryable UI messaging. `X-Request-ID` is returned on every response for correlation.
+
+## Agent support-query flow
+
+Official FARMS CHC ingestion → `machinery_rentals` provider/network records →
+`GET /machinery-rentals` response normalization → Python MCP
+`query_support_catalog` fan-out (schemes, machinery, marketplace) → bounded
+source-attributed tool envelope → Codex farmer answer. Missing provider
+locations remain explicit and are never used as coordinates for nearby search.

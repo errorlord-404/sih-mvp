@@ -353,6 +353,13 @@ future governed expert-review/export workflow before any ML use.
 **Decision:** Normalize administrative values at the boundary, store optional provider coordinates/provenance, return bounded distance-sorted results, and keep district/list fallback when coordinates are absent. Add a 2dsphere index declaration without making unverified geocoding mandatory.
 **Alternatives considered:** Parse display strings in every client, silently geocode every listing, or expose unbounded all-provider results.
 **Trade-offs accepted:** Existing un-geocoded records remain discoverable only through explicit fallback paths; a later ingestion job may populate verified points.
+
+# FARMS rows without addresses remain queryable with explicit unknown location
+**Date:** 2026-09-09
+**Context:** The official FARMS CHC feed contains provider rows without an address, while the legacy machinery response contract requires a location string.
+**Decision:** Preserve the row, use `Location not provided by FARMS` only as a display-valid marker, and add `metadata.location_missing=true`. Older rows are normalized at response time as a compatibility guard.
+**Alternatives considered:** Drop incomplete provider rows, invent a state/district location, or relax the response contract without a migration.
+**Trade-offs accepted:** The row is discoverable but cannot be treated as geographically located; nearby search still requires valid coordinates.
 ## 2026-09-09 — Diagnostics are operational, not domain data
 
 The readiness panel uses a dedicated farmer-scoped diagnostics route. It reports bounded counts and component availability, but never exposes SQLite paths, farmer identifiers, credentials, or claims that demo records are live. This keeps health checks useful to the launcher and judge while preserving the separate private SQLite/shared Mongo boundary.

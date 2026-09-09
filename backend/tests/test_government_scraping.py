@@ -66,3 +66,17 @@ def test_farms_chc_parser_maps_real_provider_vehicle_and_preserves_raw_costs():
     assert record["metadata"]["cost_per_acre"] == 1800.0
     assert record["source"] == "Government of India FARMS CHC public feed"
     assert record["source_status"] == "active"
+
+
+def test_farms_chc_parser_keeps_provider_without_address_explicitly_queryable():
+    records = parse_farms_chc_records({
+        "status": "S",
+        "listCHC": [{
+            "CHCTransactionId": "1002",
+            "agency_name": "Addressless CHC",
+            "chcVehicles": [{"vehicleType": "Rotavator", "vehicle_unique_id": "v-2"}],
+        }],
+    })
+    assert len(records) == 1
+    assert records[0]["location"] == "Location not provided by FARMS"
+    assert records[0]["metadata"]["location_missing"] is True

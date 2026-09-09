@@ -54,6 +54,7 @@ test('starts a thread and sends a text turn through the JSONL protocol', async (
   assert.deepEqual(await harness.sendText('Check soil moisture', { field_id: 'field-1' }), { turnId: 'turn-1' });
   assert.equal(ready.some((event) => event.kind === 'ready' && event.threadId === 'thread-1'), true);
   assert.equal(processes[0].messages.some((message) => message.method === 'thread/start'), true);
+  assert.match(processes[0].messages.find((message) => message.method === 'thread/start').params.baseInstructions, /query_support_catalog/);
   assert.equal(processes[0].messages.at(-1).method, 'turn/start');
   harness.close();
 });

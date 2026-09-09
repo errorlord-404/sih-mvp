@@ -79,6 +79,7 @@ def test_server_exposes_only_farmer_safe_read_tools() -> None:
     assert "get_market_price" in names
     assert "compare_msp_with_market" in names
     assert "find_machinery" in names
+    assert "query_support_catalog" in names
     assert "get_marketplace_status" in names
     assert "calculate_logistics_cost" in names
     assert "list_field_tasks" in names
@@ -95,6 +96,47 @@ def test_server_exposes_only_farmer_safe_read_tools() -> None:
     task_write_tool = next(tool for tool in registered if tool.name == "create_field_task")
     assert task_write_tool.annotations.readOnlyHint is False
     run(client.aclose())
+
+
+def test_prompt_support_query_fans_out_to_source_catalogs_and_bounds_results() -> None:
+    calls = []
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        calls.append(request)
+        if request.url.path == "/gov-schemes/by-state/Maharashtra":
+            return httpx.Response(200, json=[
+                {"name": "Farm Mechanization", "description": "tractor support", "source": "MahaDBT"},
+                {"name": "Other Scheme", "description": "not related", "source": "MahaDBT"},
+            ])
+        if request.url.path == "/machinery-rentals":
+            return httpx.Response(200, json=[{"provider_name": "CHC Pune", "category": "tractor", "source": "FARMS"}] * 20)
+        if request.url.path == "/marketplace/listings":
+            assert request.url.params["state"] == "Maharashtra"
+            assert request.url.params["category"] == "tractor"
+            return httpx.Response(200, json=[{"title": "Tractor listing", "source": "FARMS"}] * 20)
+        return httpx.Response(404, json={"detail": "not found"})
+
+    async def scenario() -> None:
+        client = make_client(handler)
+        result = await KisanSathiTools(client).query_support_catalog(
+            state="Maharashtra",
+            category="tractor",
+            query="tractor",
+            limit=2,
+        )
+        assert result["status"] == "ok"
+        assert result["data"]["filters"]["limit"] == 2
+        assert len(result["data"]["results"]["schemes"]) == 1
+        assert len(result["data"]["results"]["machinery"]) == 2
+        assert len(result["data"]["results"]["marketplace"]) == 2
+        assert {request.url.path for request in calls} == {
+            "/gov-schemes/by-state/Maharashtra",
+            "/machinery-rentals",
+            "/marketplace/listings",
+        }
+        await client.aclose()
+
+    run(scenario())
 
 
 def test_mutation_sends_deterministic_idempotency_key() -> None:

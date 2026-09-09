@@ -14,7 +14,12 @@ router = APIRouter(prefix="/machinery-rentals", tags=["machinery-rentals"])
 
 
 def _to_response(item: MachineryRental) -> MachineryRentalResponse:
-    return MachineryRentalResponse(id=str(item.id), **item.model_dump(exclude={"id"}))
+    payload = item.model_dump(exclude={"id"})
+    # Older live FARMS rows may predate the explicit parser fallback and have
+    # no address. Keep the source row queryable without inventing a location.
+    if not (payload.get("location") or payload.get("village")):
+        payload["location"] = payload.get("district") or payload.get("state") or "Location not provided by source"
+    return MachineryRentalResponse(id=str(item.id), **payload)
 
 
 def _normalise_aliases(values: dict, *, fill_defaults: bool = False) -> dict:

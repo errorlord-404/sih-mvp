@@ -22,3 +22,19 @@ Copy `config/codex.mcp.example.toml` into the Codex configuration and adjust the
 ## Identity boundary
 
 `KISANSATHI_FARMER_ID` is trusted launcher configuration and is sent as `X-Farmer-ID` on every backend request. It is deliberately absent from MCP tool schemas. The current backend documents this header as a temporary identity boundary, not production authentication; a production deployment must replace it with authenticated session claims.
+
+## Prompt-only support queries
+
+Codex can answer support questions directly from prompts through the read-only
+`query_support_catalog` tool. It fans out to the canonical government-scheme,
+machinery-rental, and marketplace APIs and returns a bounded, source-attributed
+result. Example prompts:
+
+- “What tractor rentals and farm support schemes are available in Maharashtra?”
+- “Find machinery providers near Pune for a rotavator.”
+- “Which public listings can help me arrange cold-chain transport in Maharashtra?”
+
+Use `find_nearby_machinery` or `find_nearby_marketplace_listings` when a
+farmer-owned field is selected. Directory results are discovery-only; the
+farmer must verify contact, price, stock, eligibility, and availability with
+the provider or official department.

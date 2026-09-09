@@ -4,6 +4,7 @@ import hashlib
 import json
 import base64
 import binascii
+import asyncio
 from typing import Any
 from urllib.parse import quote
 
@@ -399,6 +400,149 @@ class KisanSathiTools:
         return await self._read(
             "Government scheme details loaded from the reference catalog.",
             self.client.get(f"/gov-schemes/{quote(scheme_id, safe='')}"),
+        )
+
+    async def query_support_catalog(
+        self,
+        state: str | None = None,
+        district: str | None = None,
+        category: str | None = None,
+        query: str | None = None,
+        include_schemes: bool = True,
+        include_machinery: bool = True,
+        include_marketplace: bool = True,
+        limit: int = 10,
+    ) -> dict[str, Any]:
+        """Load bounded support records for one natural-language farmer prompt."""
+        bounded_limit = min(max(limit, 1), 50)
+        query_text = (query or "").strip().casefold()
+        calls: dict[str, Any] = {}
+        if include_schemes:
+            calls["schemes"] = self.client.get(
+                f"/gov-schemes/by-state/{quote(state, safe='')}" if state else "/gov-schemes"
+            )
+        if include_machinery:
+            calls["machinery"] = self.client.get(
+                "/machinery-rentals",
+                # FARMS vehicle labels vary (for example "tractor" versus
+                # "tractor mounted implement"), so keyword matching below is
+                # safer than an exact category filter at this boundary.
+                params={"district": district, "state": state},
+            )
+        if include_marketplace:
+            calls["marketplace"] = self.client.get(
+                "/marketplace/listings",
+                params={
+                    "category": category,
+                    "district": district,
+                    "state": state,
+                    "query": query,
+                    "limit": bounded_limit,
+                },
+            )
+        if not calls:
+            return tool_error(
+                summary="Select at least one support catalog to query.",
+                code="no_support_catalog_selected",
+                retryable=False,
+            )
+
+        responses = await asyncio.gather(*calls.values(), return_exceptions=True)
+        data: dict[str, Any] = {}
+        warnings: list[str] = []
+        request_ids: list[str] = []
+
+        def compact_record(label: str, item: Any) -> Any:
+            if not isinstance(item, dict):
+                return item
+            fields = {
+                "schemes": (
+                    "id", "source_record_id", "name", "description", "benefits",
+                    "eligibility_criteria", "official_source_url", "applicable_states",
+                    "source", "fetched_at",
+                ),
+                "machinery": (
+                    "id", "source_record_id", "record_kind", "name", "category",
+                    "provider_name", "location", "district", "state", "latitude",
+                    "longitude", "hourly_rate", "daily_rate", "availability_status",
+                    "contact_phone", "source", "source_url", "source_status", "fetched_at",
+                ),
+                "marketplace": (
+                    "id", "source_record_id", "record_kind", "listing_type", "title",
+                    "category", "provider_name", "location", "district", "state",
+                    "latitude", "longitude", "price_amount", "price_currency", "price_unit",
+                    "availability_status", "contact_phone", "source", "source_url",
+                    "source_status", "fetched_at",
+                ),
+            }[label]
+            result = {key: item[key] for key in fields if key in item and item[key] is not None}
+            for key in ("description", "benefits"):
+                if isinstance(result.get(key), str) and len(result[key]) > 360:
+                    result[key] = result[key][:357].rstrip() + "..."
+            if isinstance(result.get("eligibility_criteria"), list):
+                result["eligibility_criteria"] = result["eligibility_criteria"][:3]
+            return result
+
+        for (label, _), response in zip(calls.items(), responses):
+            if isinstance(response, BackendError):
+                warnings.append(f"{label} catalog unavailable: {response.message}")
+                continue
+            if isinstance(response, Exception):
+                warnings.append(f"{label} catalog unavailable: the backend request failed")
+                continue
+            request_ids.append(response.request_id)
+            value = response.data
+            if label == "machinery" and isinstance(value, list) and (category or query_text):
+                terms = [term for term in (category, query) if term and term.strip()]
+                value = [
+                    item for item in value
+                    if any(
+                        term.casefold() in " ".join(
+                            str(item.get(key, ""))
+                            for key in ("name", "category", "provider_name", "description", "location")
+                        ).casefold()
+                        for term in terms
+                    )
+                ]
+            if label == "schemes" and query_text and isinstance(value, list):
+                value = [
+                    item for item in value
+                    if query_text in " ".join(
+                        str(item.get(key, ""))
+                        for key in ("name", "description", "benefits", "eligibility_criteria")
+                    ).casefold()
+                ]
+            data[label] = (
+                [compact_record(label, item) for item in value[:bounded_limit]]
+                if isinstance(value, list)
+                else value
+            )
+
+        if not data:
+            return tool_result(
+                status="degraded",
+                summary="No support catalog could be loaded for this prompt.",
+                data={},
+                request_id=request_ids[0] if request_ids else None,
+                warnings=warnings or ["The selected support catalogs returned no data."],
+                max_response_bytes=self.max_response_bytes,
+            )
+        return tool_result(
+            status="degraded" if warnings else "ok",
+            summary="Support catalogs loaded for the farmer's prompt. Records are discovery-only and source-attributed.",
+            data={
+                "filters": {
+                    "state": state,
+                    "district": district,
+                    "category": category,
+                    "query": query,
+                    "limit": bounded_limit,
+                },
+                "results": data,
+            },
+            request_id=request_ids[0] if request_ids else None,
+            warnings=warnings,
+            max_response_bytes=self.max_response_bytes,
         )
 
     async def list_crops(self) -> dict[str, Any]:
