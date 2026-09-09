@@ -50,7 +50,7 @@
           "parameters": [
             {
               "name": "sources",
-              "value": "market_prices,msp,crops"
+              "value": "market_prices,msp,crops,gov_schemes,machinery,marketplace"
             }
           ]
         },

@@ -99,8 +99,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Tests failed; services were not activated.' }
 
     if (-not $SkipPopulation) {
-        Write-Host 'Populating official market, MSP, and crop reference data...'
-        & python -m app.scraping --sources market_prices,msp,crops
+        Write-Host 'Populating official market, MSP, crop, MahaDBT scheme, FARMS network, and approved marketplace data...'
+        & python -m app.scraping --sources market_prices,msp,crops,gov_schemes,machinery,marketplace
         if ($LASTEXITCODE -ne 0) { throw 'Universal-data population failed.' }
     }
 

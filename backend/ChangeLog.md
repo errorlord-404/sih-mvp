@@ -3,6 +3,30 @@
 All notable changes to this service. Newest entry on top.
 Format: `### YYYY-MM-DD HH:MM - short title`
 
+### 2026-09-09 - Official MahaDBT schemes and FARMS network ingestion
+**What changed:**
+- Added bounded MahaDBT Farmer Portal ingestion for published agricultural
+  scheme detail pages, with stable source IDs, official URLs and fetch times.
+- Added Government of India FARMS ingestion for public custom-hiring dashboard
+  endpoints, stored as explicitly labelled `network_status` marketplace rows.
+- Expanded universal ingestion sources with `gov_schemes` and `machinery`.
+
+**Why:** The directory must refresh from real public government sources without
+inventing rental providers, rates, contacts, stock or eligibility claims.
+FARMS currently exposes aggregate counts rather than an unauthenticated
+individual rental catalogue, so the importer preserves that limitation.
+
+**Status:** Ready for live refresh when MongoDB is available. Individual rental
+records still require an official provider-detail interface or permissioned
+directory; aggregate network rows are never presented as bookings.
+
+### 2026-09-09 - Live refresh cleans superseded directory fixtures
+**What changed:**
+- Added `scripts/refresh_live_reference_data.py`, which cleans only local demo
+  scheme, machinery and marketplace rows after a fully successful live refresh.
+- The Electron demo launcher now attempts this refresh after the labelled seed;
+  source failure leaves the offline fixtures intact and visibly labelled.
+
 ### 2026-09-09 - Local MongoDB reference seed for the prototype
 **What changed:**
 - Added a Docker-backed, localhost-only MongoDB setup guide and an idempotent

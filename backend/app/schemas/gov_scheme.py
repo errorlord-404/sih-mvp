@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class GovSchemeCreate(BaseModel): 
+    source_record_id: Optional[str] = None
     name: str
     description: str
     eligibility_criteria: List[str] = Field(default_factory=list)
@@ -14,9 +15,12 @@ class GovSchemeCreate(BaseModel):
     application_steps: List[str] = Field(default_factory=list)
     official_source_url: str
     applicable_states: List[str] = Field(default_factory=list)
+    source: str = "manual"
+    fetched_at: Optional[datetime] = None
 
 
 class GovSchemeUpdate(BaseModel):
+    source_record_id: Optional[str] = None
     name: Optional[str] = None
     description: Optional[str] = None
     eligibility_criteria: Optional[List[str]] = None
@@ -26,6 +30,8 @@ class GovSchemeUpdate(BaseModel):
     application_steps: Optional[List[str]] = None
     official_source_url: Optional[str] = None
     applicable_states: Optional[List[str]] = None
+    source: Optional[str] = None
+    fetched_at: Optional[datetime] = None
 
 
 class GovSchemeResponse(GovSchemeCreate):

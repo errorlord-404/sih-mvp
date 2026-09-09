@@ -7,6 +7,8 @@ from pymongo import IndexModel
 
 
 class MachineryRental(Document):
+    source_record_id: Optional[str] = None
+    record_kind: str = "provider_listing"
     name: str
     category: str
     description: Optional[str] = None
@@ -31,6 +33,7 @@ class MachineryRental(Document):
     image_url: Optional[str] = None
     observed_at: Optional[datetime] = None
     fetched_at: Optional[datetime] = None
+    metadata: Optional[dict[str, Any]] = None
     # Legacy/reference-catalog aliases retained for backend-fastapi clients.
     hp: Optional[str] = None
     implements_included: Optional[str] = None
@@ -42,4 +45,4 @@ class MachineryRental(Document):
 
     class Settings:
         name = "machinery_rentals"
-        indexes = [IndexModel([("location_point", "2dsphere")], sparse=True), "state", "district", "category"]
+        indexes = [IndexModel([("location_point", "2dsphere")], sparse=True), IndexModel("source_record_id", unique=True, sparse=True), "state", "district", "category"]

@@ -21,6 +21,7 @@ router = APIRouter(prefix="/gov-schemes", tags=["gov-schemes"])
 def _to_response(gov_scheme: GovScheme) -> GovSchemeResponse:
     return GovSchemeResponse(
         id=str(gov_scheme.id),
+        source_record_id=gov_scheme.source_record_id,
         name=gov_scheme.name,
         description=gov_scheme.description,
         eligibility_criteria=gov_scheme.eligibility_criteria,
@@ -30,6 +31,8 @@ def _to_response(gov_scheme: GovScheme) -> GovSchemeResponse:
         application_steps=gov_scheme.application_steps,
         official_source_url=gov_scheme.official_source_url,
         applicable_states=gov_scheme.applicable_states,
+        source=gov_scheme.source,
+        fetched_at=gov_scheme.fetched_at,
     )
 
 

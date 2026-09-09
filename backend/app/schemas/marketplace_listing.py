@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class MarketplaceListingResponse(BaseModel):
     id: str
     listing_type: str
+    record_kind: str = "provider_listing"
     title: str
     category: str | None = None
     provider_name: str | None = None
@@ -29,6 +30,7 @@ class MarketplaceListingResponse(BaseModel):
     source_url: str
     observed_at: datetime | None = None
     fetched_at: datetime
+    metadata: dict | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

@@ -15,7 +15,7 @@ Every imported document stores a stable `source_record_id`, `source`, `source_ur
 
 Seeds, fertilizer dosage/pricing, disease treatment, and scheme eligibility are not auto-filled by this job: the researched government pages do not provide stable structured feeds matching the existing schemas. Those collections remain available through CRUD and must be populated only from approved domain-specific sources.
 
-Marketplace discovery is deliberately separate from those recommendation catalogs. Configure approved HTTPS directory sources in `MARKETPLACE_DIRECTORY_SOURCES_JSON`, then run `--sources marketplace`. See [MARKETPLACE_DIRECTORY.md](MARKETPLACE_DIRECTORY.md) for the source policy and configuration shape.
+Marketplace discovery is deliberately separate from those recommendation catalogs. Configure approved HTTPS directory sources in `MARKETPLACE_DIRECTORY_SOURCES_JSON`, then run `--sources marketplace`. The `gov_schemes` source refreshes the public MahaDBT Farmer Portal catalogue, and `machinery` refreshes Government of India FARMS network-status counts. FARMS does not expose an unauthenticated individual provider/rate catalogue, so those records are explicitly labelled network status and never imply a booking or price. See [MARKETPLACE_DIRECTORY.md](MARKETPLACE_DIRECTORY.md) for the source policy and configuration shape.
 
 ## Run locally
 
@@ -41,7 +41,7 @@ The script downloads the official MongoDB Community archive into the ignored `.r
 
 3. Populate immediately:
 
-   `python -m app.scraping --sources market_prices,msp,crops,marketplace`
+   `python -m app.scraping --sources market_prices,msp,crops,gov_schemes,machinery,marketplace`
 
 The imported n8n workflow runs every day at 06:30 Asia/Kolkata. It calls the protected `POST /internal/universal-data/sync` endpoint and retries transient failures three times. Ingestion history is available from `GET /internal/universal-data/runs` with the same `X-Ingestion-Token` header.
 

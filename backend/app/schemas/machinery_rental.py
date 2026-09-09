@@ -5,6 +5,8 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class MachineryRentalPayload(BaseModel):
+    source_record_id: Optional[str] = None
+    record_kind: str = "provider_listing"
     name: str
     category: str
     description: Optional[str] = None
@@ -28,6 +30,7 @@ class MachineryRentalPayload(BaseModel):
     image_url: Optional[str] = None
     observed_at: Optional[datetime] = None
     fetched_at: Optional[datetime] = None
+    metadata: Optional[dict] = None
     hp: Optional[str] = None
     implements_included: Optional[str] = None
     owner_name: Optional[str] = None
@@ -50,6 +53,8 @@ class MachineryRentalCreate(MachineryRentalPayload):
 
 
 class MachineryRentalUpdate(BaseModel):
+    source_record_id: Optional[str] = None
+    record_kind: Optional[str] = None
     name: Optional[str] = None
     category: Optional[str] = None
     description: Optional[str] = None
@@ -73,6 +78,7 @@ class MachineryRentalUpdate(BaseModel):
     image_url: Optional[str] = None
     observed_at: Optional[datetime] = None
     fetched_at: Optional[datetime] = None
+    metadata: Optional[dict] = None
     hp: Optional[str] = None
     implements_included: Optional[str] = None
     owner_name: Optional[str] = None

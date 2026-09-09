@@ -17,9 +17,12 @@ from app.models.msp import MSP
 from app.models.marketplace_listing import MarketplaceListing
 from app.scraping.sources import MARKET_DATASET_URL, SourceFetchError, fetch_market_records, fetch_msp_records, stable_source_id
 from app.scraping.marketplace import ALLOWED_LISTING_TYPES, fetch_apeda_exporter_records, fetch_marketplace_records
+from app.models.gov_scheme import GovScheme
+from app.models.machinery_rental import MachineryRental
+from app.scraping.government import fetch_farms_network_records, fetch_mahadbt_scheme_records
 
 
-SUPPORTED_SOURCES = {"market_prices", "msp", "crops", "marketplace"}
+SUPPORTED_SOURCES = {"market_prices", "msp", "crops", "marketplace", "gov_schemes", "machinery"}
 
 
 def _chunks(items: list[Any], size: int = 1000) -> Iterable[list[Any]]:
@@ -231,6 +234,63 @@ async def _execute_sync(
             if marketplace_records:
                 stats["marketplace"] = await _bulk_upsert(MarketplaceListing, marketplace_records)
             stats["marketplace_sources"] = per_source_stats
+
+    if "gov_schemes" in requested:
+        try:
+            scheme_records, fetched = await asyncio.to_thread(
+                fetch_mahadbt_scheme_records,
+                index_url=settings.MAHADBT_SCHEME_INDEX_URL,
+                timeout=settings.UNIVERSAL_DATA_HTTP_TIMEOUT_SECONDS,
+                max_schemes=settings.MAHADBT_MAX_SCHEMES,
+            )
+            stats["gov_schemes_fetch"] = fetched
+            source_urls.append(settings.MAHADBT_SCHEME_INDEX_URL)
+            if scheme_records:
+                stats["gov_schemes"] = await _bulk_upsert(GovScheme, scheme_records)
+            else:
+                errors.append("gov_schemes: official MahaDBT page contained no scheme records")
+        except SourceFetchError as exc:
+            errors.append(f"gov_schemes: {exc}")
+
+    if "machinery" in requested:
+        if not settings.FARMS_NETWORK_STATUS_ENABLED:
+            errors.append("machinery: FARMS network status ingestion is disabled")
+        else:
+            try:
+                network_records, fetched = await asyncio.to_thread(
+                    fetch_farms_network_records,
+                    timeout=settings.UNIVERSAL_DATA_HTTP_TIMEOUT_SECONDS,
+                )
+                stats["machinery_fetch"] = fetched
+                source_urls.extend([
+                    "https://agrimachinery.nic.in/Index/farmsapp",
+                    "https://agrimachinery.nic.in/GraphReport/SMAMFmtti/ServiceData2.asmx/GetCHCAppServiceProviders",
+                    "https://agrimachinery.nic.in/GraphReport/SMAMFmtti/ServiceData2.asmx/GetStatusofImplementHiring",
+                ])
+                if network_records:
+                    stats["machinery"] = await _bulk_upsert(MarketplaceListing, network_records)
+                    rental_records = []
+                    for record in network_records:
+                        rental_records.append({
+                            "source_record_id": record["source_record_id"],
+                            "record_kind": "network_status",
+                            "name": record["title"],
+                            "category": record["category"],
+                            "description": record["description"],
+                            "provider_name": record["provider_name"],
+                            "location": record["location"],
+                            "state": record["state"],
+                            "availability_status": "network_status",
+                            "source": record["source"],
+                            "source_url": record["source_url"],
+                            "fetched_at": record["fetched_at"],
+                            "metadata": record["metadata"],
+                        })
+                    stats["machinery_rentals"] = await _bulk_upsert(MachineryRental, rental_records)
+                else:
+                    errors.append("machinery: official FARMS endpoints returned no state snapshots")
+            except SourceFetchError as exc:
+                errors.append(f"machinery: {exc}")
 
     run.completed_at = datetime.now(timezone.utc)
     run.stats = stats

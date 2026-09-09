@@ -10,6 +10,7 @@ class MarketplaceListing(Document):
     """A source-attributed discovery record, never a booking or purchase."""
 
     source_record_id: str
+    record_kind: str = Field(default="provider_listing", description="provider_listing or network_status")
     listing_type: str = Field(description="machinery, seed, fertilizer, logistics, buyer, or exporter")
     title: str
     category: Optional[str] = None
@@ -34,6 +35,7 @@ class MarketplaceListing(Document):
     source_url: str
     observed_at: Optional[datetime] = None
     fetched_at: datetime
+    metadata: Optional[dict[str, Any]] = None
 
     class Settings:
         name = "marketplace_listings"

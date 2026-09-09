@@ -1,5 +1,20 @@
 # Decisions
 
+## Government source boundary for machinery and schemes
+**Date:** 2026-09-09
+
+MahaDBT is used for Maharashtra agricultural scheme detail pages because it
+publishes the catalogue and eligibility/documents on public HTTPS pages. The
+source URL, stable source ID and fetch time are retained.
+
+The FARMS dashboard is used for machinery-network evidence only. Its public
+JSON endpoints expose state-level custom-hiring provider and booking counts,
+not a complete individual provider/rate/availability catalogue. Those rows
+are stored as `record_kind=network_status` marketplace records with no
+invented contact, price, coordinates or booking claim. A future official
+provider-detail endpoint can add `provider_listing` rows without changing the
+farmer-facing contract.
+
 Records WHY a non-obvious choice was made. Not every change needs an entry -
 only ones where a reasonable person might ask "why did you do it this way?"
 

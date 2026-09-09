@@ -86,6 +86,15 @@ try {
     $env:PYTHONPATH = $backendRoot
     python (Join-Path $backendRoot 'scripts\seed_local_reference_data.py') | Out-Host
     python (Join-Path $backendRoot 'scripts\seed_demo_farmer_state.py') | Out-Host
+    # Refresh approved public directories after the labelled offline seed. If
+    # a government source is unavailable, retain the clearly labelled fixtures
+    # so the rest of the field-state demo remains runnable.
+    try {
+      python (Join-Path $backendRoot 'scripts\refresh_live_reference_data.py') | Out-Host
+      if ($LASTEXITCODE -ne 0) { Write-Warning 'Live reference refresh failed; local demo directory records remain labelled and unchanged.' }
+    } catch {
+      Write-Warning "Live reference refresh failed; local demo directory records remain labelled and unchanged. $($_.Exception.Message)"
+    }
   }
 
   $RendererPort = Select-RendererPort -Preferred $RendererPort

@@ -60,5 +60,8 @@ class Settings(BaseSettings):
     MSP_KHARIF_URL: str = "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2260618&lang=2&reg=48"
     MSP_RABI_URL: str = "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2173567&lang=35&reg=38"
     MARKETPLACE_DIRECTORY_SOURCES_JSON: str = '[{"url":"https://agriexchange.apeda.gov.in/AgriDirectory/Exporter/Exporters","name":"APEDA registered exporters","listing_type":"exporter","adapter":"apeda_exporters"}]'
+    MAHADBT_SCHEME_INDEX_URL: str = "https://mahadbt.maharashtra.gov.in/Farmer/SchemeData/SchemeData?str=E9DDFA703C38E51A23C0254248DAFF28"
+    MAHADBT_MAX_SCHEMES: int = 30
+    FARMS_NETWORK_STATUS_ENABLED: bool = True
 
 settings = Settings()

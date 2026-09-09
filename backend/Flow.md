@@ -1,5 +1,25 @@
 # Flow.md
 
+## Official scheme and machinery network refresh
+
+`python -m app.scraping --sources gov_schemes,machinery` (or the protected
+universal-data endpoint) -> `app/scraping/government.py` -> public MahaDBT
+scheme pages and public Government of India FARMS JSON endpoints -> parser
+validation -> stable source IDs -> Mongo `gov_schemes` and
+`marketplace_listings` -> `/gov-schemes` and `/marketplace/listings`.
+
+MahaDBT rows are scheme details. FARMS rows are state-level
+`record_kind=network_status` snapshots and carry no individual rental
+price/contact/availability. Source URLs and fetched timestamps make freshness
+inspectable; failed refreshes are recorded in `ingestion_runs` and do not
+delete the last known row.
+
+The desktop bootstrap first creates optional local fixtures for offline
+continuity, then runs `scripts/refresh_live_reference_data.py`. Only a fully
+successful run removes local scheme/machinery/marketplace fixtures; a provider
+failure leaves those records in place with their `local_demo_seed_not_live`
+provenance.
+
 Describes how requests move through this service, so a bug can be traced to
 "before" or "after" a given point. Update whenever you add a new module or
 change how existing ones connect.
