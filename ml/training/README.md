@@ -178,6 +178,32 @@ python ml/training/compare_tflite_candidates.py `
 This comparison is not a release decision. It has no target-device thermal,
 battery or latency evidence and cannot change a manifest.
 
+### External-domain check (PlantDoc, evaluation only)
+
+`materialize_plantdoc_tomato_external_test.py` can fetch a **bounded** subset
+from an immutable local PlantDoc Git revision without checking out its
+Windows-incompatible source filenames. It writes only sanitized evaluation
+copies and an upstream-source manifest. It must not be used for training or as
+farmer-phone release evidence:
+
+```powershell
+python ml/training/materialize_plantdoc_tomato_external_test.py `
+  --repository C:\approved\PlantDoc-Dataset `
+  --revision 5467f6012d78d1c446145d5f582da6096f852ae8 `
+  --output C:\approved\plantdoc-tomato-external `
+  --unknown-output C:\approved\plantdoc-nontomato-ood `
+  --per-label 6 `
+  --unknown-source-label 'Bell_pepper leaf' `
+  --unknown-source-label 'Corn leaf blight' `
+  --unknown-source-label 'Apple leaf'
+```
+
+Then pass the known and OOD folders to `evaluate_tflite_classifier.py`. The
+first check is documented in
+[`../evaluation/PLANTDOC_EXTERNAL_CHECK_2026_09_09.md`](../evaluation/PLANTDOC_EXTERNAL_CHECK_2026_09_09.md):
+the controlled demo fell from 97.75% to 45.83% raw accuracy on its tiny external
+tomato subset. That is a warning against deployment, not a new release metric.
+
 ## Field-data review queue (no automatic export)
 
 The farmer app can record consented diagnosis feedback, but it is not a

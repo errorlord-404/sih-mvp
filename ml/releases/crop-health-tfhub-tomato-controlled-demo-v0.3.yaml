@@ -49,6 +49,14 @@ evaluation:
   full_int8_accuracy: 0.9650
   full_int8_accuracy_delta: 0.0125
   full_int8_status: controlled_benchmark_passes_accuracy_delta_not_selected_pending_target_device_benchmark
+  external_plantdoc_exploratory_check:
+    source_revision: 5467f6012d78d1c446145d5f582da6096f852ae8
+    known_tomato_images: 24
+    raw_accuracy: 0.4583
+    macro_f1: 0.3906
+    current_gate_known_coverage: 0.5417
+    current_gate_ood_rejection: 0.8333
+    status: domain_shift_observed_not_release_evidence
   independent_field_test: missing
   unknown_ood_test: missing
 release_blockers:
@@ -57,6 +65,7 @@ release_blockers:
   - Independent field-held-out evaluation is absent.
   - Agronomist approval and reviewed treatment content are absent.
   - Device latency, thermal, and battery evidence are absent.
+  - The exploratory external PlantDoc check shows substantial domain shift.
 release_gates:
   independent_field_test: missing
   unknown_ood_test: missing

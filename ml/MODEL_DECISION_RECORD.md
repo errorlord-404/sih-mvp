@@ -263,6 +263,18 @@ This selection changes only controlled demonstration quality. It does not pass
 the independent field, unknown/OOD, agronomist or deployment-device gates, and
 therefore cannot authorize diagnosis, treatment, irrigation or pump actions.
 
+### External-domain warning (9 September 2026)
+
+A bounded 24-image PlantDoc external tomato check at revision
+`5467f6012d78d1c446145d5f582da6096f852ae8` returned only 45.83% raw accuracy
+for the selected dynamic TFLite artifact (0.3906 macro-F1), compared with
+97.75% on the controlled PlantVillage split. At the current 0.70/0.15 gate it
+accepted 13/24 known images and rejected 15/18 non-tomato PlantDoc images.
+This tiny web-image sample is insufficient to tune or certify a threshold, but
+it is sufficient to show the domain-transfer risk. No runtime threshold,
+release status, treatment content or actuation authority was changed. See
+`evaluation/PLANTDOC_EXTERNAL_CHECK_2026_09_09.md`.
+
 ## Source ledger
 
 - [PlantVillage Dataset repository](https://github.com/spMohanty/PlantVillage-Dataset) — dataset size/scope and original paper.

@@ -23,6 +23,8 @@
     better warm-up checkpoint and metadata reports completed, not merely
     planned, training epochs.
 11. Added a reusable host-only TFLite latency benchmark utility.
+12. Added a bounded PlantDoc external-evaluation importer and evaluated the
+    chosen model on a separate tomato/OOD image source.
 
 ## Verification
 
@@ -33,6 +35,9 @@
 - Live HTTP `POST /v1/diagnoses` with a held-out late-blight image:
   `needs_expert_review`, EfficientNetV2-B0/v0.3 identity, late blight top
   candidate at 0.9235, no treatment and no action authority.
+- PlantDoc exploratory cross-domain result: 45.83% raw accuracy on 24 tomato
+  images; current gate rejects 15/18 non-tomato images but accepts only 13/24
+  known tomato images. The release remains demo-only.
 
 ## Important local paths
 
@@ -48,6 +53,8 @@
   `ml/releases/crop-health-tfhub-tomato-controlled-demo-v0.3.yaml`
 - Detailed benchmark:
   `ml/evaluation/TOMATO_TFHUB_BENCHMARK_2026_09_09.md`
+- External-domain warning:
+  `ml/evaluation/PLANTDOC_EXTERNAL_CHECK_2026_09_09.md`
 
 ## What remains before a truthful field release
 

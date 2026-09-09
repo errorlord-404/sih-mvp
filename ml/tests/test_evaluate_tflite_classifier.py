@@ -3,7 +3,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "training"))
 
-from evaluate_tflite_classifier import accepted_prediction, classification_report
+from evaluate_tflite_classifier import accepted_prediction, classification_report, image_files
 
 
 def test_acceptance_requires_both_probability_and_margin():
@@ -30,3 +30,12 @@ def test_report_counts_rejected_supported_cases_and_macro_metrics():
     assert report["per_class"]["healthy"]["recall"] == 0.5
     assert report["per_class"]["blight"]["recall"] == 0.5
     assert report["macro_f1"] > 0
+
+
+def test_image_files_ignores_dataset_manifests(tmp_path):
+    (tmp_path / "image.jpg").write_bytes(b"image")
+    (tmp_path / "SOURCE_MANIFEST.tsv").write_text("metadata", encoding="utf-8")
+    nested = tmp_path / "nested"
+    nested.mkdir()
+    (nested / "leaf.PNG").write_bytes(b"image")
+    assert [path.name for path in image_files(tmp_path)] == ["image.jpg", "leaf.PNG"]

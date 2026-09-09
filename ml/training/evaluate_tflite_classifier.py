@@ -14,6 +14,14 @@ from pathlib import Path
 from typing import Any
 
 
+IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
+
+
+def image_files(root: Path) -> list[Path]:
+    """Return only image payloads, excluding dataset manifests and review notes."""
+    return sorted(path for path in root.rglob("*") if path.is_file() and path.suffix.lower() in IMAGE_SUFFIXES)
+
+
 def accepted_prediction(scores: list[float], minimum_score: float, minimum_margin: float) -> tuple[int | None, float, float]:
     """Return accepted top index, score, and top-one/top-two margin."""
     if not scores:
@@ -117,7 +125,7 @@ def main() -> None:
         label_dir = args.dataset / label
         if not label_dir.is_dir():
             raise SystemExit(f"Field dataset is missing label directory: {label_dir}")
-        for path in sorted(item for item in label_dir.rglob("*") if item.is_file()):
+        for path in image_files(label_dir):
             predicted, _, _ = predict(path)
             expected_predictions.append((expected, predicted))
     report = classification_report(labels, expected_predictions)
@@ -125,7 +133,7 @@ def main() -> None:
     report["model"] = str(args.model)
     report["labels"] = str(args.labels)
     if args.unknown_dataset:
-        outcomes = [predict(path) for path in sorted(path for path in args.unknown_dataset.rglob("*") if path.is_file())]
+        outcomes = [predict(path) for path in image_files(args.unknown_dataset)]
         rejected = sum(prediction is None for prediction, _, _ in outcomes)
         report["unknown_ood"] = {"samples": len(outcomes), "rejected": rejected, "true_rejection_rate": rejected / len(outcomes) if outcomes else 0.0}
     else:
