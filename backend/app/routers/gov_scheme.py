@@ -13,6 +13,7 @@ from app.schemas.gov_scheme import (
     SchemeEligibilityResponse,
 )
 from app.services.gov_scheme_mutator import GovSchemeMutator, get_gov_scheme_mutator
+from app.services.geo import normalize_admin
 
 router = APIRouter(prefix="/gov-schemes", tags=["gov-schemes"])
 
@@ -54,9 +55,16 @@ async def list_gov_schemes():
 
 @router.get("/by-state/{state}", response_model=List[GovSchemeResponse])
 async def list_gov_schemes_by_state(state: str):
-    gov_schemes = await GovScheme.find(
-        (GovScheme.applicable_states == []) | (GovScheme.applicable_states.in_([state]))
-    ).to_list()
+    normalized_state = normalize_admin(state) or state.strip()
+    # Beanie's list-field expression API differs across supported versions;
+    # keep this small reference catalogue query deterministic and bounded.
+    all_schemes = await GovScheme.find_all().to_list()
+    gov_schemes = [
+        scheme for scheme in all_schemes
+        if not scheme.applicable_states
+        or any(normalize_admin(value) == normalized_state for value in scheme.applicable_states)
+        or any((normalize_admin(value) or "").casefold().startswith("india") for value in scheme.applicable_states)
+    ]
     return [_to_response(gov_scheme) for gov_scheme in gov_schemes]
 
 

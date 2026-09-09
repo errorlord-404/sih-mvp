@@ -8,6 +8,7 @@ from app.schemas.machinery_rental import (
     MachineryRentalResponse,
     MachineryRentalUpdate,
 )
+from app.services.geo import haversine_km, normalize_admin
 
 router = APIRouter(prefix="/machinery-rentals", tags=["machinery-rentals"])
 
@@ -63,12 +64,31 @@ async def list_machinery_rentals(
     if category:
         criteria["category"] = category
     if district:
-        criteria["district"] = district
+        criteria["district"] = normalize_admin(district)
     if state:
-        criteria["state"] = state
+        criteria["state"] = normalize_admin(state)
     records = await (MachineryRental.find(criteria) if criteria else MachineryRental.find_all()).to_list()
     records.sort(key=lambda item: item.distance_km if item.distance_km is not None else float("inf"))
     return [_to_response(record) for record in records]
+
+
+@router.get("/nearby", response_model=list[MachineryRentalResponse])
+async def nearby_machinery_rentals(
+    lat: float = Query(..., ge=-90, le=90),
+    lon: float = Query(..., ge=-180, le=180),
+    radius_km: float = Query(default=25, gt=0, le=250),
+    category: str | None = Query(default=None, min_length=1),
+    limit: int = Query(default=30, ge=1, le=100),
+):
+    records = await (MachineryRental.find({"category": category}) if category else MachineryRental.find_all()).to_list()
+    ranked = []
+    for item in records:
+        distance = haversine_km(lat, lon, item.latitude, item.longitude)
+        if distance is not None and distance <= radius_km:
+            item.distance_km = distance
+            ranked.append(item)
+    ranked.sort(key=lambda item: item.distance_km if item.distance_km is not None else float("inf"))
+    return [_to_response(record) for record in ranked[:limit]]
 
 
 @router.get("/{rental_id}", response_model=MachineryRentalResponse)

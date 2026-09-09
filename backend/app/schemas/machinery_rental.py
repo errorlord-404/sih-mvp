@@ -12,6 +12,11 @@ class MachineryRentalPayload(BaseModel):
     location: Optional[str] = None
     district: Optional[str] = None
     state: Optional[str] = None
+    latitude: Optional[float] = Field(default=None, ge=-90, le=90)
+    longitude: Optional[float] = Field(default=None, ge=-180, le=180)
+    service_radius_km: Optional[float] = Field(default=None, ge=0)
+    geocode_source: Optional[str] = None
+    verified_at: Optional[datetime] = None
     distance_km: Optional[float] = Field(default=None, ge=0)
     hourly_rate: Optional[float] = Field(default=None, ge=0)
     daily_rate: Optional[float] = Field(default=None, ge=0)
@@ -52,6 +57,11 @@ class MachineryRentalUpdate(BaseModel):
     location: Optional[str] = None
     district: Optional[str] = None
     state: Optional[str] = None
+    latitude: Optional[float] = Field(default=None, ge=-90, le=90)
+    longitude: Optional[float] = Field(default=None, ge=-180, le=180)
+    service_radius_km: Optional[float] = Field(default=None, ge=0)
+    geocode_source: Optional[str] = None
+    verified_at: Optional[datetime] = None
     distance_km: Optional[float] = Field(default=None, ge=0)
     hourly_rate: Optional[float] = Field(default=None, ge=0)
     daily_rate: Optional[float] = Field(default=None, ge=0)

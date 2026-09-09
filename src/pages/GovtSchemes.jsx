@@ -4,15 +4,11 @@ import { referenceApi } from '../api/referenceApi.js';
 import { useFarmData } from '../context/FarmDataContext.jsx';
 import { useLanguage } from '../hooks/useLanguage.jsx';
 import { EmptyState, ErrorState, LoadingState, SourceStamp } from '../components/feedback/ApiState.jsx';
+import { parseDisplayLocation } from '../lib/location.js';
 
 const Page = ({ children }) => (
   <div className="mx-auto max-w-[1440px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">{children}</div>
 );
-
-function stateFromLocation(location) {
-  const parts = (location || '').split(',').map((part) => part.trim()).filter(Boolean);
-  return parts.length > 1 ? parts.at(-1) : '';
-}
 
 function matchesScheme(scheme, query) {
   if (!query) return true;
@@ -33,7 +29,7 @@ export default function GovtSchemes() {
   const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const state = stateFromLocation(profile?.location);
+  const state = parseDisplayLocation(profile?.location).state;
   const isHindi = language === 'hi';
 
   const loadSchemes = useCallback(async () => {

@@ -1,7 +1,9 @@
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 from beanie import Document
+from pydantic import Field
+from pymongo import IndexModel
 
 
 class MachineryRental(Document):
@@ -12,6 +14,12 @@ class MachineryRental(Document):
     location: Optional[str] = None
     district: Optional[str] = None
     state: Optional[str] = None
+    latitude: Optional[float] = Field(default=None, ge=-90, le=90)
+    longitude: Optional[float] = Field(default=None, ge=-180, le=180)
+    location_point: Optional[dict[str, Any]] = None
+    service_radius_km: Optional[float] = Field(default=None, ge=0)
+    geocode_source: Optional[str] = None
+    verified_at: Optional[datetime] = None
     distance_km: Optional[float] = None
     hourly_rate: Optional[float] = None
     daily_rate: Optional[float] = None
@@ -34,3 +42,4 @@ class MachineryRental(Document):
 
     class Settings:
         name = "machinery_rentals"
+        indexes = [IndexModel([("location_point", "2dsphere")], sparse=True), "state", "district", "category"]

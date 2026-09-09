@@ -1,48 +1,623 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Camera, CheckCircle2, ChevronRight, List, ScanSearch, Sprout, Upload, Wheat } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { farmStateApi } from '../api/farmStateApi.js';
-import { useFarmData } from '../context/FarmDataContext.jsx';
-import { EmptyState, ErrorState, LoadingState, SourceStamp } from '../components/feedback/ApiState.jsx';
+import { useEffect, useState } from "react";
+import {
+  Camera,
+  CheckCircle2,
+  ChevronRight,
+  List,
+  ScanSearch,
+  Sprout,
+  Upload,
+  Wheat,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { farmStateApi } from "../api/farmStateApi.js";
+import { useFarmData } from "../context/FarmDataContext.jsx";
+import FarmBoundaryMap from "../components/maps/FarmBoundaryMap.jsx";
+import {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+  SourceStamp,
+} from "../components/feedback/ApiState.jsx";
+import {
+  cropOptions,
+  cropRoutingState,
+  UNKNOWN_CROP,
+} from "../features/cropRouting.js";
 
-const Card = ({ children, className = '' }) => <section className={`rounded-card border border-border bg-white p-5 shadow-card ${className}`}>{children}</section>;
-const Page = ({ title, subtitle, children }) => <div className="mx-auto max-w-[1440px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7"><h1 className="text-2xl font-bold">{title}</h1><p className="mt-1 text-sm text-text-secondary">{subtitle}</p><div className="mt-6">{children}</div></div>;
-
-function boundaryCoordinates(boundary) { const geometry = boundary?.geometry || boundary; const polygons = geometry?.type === 'MultiPolygon' ? geometry.coordinates.map((polygon) => polygon[0]) : [geometry?.coordinates?.[0] || []]; return polygons; }
-function GeoMap({ fields, selected, onSelect }) {
-  const points = useMemo(() => {
-    const all = fields.flatMap((field) => boundaryCoordinates(field.boundary_geojson).flat()).filter((point) => point.length >= 2);
-    if (!all.length) return {};
-    const xs = all.map((point) => point[0]);
-    const ys = all.map((point) => point[1]);
-    const minX = Math.min(...xs);
-    const maxX = Math.max(...xs);
-    const minY = Math.min(...ys);
-    const maxY = Math.max(...ys);
-    return Object.fromEntries(fields.map((field) => [
-      field.id,
-      boundaryCoordinates(field.boundary_geojson).map((polygon) => polygon.map(([x, y]) => [
-        20 + ((x - minX) / Math.max(maxX - minX, 0.0001)) * 560,
-        390 - ((y - minY) / Math.max(maxY - minY, 0.0001)) * 340,
-      ].join(',')).join(' ')),
-    ]));
-  }, [fields]);
-  return <div className="relative min-h-[430px] overflow-hidden rounded-card border border-border bg-[linear-gradient(135deg,#6a7a39,#9eae61_45%,#c9a76b_46%,#7e963e_70%,#b8ca7a)] shadow-card"><svg viewBox="0 0 620 430" className="absolute inset-0 h-full w-full" role="img" aria-label="Farm map"><defs><pattern id="fieldGrid" width="55" height="55" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><path d="M 0 0 L 0 55" stroke="white" strokeOpacity=".17" strokeWidth="2" /></pattern></defs><rect width="620" height="430" fill="url(#fieldGrid)" pointerEvents="none" />{fields.map((field) => <g key={field.id} onClick={() => onSelect(field)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') onSelect(field); }} role="button" tabIndex="0" aria-label={`Select ${field.name}`} pointerEvents="bounding-box" className="cursor-pointer"><polygon points={points[field.id]?.[0] || '80,80 180,80 180,160 80,160'} fill={field.id === selected?.id ? '#1f6f36' : '#2e7d32'} fillOpacity=".78" stroke="white" strokeWidth={field.id === selected?.id ? 5 : 2} /><text x="130" y="120" fill="white" textAnchor="middle" fontSize="13">{field.name}</text></g>)}</svg><p className="absolute bottom-4 left-4 rounded-lg bg-black/45 px-3 py-2 text-xs text-white">Backend GeoJSON · select a field</p></div>;
-}
+const Card = ({ children, className = "" }) => (
+  <section
+    className={`rounded-card border border-border bg-white p-5 shadow-card ${className}`}
+  >
+    {children}
+  </section>
+);
+const Page = ({ title, subtitle, children }) => (
+  <div className="mx-auto max-w-[1440px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+    <h1 className="text-2xl font-bold">{title}</h1>
+    <p className="mt-1 text-sm text-text-secondary">{subtitle}</p>
+    <div className="mt-6">{children}</div>
+  </div>
+);
 
 export function FarmMap() {
-  const { mapFields, fields, loading, error, refresh } = useFarmData(); const [selected, setSelected] = useState(null); const [mode, setMode] = useState('map'); const list = mapFields.length ? mapFields : fields; const activeSelected = selected || list[0];
-  return <Page title="My Farm Map" subtitle="View the status of every field from recorded boundaries and observations.">{loading ? <LoadingState /> : error ? <ErrorState error={error} onRetry={refresh} /> : !list.length ? <EmptyState title="No mapped fields" detail="Create a field with a location before opening the farm map." /> : <><div className="mb-5 inline-flex rounded-lg bg-surface-muted p-1"><button onClick={() => setMode('map')} className={mode === 'map' ? 'rounded-md bg-primary px-4 py-2 text-xs font-semibold text-white' : 'rounded-md px-4 py-2 text-xs font-semibold text-text-secondary'}>Map View</button><button onClick={() => setMode('list')} className={mode === 'list' ? 'rounded-md bg-primary px-4 py-2 text-xs font-semibold text-white' : 'rounded-md px-4 py-2 text-xs font-semibold text-text-secondary'}><List size={13} className="mr-1 inline" />List View</button></div>{mode === 'map' ? <div className="grid gap-5 lg:grid-cols-[1fr_300px]"><GeoMap fields={list} selected={activeSelected} onSelect={setSelected} /><Card><Wheat size={21} className="text-primary" /><h2 className="mt-4 text-lg font-bold">{activeSelected?.name}</h2><p className="mt-1 text-sm text-text-secondary">{activeSelected?.current_crop || 'Crop not recorded'} · {activeSelected?.area_acres} acres</p><div className="mt-5 space-y-3 border-y border-border py-4 text-sm"><p className="flex justify-between"><span className="text-text-secondary">Growth stage</span><b>{activeSelected?.current_stage || '—'}</b></p><p className="flex justify-between"><span className="text-text-secondary">Soil moisture</span><b>{activeSelected?.latest_moisture_percent == null ? '—' : String(activeSelected.latest_moisture_percent) + '%'}</b></p><p className="flex justify-between"><span className="text-text-secondary">Open alerts</span><b>{activeSelected?.alert_count ?? 0}</b></p></div><Link to={'/fields/' + activeSelected?.id} className="mt-5 flex items-center justify-between rounded-lg bg-primary px-4 py-2.5 text-xs font-semibold text-white">View field details <ChevronRight size={15} /></Link></Card></div> : <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{list.map((field) => <button className="rounded-card border border-border bg-white p-5 text-left shadow-card hover:border-primary" onClick={() => { setSelected(field); setMode('map'); }} key={field.id}><div className="flex justify-between"><div><p className="font-bold">{field.name}</p><p className="mt-1 text-xs text-text-secondary">{field.current_crop || 'Crop not recorded'} · {field.area_acres} acres</p></div><span className="rounded-full bg-primary-50 px-2 py-1 text-[10px] font-bold text-primary">{field.alert_count || 0} alerts</span></div><p className="mt-5 text-sm font-semibold text-primary-dark">{field.current_stage || 'No stage recorded'}</p><p className="mt-1 text-xs text-text-secondary">Moisture: {field.latest_moisture_percent == null ? '—' : String(field.latest_moisture_percent) + '%'}</p></button>)}</div>}</>}</Page>;
+  const { mapFields, fields, loading, error, refresh } = useFarmData();
+  const [selected, setSelected] = useState(null);
+  const [mode, setMode] = useState("map");
+  const list = mapFields.length ? mapFields : fields;
+  const activeSelected = selected || list[0];
+  return (
+    <Page
+      title="My Farm Map"
+      subtitle="View the status of every field from recorded boundaries and observations."
+    >
+      {loading ? (
+        <LoadingState />
+      ) : error ? (
+        <ErrorState error={error} onRetry={refresh} />
+      ) : !list.length ? (
+        <EmptyState
+          title="No mapped fields"
+          detail="Create a field with a location before opening the farm map."
+        />
+      ) : (
+        <>
+          <div className="mb-5 inline-flex rounded-lg bg-surface-muted p-1">
+            <button
+              onClick={() => setMode("map")}
+              className={
+                mode === "map"
+                  ? "rounded-md bg-primary px-4 py-2 text-xs font-semibold text-white"
+                  : "rounded-md px-4 py-2 text-xs font-semibold text-text-secondary"
+              }
+            >
+              Map View
+            </button>
+            <button
+              onClick={() => setMode("list")}
+              className={
+                mode === "list"
+                  ? "rounded-md bg-primary px-4 py-2 text-xs font-semibold text-white"
+                  : "rounded-md px-4 py-2 text-xs font-semibold text-text-secondary"
+              }
+            >
+              <List size={13} className="mr-1 inline" />
+              List View
+            </button>
+          </div>
+          {mode === "map" ? (
+            <div className="grid gap-5 lg:grid-cols-[1fr_300px]">
+              <FarmBoundaryMap
+                fields={list}
+                selected={activeSelected}
+                onSelect={setSelected}
+              />
+              <Card>
+                <Wheat size={21} className="text-primary" />
+                <h2 className="mt-4 text-lg font-bold">
+                  {activeSelected?.name}
+                </h2>
+                <p className="mt-1 text-sm text-text-secondary">
+                  {activeSelected?.current_crop || "Crop not recorded"} ·{" "}
+                  {activeSelected?.area_acres} acres
+                </p>
+                <div className="mt-5 space-y-3 border-y border-border py-4 text-sm">
+                  <p className="flex justify-between">
+                    <span className="text-text-secondary">Growth stage</span>
+                    <b>{activeSelected?.current_stage || "—"}</b>
+                  </p>
+                  <p className="flex justify-between">
+                    <span className="text-text-secondary">Soil moisture</span>
+                    <b>
+                      {activeSelected?.latest_moisture_percent == null
+                        ? "—"
+                        : String(activeSelected.latest_moisture_percent) + "%"}
+                    </b>
+                  </p>
+                  <p className="flex justify-between">
+                    <span className="text-text-secondary">Open alerts</span>
+                    <b>{activeSelected?.alert_count ?? 0}</b>
+                  </p>
+                </div>
+                <Link
+                  to={"/fields/" + activeSelected?.id}
+                  className="mt-5 flex items-center justify-between rounded-lg bg-primary px-4 py-2.5 text-xs font-semibold text-white"
+                >
+                  View field details <ChevronRight size={15} />
+                </Link>
+              </Card>
+            </div>
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {list.map((field) => (
+                <button
+                  className="rounded-card border border-border bg-white p-5 text-left shadow-card hover:border-primary"
+                  onClick={() => {
+                    setSelected(field);
+                    setMode("map");
+                  }}
+                  key={field.id}
+                >
+                  <div className="flex justify-between">
+                    <div>
+                      <p className="font-bold">{field.name}</p>
+                      <p className="mt-1 text-xs text-text-secondary">
+                        {field.current_crop || "Crop not recorded"} ·{" "}
+                        {field.area_acres} acres
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-primary-50 px-2 py-1 text-[10px] font-bold text-primary">
+                      {field.alert_count || 0} alerts
+                    </span>
+                  </div>
+                  <p className="mt-5 text-sm font-semibold text-primary-dark">
+                    {field.current_stage || "No stage recorded"}
+                  </p>
+                  <p className="mt-1 text-xs text-text-secondary">
+                    Moisture:{" "}
+                    {field.latest_moisture_percent == null
+                      ? "—"
+                      : String(field.latest_moisture_percent) + "%"}
+                  </p>
+                </button>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </Page>
+  );
 }
 
 export function PestDisease() {
-  const { fields } = useFarmData(); const [fieldId, setFieldId] = useState(fields[0]?.id || ''); const selectedFieldId = fieldId || fields[0]?.id || ''; const [file, setFile] = useState(null); const [result, setResult] = useState(null); const [error, setError] = useState(null); const [uploading, setUploading] = useState(false);
-  const upload = async () => { if (!file) { setError(new Error('Choose a JPG, PNG, or WebP image first.')); return; } setUploading(true); setError(null); try { setResult(await farmStateApi.createDiagnosis(file, selectedFieldId)); } catch (err) { setError(err); } finally { setUploading(false); } };
-  return <Page title="Pest & Disease" subtitle="Upload a real crop photo. The backend will show an explicit result or an inconclusive provider state."><div className="grid gap-5 lg:grid-cols-[1fr_360px]"><Card><div className="flex min-h-72 flex-col items-center justify-center rounded-xl border-2 border-dashed border-primary-light bg-primary-50 p-6 text-center"><span className="grid size-14 place-items-center rounded-full bg-white text-primary shadow-card"><Camera size={26} /></span><h2 className="mt-4 font-bold">Upload a crop photo</h2><p className="mt-2 max-w-sm text-sm leading-6 text-text-secondary">No diagnosis is invented when a vision provider is unavailable.</p>{fields.length > 0 && <select value={fieldId} onChange={(event) => setFieldId(event.target.value)} className="mt-4 rounded-lg border border-border bg-white px-3 py-2 text-sm"><option value="">No field selected</option>{fields.map((field) => <option value={field.id} key={field.id}>{field.name}</option>)}</select>}<input id="diagnosis-file" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { setFile(event.target.files?.[0] || null); setResult(null); }} className="mt-4 block max-w-full text-xs" /><button onClick={upload} disabled={uploading} className="mt-5 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"><Upload size={16} />{uploading ? 'Uploading…' : 'Upload photo'}</button>{error && <p className="mt-3 text-xs text-red-700">{error.message}</p>}</div></Card><Card><h2 className="font-bold">Photo tips</h2><ul className="mt-4 space-y-4 text-sm text-text-secondary"><li className="flex gap-2"><CheckCircle2 size={17} className="shrink-0 text-primary" />Use natural daylight.</li><li className="flex gap-2"><CheckCircle2 size={17} className="shrink-0 text-primary" />Keep the affected area in focus.</li><li className="flex gap-2"><CheckCircle2 size={17} className="shrink-0 text-primary" />Include leaf edges and both sides if possible.</li></ul></Card></div>{result && <Card className="mt-5 border-amber-200"><div className="flex items-start gap-3"><ScanSearch size={19} className="text-primary" /><div><p className="font-bold">{result.status === 'inconclusive' ? 'Diagnosis inconclusive' : result.label || 'Diagnosis result'}</p><p className="mt-2 text-sm leading-6 text-text-secondary">{result.error || 'The provider returned no additional explanation.'}</p><SourceStamp source={result.provider} fetchedAt={result.created_at} /></div></div></Card>}</Page>;
+  const { fields } = useFarmData();
+  const [fieldId, setFieldId] = useState(fields[0]?.id || "");
+  const selectedFieldId = fieldId || fields[0]?.id || "";
+  const selectedField = fields.find((field) => field.id === selectedFieldId);
+  const defaultCrop =
+    String(selectedField?.current_crop || UNKNOWN_CROP)
+      .trim()
+      .toLowerCase() || UNKNOWN_CROP;
+  const [selectedCrop, setSelectedCrop] = useState(UNKNOWN_CROP);
+  const [confirmedFieldId, setConfirmedFieldId] = useState(null);
+  const cropConfirmed = confirmedFieldId === selectedFieldId;
+  const crop = cropConfirmed ? selectedCrop : defaultCrop;
+  const [file, setFile] = useState(null);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [feedbackCorrectness, setFeedbackCorrectness] = useState("confirmed");
+  const [feedbackLabel, setFeedbackLabel] = useState("");
+  const [shareFeedback, setShareFeedback] = useState(false);
+  const [feedbackSaving, setFeedbackSaving] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState("");
+  const routing = cropRoutingState(crop, cropConfirmed);
+  const upload = async () => {
+    if (!file) {
+      setError(new Error("Choose a JPG, PNG, or WebP image first."));
+      return;
+    }
+    if (!cropConfirmed) {
+      setError(
+        new Error(
+          "Please confirm the crop, or select “I do not know”, before uploading.",
+        ),
+      );
+      return;
+    }
+    setUploading(true);
+    setError(null);
+    try {
+      const outcome = await farmStateApi.createDiagnosis(file, selectedFieldId, crop);
+      setResult(outcome);
+      setFeedbackCorrectness("confirmed");
+      setFeedbackLabel(outcome.label || "");
+      setShareFeedback(false);
+      setFeedbackMessage("");
+    } catch (err) {
+      setError(err);
+    } finally {
+      setUploading(false);
+    }
+  };
+  const saveFeedback = async () => {
+    if (!result?.id) return;
+    setFeedbackSaving(true);
+    setFeedbackMessage("");
+    try {
+      const saved = await farmStateApi.createDiagnosisFeedback(result.id, {
+        correctness: feedbackCorrectness,
+        confirmed_crop: crop === UNKNOWN_CROP ? null : crop,
+        label: feedbackCorrectness === "unknown" ? null : feedbackLabel,
+        share_for_model_improvement: shareFeedback,
+      });
+      setFeedbackMessage(saved.share_for_model_improvement ? "Feedback saved. It still needs expert review before it can be used for model work." : "Feedback saved only in your local farm record.");
+    } catch (feedbackError) {
+      setFeedbackMessage(feedbackError.message || "Feedback could not be saved.");
+    } finally {
+      setFeedbackSaving(false);
+    }
+  };
+  return (
+    <Page
+      title="Pest & Disease"
+      subtitle="Confirm the crop first, then upload a real crop photo. Disease routing stays explicit when models are unavailable."
+    >
+      <div className="grid gap-5 lg:grid-cols-[1fr_360px]">
+        <Card>
+          <div className="min-h-72 rounded-xl border border-primary-light bg-[radial-gradient(circle_at_top_left,_#f1f8df,_#fff_58%)] p-6">
+            <div className="flex flex-col items-center text-center">
+              <span className="grid size-14 place-items-center rounded-full bg-white text-primary shadow-card">
+                <Camera size={26} />
+              </span>
+              <h2 className="mt-4 font-bold">Confirm crop → inspect photo</h2>
+              <p className="mt-2 max-w-sm text-sm leading-6 text-text-secondary">
+                The router will ask instead of silently choosing the wrong
+                disease specialist.
+              </p>
+            </div>
+            {fields.length > 0 && (
+              <label className="mt-5 block text-sm font-semibold">
+                Field
+                <select
+                  value={fieldId}
+                  onChange={(event) => setFieldId(event.target.value)}
+                  className="mt-2 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm"
+                >
+                  <option value="">No field selected</option>
+                  {fields.map((field) => (
+                    <option value={field.id} key={field.id}>
+                      {field.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            <div className="mt-4 rounded-xl border border-primary-light bg-white/80 p-4">
+              <label
+                htmlFor="photo-crop"
+                className="block text-sm font-semibold"
+              >
+                What crop is in this photo?
+              </label>
+              <select
+                id="photo-crop"
+                value={crop}
+                onChange={(event) => {
+                  setSelectedCrop(event.target.value);
+                  setConfirmedFieldId(selectedFieldId);
+                  setResult(null);
+                }}
+                className="mt-2 w-full rounded-lg border border-border bg-white px-3 py-2 text-sm"
+              >
+                <option value={UNKNOWN_CROP}>I do not know</option>
+                {cropOptions(selectedField?.current_crop).map((option) => (
+                  <option key={option} value={option}>
+                    {option[0].toUpperCase() + option.slice(1)}
+                  </option>
+                ))}
+              </select>
+              <p
+                className={
+                  routing.status === "ready"
+                    ? "mt-2 text-xs text-primary-dark"
+                    : "mt-2 text-xs text-amber-800"
+                }
+              >
+                {routing.message}
+              </p>
+            </div>
+            <input
+              id="diagnosis-file"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(event) => {
+                setFile(event.target.files?.[0] || null);
+                setResult(null);
+              }}
+              className="mt-4 block max-w-full text-xs"
+            />
+            <button
+              onClick={upload}
+              disabled={uploading}
+              className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+            >
+              <Upload size={16} />
+              {uploading ? "Uploading…" : "Save photo for crop-health check"}
+            </button>
+            {error && (
+              <p className="mt-3 text-xs text-red-700">{error.message}</p>
+            )}
+          </div>
+        </Card>
+        <Card>
+          <h2 className="font-bold">How the prototype decides</h2>
+          <ol className="mt-4 space-y-4 text-sm text-text-secondary">
+            <li className="flex gap-2">
+              <b className="text-primary">1</b>
+              <span>
+                Farmer confirms the crop, or explicitly says it is unknown.
+              </span>
+            </li>
+            <li className="flex gap-2">
+              <b className="text-primary">2</b>
+              <span>
+                A local specialist runs only for a supported confirmed crop.
+              </span>
+            </li>
+            <li className="flex gap-2">
+              <b className="text-primary">3</b>
+              <span>
+                The AI explains uncertainty; it does not invent treatment.
+              </span>
+            </li>
+          </ol>
+          <h3 className="mt-6 font-semibold">Photo tips</h3>
+          <ul className="mt-3 space-y-3 text-sm text-text-secondary">
+            <li className="flex gap-2">
+              <CheckCircle2 size={17} className="shrink-0 text-primary" />
+              Use natural daylight.
+            </li>
+            <li className="flex gap-2">
+              <CheckCircle2 size={17} className="shrink-0 text-primary" />
+              Keep the affected area in focus.
+            </li>
+            <li className="flex gap-2">
+              <CheckCircle2 size={17} className="shrink-0 text-primary" />
+              Include leaf edges and both sides if possible.
+            </li>
+          </ul>
+        </Card>
+      </div>
+      {result && (
+        <Card className="mt-5 border-primary-light">
+          <div className="flex items-start gap-3">
+            <ScanSearch size={19} className="text-primary" />
+            <div className="min-w-0 flex-1">
+              <p className="font-bold">
+                {result.status === "completed"
+                  ? result.label?.replaceAll("_", " ") || "Crop-health result"
+                  : "Photo needs review"}
+              </p>
+              {result.confidence != null && (
+                <p className="mt-1 text-sm font-semibold text-primary-dark">
+                  Model confidence: {Math.round(result.confidence * 100)}%
+                </p>
+              )}
+              <p className="mt-2 text-sm leading-6 text-text-secondary">
+                {result.error ||
+                  (result.status === "completed"
+                    ? "This is a screening result, not treatment advice."
+                    : "The provider returned no additional explanation.")}
+              </p>
+              {result.crop_candidates?.length > 0 && (
+                <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                  <p className="text-xs font-bold uppercase tracking-wide text-amber-900">
+                    Suggested crop — please confirm
+                  </p>
+                  <ul className="mt-2 space-y-1 text-sm">
+                    {result.crop_candidates.map((candidate) => (
+                      <li
+                        className="flex justify-between"
+                        key={candidate.label}
+                      >
+                        <span>{candidate.label.replaceAll("_", " ")}</span>
+                        <span className="font-semibold">
+                          {Math.round(candidate.score * 100)}%
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {result.candidates?.length > 0 && (
+                <div className="mt-4 rounded-lg bg-surface-muted p-3">
+                  <p className="text-xs font-bold uppercase tracking-wide text-text-secondary">
+                    Model alternatives
+                  </p>
+                  <ul className="mt-2 space-y-1 text-sm">
+                    {result.candidates.map((candidate) => (
+                      <li
+                        className="flex justify-between"
+                        key={candidate.label}
+                      >
+                        <span>{candidate.label.replaceAll("_", " ")}</span>
+                        <span className="font-semibold">
+                          {Math.round(candidate.score * 100)}%
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {result.model_version && (
+                <p className="mt-4 text-xs text-text-secondary">
+                  {result.model_id} · {result.model_version} ·{" "}
+                  {result.inference_location}
+                </p>
+              )}
+              {result.limitations?.map((limitation) => (
+                <p className="mt-2 text-xs text-amber-800" key={limitation}>
+                  • {limitation}
+                </p>
+              ))}
+              <div className="mt-5 rounded-xl border border-primary/20 bg-primary-50 p-4">
+                <p className="font-semibold text-primary-dark">Was this result correct?</p>
+                <p className="mt-1 text-xs leading-5 text-text-secondary">Your feedback can be kept as a local record. If you opt in, it is still only a review lead—not automatic model training or an image upload.</p>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <label className="text-xs font-semibold">Your assessment
+                    <select aria-label="Diagnosis feedback assessment" value={feedbackCorrectness} onChange={(event) => setFeedbackCorrectness(event.target.value)} className="mt-1.5 block w-full rounded-lg border border-border bg-white px-3 py-2 text-sm font-normal">
+                      <option value="confirmed">Result is correct</option><option value="corrected">I want to correct it</option><option value="unknown">I am not sure</option>
+                    </select>
+                  </label>
+                  {feedbackCorrectness !== "unknown" && <label className="text-xs font-semibold">Observed condition
+                    <input aria-label="Diagnosis feedback label" value={feedbackLabel} onChange={(event) => setFeedbackLabel(event.target.value)} placeholder="For example: late blight" className="mt-1.5 block w-full rounded-lg border border-border bg-white px-3 py-2 text-sm font-normal" />
+                  </label>}
+                </div>
+                <label className="mt-3 flex items-start gap-2 text-xs text-text-secondary"><input aria-label="Share diagnosis feedback for model improvement" type="checkbox" checked={shareFeedback} onChange={(event) => setShareFeedback(event.target.checked)} className="mt-0.5" /><span>I consent to this feedback being considered later for expert-reviewed model improvement. It will not be exported or used for training automatically.</span></label>
+                <button onClick={saveFeedback} disabled={feedbackSaving || (feedbackCorrectness !== "unknown" && !feedbackLabel.trim())} className="mt-3 rounded-lg border border-primary bg-white px-3 py-2 text-xs font-semibold text-primary disabled:opacity-50">{feedbackSaving ? "Saving feedback…" : "Save my feedback"}</button>
+                {feedbackMessage && <p className="mt-2 text-xs text-primary-dark" role="status">{feedbackMessage}</p>}
+              </div>
+              <SourceStamp
+                source={result.provider}
+                fetchedAt={result.created_at}
+              />
+            </div>
+          </div>
+        </Card>
+      )}
+    </Page>
+  );
 }
 
 export function CropGuide() {
-  const { fields } = useFarmData(); const [fieldId, setFieldId] = useState(fields[0]?.id || ''); const selectedFieldId = fieldId || fields[0]?.id || ''; const [cycles, setCycles] = useState([]); const [error, setError] = useState(null); const selected = fields.find((field) => field.id === selectedFieldId);
-  useEffect(() => { if (!selectedFieldId) return; farmStateApi.getTimeline(selectedFieldId).then(setCycles).catch(setError); }, [selectedFieldId]); const cycle = cycles[0];
-  return <Page title="Crop Guide" subtitle="Stage history and guidance from the selected field's recorded crop cycle.">{fields.length ? <select value={fieldId} onChange={(event) => setFieldId(event.target.value)} className="mb-5 rounded-lg border border-border bg-white px-3 py-2 text-sm">{fields.map((field) => <option value={field.id} key={field.id}>{field.name}</option>)}</select> : <EmptyState title="No fields" detail="Create a field first." />}{error && <ErrorState error={error} />}{cycle ? <div className="grid gap-5 lg:grid-cols-[280px_1fr]"><Card><Sprout size={23} className="text-primary" /><h2 className="mt-4 font-bold">{selected?.name}</h2><p className="mt-1 text-sm text-text-secondary">{cycle.crop_name}</p><p className="mt-5 text-sm"><span className="text-text-secondary">Current stage</span><b className="ml-2 text-primary">{cycle.current_stage}</b></p></Card><div className="space-y-3">{cycle.stage_events.map((event) => <Card className={event.stage === cycle.current_stage ? 'border-primary bg-primary-50' : ''} key={event.id}><div className="flex gap-4"><span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-white">✓</span><div><h2 className="font-bold">{event.stage}</h2><p className="mt-1 text-sm text-text-secondary">Recorded on {new Date(event.occurred_at).toLocaleDateString()}</p>{event.note && <p className="mt-2 text-xs text-text-secondary">{event.note}</p>}</div></div></Card>)}</div></div> : fields.length > 0 && <EmptyState title="No crop cycle recorded" detail="Create a crop cycle through the Farm State API before using the live crop guide." />}</Page>;
+  const { fields } = useFarmData();
+  const [fieldId, setFieldId] = useState(fields[0]?.id || "");
+  const selectedFieldId = fieldId || fields[0]?.id || "";
+  const [cycles, setCycles] = useState([]);
+  const [error, setError] = useState(null);
+  const [season, setSeason] = useState("Kharif");
+  const [previousCrop, setPreviousCrop] = useState(fields[0]?.current_crop || "");
+  const [soilType, setSoilType] = useState("");
+  const [options, setOptions] = useState([]);
+  const [optionsError, setOptionsError] = useState(null);
+  const [optionsLoading, setOptionsLoading] = useState(false);
+  const selected = fields.find((field) => field.id === selectedFieldId);
+  const selectField = (nextFieldId) => {
+    const nextField = fields.find((field) => field.id === nextFieldId);
+    setFieldId(nextFieldId);
+    setError(null);
+    setOptions([]);
+    setOptionsError(null);
+    setPreviousCrop(nextField?.current_crop || "");
+  };
+  useEffect(() => {
+    if (!selectedFieldId) return;
+    farmStateApi.getTimeline(selectedFieldId).then(setCycles).catch(setError);
+  }, [selectedFieldId]);
+  const loadOptions = async () => {
+    if (!selectedFieldId) return;
+    setOptionsLoading(true);
+    setOptionsError(null);
+    try {
+      setOptions(await farmStateApi.getCropOptions(selectedFieldId, { season, previousCrop, soilType }));
+    } catch (nextError) {
+      setOptionsError(nextError);
+    } finally {
+      setOptionsLoading(false);
+    }
+  };
+  const cycle = cycles[0];
+  return (
+    <Page
+      title="Crop Guide"
+      subtitle="Stage history and guidance from the selected field's recorded crop cycle."
+    >
+      {fields.length ? (
+        <select
+          value={fieldId}
+          onChange={(event) => selectField(event.target.value)}
+          className="mb-5 rounded-lg border border-border bg-white px-3 py-2 text-sm"
+        >
+          {fields.map((field) => (
+            <option value={field.id} key={field.id}>
+              {field.name}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <EmptyState title="No fields" detail="Create a field first." />
+      )}
+      {error && <ErrorState error={error} />}
+      {fields.length > 0 && (
+        <Card className="mb-5 border-primary/20 bg-[linear-gradient(135deg,#f2f7df,_#fff_56%,_#f7f0dd)]">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">Next-cycle evidence</p>
+              <h2 className="mt-1 text-lg font-bold text-primary-dark">Compare crop options before you commit</h2>
+              <p className="mt-1 max-w-2xl text-sm leading-6 text-text-secondary">This checks the sourced crop catalogue against the season, previous crop and soil type you enter. It does not predict yield or profit, select a crop, or buy inputs.</p>
+            </div>
+            <span className="rounded-full border border-primary/20 bg-white px-3 py-1 text-xs font-semibold text-primary">Farmer review required</span>
+          </div>
+          <div className="mt-5 grid gap-3 md:grid-cols-3">
+            <label className="text-sm font-semibold">Season
+              <select aria-label="Next crop season" value={season} onChange={(event) => setSeason(event.target.value)} className="mt-2 block w-full rounded-lg border border-border bg-white px-3 py-2 text-sm font-normal">
+                <option value="Kharif">Kharif</option><option value="Rabi">Rabi</option><option value="Zaid">Zaid</option>
+              </select>
+            </label>
+            <label className="text-sm font-semibold">Previous crop
+              <input aria-label="Previous crop" value={previousCrop} onChange={(event) => setPreviousCrop(event.target.value)} placeholder="For example: Wheat" className="mt-2 block w-full rounded-lg border border-border bg-white px-3 py-2 text-sm font-normal" />
+            </label>
+            <label className="text-sm font-semibold">Soil type
+              <input aria-label="Soil type" value={soilType} onChange={(event) => setSoilType(event.target.value)} placeholder="For example: Loamy" className="mt-2 block w-full rounded-lg border border-border bg-white px-3 py-2 text-sm font-normal" />
+            </label>
+          </div>
+          <button onClick={loadOptions} disabled={optionsLoading} className="mt-4 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-dark disabled:opacity-50">{optionsLoading ? "Checking sourced evidence…" : "Check crop options"}</button>
+          {optionsError && <div className="mt-4"><ErrorState error={optionsError} onRetry={loadOptions} /></div>}
+          {options.length > 0 && <div className="mt-5 grid gap-3 lg:grid-cols-2">{options.map((option) => <article className="rounded-xl border border-border bg-white p-4 shadow-sm" key={option.crop_name}>
+            <div className="flex items-start justify-between gap-3"><div><h3 className="font-bold">{option.crop_name}</h3><p className="mt-1 text-xs text-text-secondary">Catalog season: {option.season || "not recorded"}</p></div><span className={`rounded-full px-2 py-1 text-[10px] font-bold ${option.status === "candidate_needs_review" ? "bg-amber-50 text-amber-800" : "bg-red-50 text-red-800"}`}>{option.status === "candidate_needs_review" ? "Review evidence" : "Conflict found"}</span></div>
+            <dl className="mt-4 grid grid-cols-3 gap-2 text-xs"><div className="rounded-lg bg-surface-muted p-2"><dt className="text-text-secondary">Season</dt><dd className="mt-1 font-semibold">{option.checks.season === true ? "Matches" : option.checks.season === false ? "Conflict" : "Missing"}</dd></div><div className="rounded-lg bg-surface-muted p-2"><dt className="text-text-secondary">Rotation</dt><dd className="mt-1 font-semibold">{option.checks.previous_crop_rotation === true ? "Matches" : option.checks.previous_crop_rotation === false ? "Conflict" : "Missing"}</dd></div><div className="rounded-lg bg-surface-muted p-2"><dt className="text-text-secondary">Soil</dt><dd className="mt-1 font-semibold">{option.checks.soil_type === true ? "Matches" : option.checks.soil_type === false ? "Conflict" : "Missing"}</dd></div></dl>
+            {option.reference_price_per_quintal != null && <p className="mt-3 text-sm text-text-secondary">Reference price: <b className="text-text-primary">₹{option.reference_price_per_quintal}/quintal</b></p>}
+            {option.missing_evidence.length > 0 && <p className="mt-3 text-xs text-amber-800">Still needed: {option.missing_evidence.join(", ")}</p>}
+            {option.conflicts.length > 0 && <p className="mt-3 text-xs text-red-800">Conflicts: {option.conflicts.join(", ")}</p>}
+            <p className="mt-3 text-[11px] text-text-muted">Source: {option.price_source || "crop catalogue"}</p>
+            {option.source_url && <a href={option.source_url} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs font-semibold text-primary underline">View price source</a>}
+          </article>)}</div>}
+          {options.length === 0 && !optionsLoading && !optionsError && <p className="mt-4 text-sm text-text-secondary">No crop option has been checked yet.</p>}
+        </Card>
+      )}
+      {cycle ? (
+        <div className="grid gap-5 lg:grid-cols-[280px_1fr]">
+          <Card>
+            <Sprout size={23} className="text-primary" />
+            <h2 className="mt-4 font-bold">{selected?.name}</h2>
+            <p className="mt-1 text-sm text-text-secondary">
+              {cycle.crop_name}
+            </p>
+            <p className="mt-5 text-sm">
+              <span className="text-text-secondary">Current stage</span>
+              <b className="ml-2 text-primary">{cycle.current_stage}</b>
+            </p>
+          </Card>
+          <div className="space-y-3">
+            {cycle.stage_events.map((event) => (
+              <Card
+                className={
+                  event.stage === cycle.current_stage
+                    ? "border-primary bg-primary-50"
+                    : ""
+                }
+                key={event.id}
+              >
+                <div className="flex gap-4">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-white">
+                    ✓
+                  </span>
+                  <div>
+                    <h2 className="font-bold">{event.stage}</h2>
+                    <p className="mt-1 text-sm text-text-secondary">
+                      Recorded on{" "}
+                      {new Date(event.occurred_at).toLocaleDateString()}
+                    </p>
+                    {event.note && (
+                      <p className="mt-2 text-xs text-text-secondary">
+                        {event.note}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      ) : (
+        fields.length > 0 && (
+          <EmptyState
+            title="No crop cycle recorded"
+            detail="Create a crop cycle through the Farm State API before using the live crop guide."
+          />
+        )
+      )}
+    </Page>
+  );
 }
