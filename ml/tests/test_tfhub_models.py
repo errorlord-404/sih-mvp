@@ -1,10 +1,12 @@
 import sys
 from pathlib import Path
 
+import pytest
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "training"))
 
 from tfhub_models import get_backbone
-from train_tfhub_classifier import balanced_class_weights, parser, should_keep_fine_tuned, training_stages
+from train_tfhub_classifier import balanced_class_weights, parser, resolve_dataset_dirs, should_keep_fine_tuned, training_stages
 
 
 def test_tfhub_backbones_have_deployable_contracts():
@@ -55,3 +57,12 @@ def test_fine_tuning_must_not_replace_a_more_accurate_warmup_checkpoint():
     assert should_keep_fine_tuned(warmup_accuracy=0.91, fine_tuned_accuracy=0.92) is True
     assert should_keep_fine_tuned(warmup_accuracy=0.91, fine_tuned_accuracy=0.91) is True
     assert should_keep_fine_tuned(warmup_accuracy=0.91, fine_tuned_accuracy=0.89) is False
+
+
+def test_tfhub_trainer_accepts_reviewed_validation_name_without_ambiguity(tmp_path):
+    (tmp_path / "train").mkdir()
+    (tmp_path / "validation").mkdir()
+    assert resolve_dataset_dirs(tmp_path) == (tmp_path / "train", tmp_path / "validation")
+    (tmp_path / "val").mkdir()
+    with pytest.raises(ValueError, match="both val/ and validation"):
+        resolve_dataset_dirs(tmp_path)

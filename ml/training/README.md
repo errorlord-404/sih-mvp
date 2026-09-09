@@ -286,6 +286,8 @@ python ml/training/materialize_reviewed_split.py `
 
 Use the resulting `train/`, `validation/` and `field_test/` folders only after
 checking their field-group manifest. Do not include `field_test` in tuning.
+`train_tfhub_classifier.py` accepts the reviewed `validation/` name as well as
+legacy demo `val/` folders, but rejects a dataset containing both names.
 
 Before any local demonstration or release review, validate the manifest against
 the exact local model and labels. A rejected demo still validates integrity but

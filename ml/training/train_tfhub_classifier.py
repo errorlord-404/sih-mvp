@@ -78,6 +78,22 @@ def should_keep_fine_tuned(*, warmup_accuracy: float, fine_tuned_accuracy: float
     return fine_tuned_accuracy >= warmup_accuracy
 
 
+def resolve_dataset_dirs(dataset: Path) -> tuple[Path, Path]:
+    """Resolve training plus one unambiguous validation directory.
+
+    Legacy demo data uses ``val/`` while the reviewed field-split builder uses
+    ``validation/``. Supporting both prevents a manual rename that could blur
+    the protected field-test boundary. Both names together are rejected.
+    """
+    train_dir = dataset / "train"
+    candidates = [dataset / name for name in ("val", "validation") if (dataset / name).is_dir()]
+    if not train_dir.is_dir() or not candidates:
+        raise ValueError("Dataset must contain train/ and either val/ or validation/ directories.")
+    if len(candidates) > 1:
+        raise ValueError("Dataset contains both val/ and validation/ directories; use exactly one to avoid ambiguous evidence.")
+    return train_dir, candidates[0]
+
+
 def main() -> None:
     args = parser().parse_args()
     try:
@@ -106,9 +122,10 @@ def main() -> None:
         )
     except ValueError as exc:
         raise SystemExit(str(exc)) from exc
-    train_dir, val_dir = args.dataset / "train", args.dataset / "val"
-    if not train_dir.is_dir() or not val_dir.is_dir():
-        raise SystemExit("Dataset must contain train/ and val/ directories.")
+    try:
+        train_dir, val_dir = resolve_dataset_dirs(args.dataset)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from exc
     train = tf.keras.utils.image_dataset_from_directory(train_dir, image_size=(spec.image_size, spec.image_size), batch_size=args.batch_size, seed=args.seed)
     labels = list(train.class_names)
     val = tf.keras.utils.image_dataset_from_directory(val_dir, image_size=(spec.image_size, spec.image_size), batch_size=args.batch_size, shuffle=False)
