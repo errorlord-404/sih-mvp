@@ -2,6 +2,8 @@
 param(
   [string]$BackendUrl = 'http://127.0.0.1:8001',
   [string]$FarmerId = 'demo',
+  [ValidateRange(1, 65535)]
+  [int]$RendererPort = 5173,
   [switch]$SkipMongo,
   [switch]$SkipSeed
 )
@@ -29,8 +31,25 @@ function Wait-Backend {
 function Stop-OwnedProcess {
   param($Process)
   if ($null -ne $Process -and -not $Process.HasExited) {
-    Stop-Process -Id $Process.Id -Force -ErrorAction SilentlyContinue
+    # npm.cmd and Vite spawn child processes. Kill only this owned process tree so
+    # Ctrl+C cannot leave a renderer/server running on the demo port.
+    try {
+      & taskkill.exe /PID $Process.Id /T /F *> $null
+    } catch {
+      Stop-Process -Id $Process.Id -Force -ErrorAction SilentlyContinue
+    }
   }
+}
+
+function Select-RendererPort {
+  param([int]$Preferred)
+  for ($candidate = $Preferred; $candidate -le ($Preferred + 20); $candidate++) {
+    try {
+      $listener = Get-NetTCPConnection -LocalPort $candidate -State Listen -ErrorAction Stop
+      if ($listener) { continue }
+    } catch { return $candidate }
+  }
+  throw "No free renderer port found near $Preferred."
 }
 
 try {
@@ -54,18 +73,20 @@ try {
   $health = Wait-Backend -Url $BackendUrl
   Write-Host "Backend ready: $BackendUrl/health ($($health.status), reference $($health.reference_database))"
 
+  $RendererPort = Select-RendererPort -Preferred $RendererPort
+  $rendererUrl = "http://127.0.0.1:$RendererPort"
   $env:VITE_FARM_STATE_API_URL = $BackendUrl
   $env:VITE_REFERENCE_API_URL = $BackendUrl
   $env:VITE_DEMO_FARMER_ID = $FarmerId
-  $frontendProcess = Start-Process -FilePath 'npm.cmd' -ArgumentList @('run','dev','--','--host','127.0.0.1') -WorkingDirectory $repoRoot -PassThru -WindowStyle Hidden
+  $frontendProcess = Start-Process -FilePath 'npm.cmd' -ArgumentList @('run','dev','--','--host','127.0.0.1','--port',$RendererPort) -WorkingDirectory $repoRoot -PassThru -WindowStyle Hidden
   for ($attempt = 1; $attempt -le 30; $attempt++) {
-    try { if ((Invoke-WebRequest -Uri 'http://127.0.0.1:5173' -TimeoutSec 2).StatusCode -eq 200) { break } } catch { }
+    try { if ((Invoke-WebRequest -Uri $rendererUrl -UseBasicParsing -TimeoutSec 2).StatusCode -eq 200) { break } } catch { }
     Start-Sleep -Milliseconds 500
   }
 
   $env:KISANSATHI_BACKEND_URL = $BackendUrl
   $env:KISANSATHI_FARMER_ID = $FarmerId
-  $env:ELECTRON_RENDERER_URL = 'http://127.0.0.1:5173'
+  $env:ELECTRON_RENDERER_URL = $rendererUrl
   $electronProcess = Start-Process -FilePath 'npm.cmd' -ArgumentList @('run','desktop') -WorkingDirectory $repoRoot -PassThru
   Write-Host 'KisanSathi Electron demo is running. Close Electron or press Ctrl+C to stop owned services.'
   Wait-Process -Id $electronProcess.Id

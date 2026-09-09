@@ -38,7 +38,12 @@ from the existing dirty session files so a later agent can resume safely.
 - `npm run test:ui -- --run`: 10 files, 17 tests passed.
 - `python -m pytest backend/tests -q`: 48 passed after the geo contract tests; only existing dependency
   deprecation warning.
+- `python -m pytest agent/tests -q`: 12 passed; only existing settings/deprecation warnings.
 - PowerShell AST parse of `scripts/start-demo.ps1`: passed.
+- Isolated launcher UAT on backend `8015` and renderer `5175`: backend health and renderer routes returned
+  HTTP 200, Electron launched, and Ctrl+C cleaned the owned backend/renderer process trees and ports.
+- Renderer smoke through the app shell: Leaflet farm map loaded; marketplace Map/List mode showed the
+  seeded provider and distance; schemes loaded three Maharashtra reference cards.
 - Fresh backend smoke on port 8013 with seeded Mongo:
   - `/health`: `status=ok`, `farm_state=available`, `reference_database=available`.
   - `/gov-schemes/by-state/Maharashtra`: 3 records.
@@ -57,10 +62,9 @@ from the existing dirty session files so a later agent can resume safely.
   a native `$near` query after ingestion volume justifies it.
 - Existing seeded provider records are local-demo references, not live stock,
   prices, availability or verified providers.
-- The Electron launcher has been syntax-checked but has not yet been run as a
-  full fresh-machine UAT in this checkpoint.
-- Full Electron fresh-machine UAT and visual screenshot evidence are still
-  pending; the new Codex nearby tools have unit/contract coverage.
+- Native Electron visual screenshot capture is not available through the current
+  browser automation surface; the launcher lifecycle and the same renderer routes
+  were validated in an isolated Electron run.
 - Physical actuation, production authentication, offline mobile sync and
   field-released crop-health inference remain out of scope for this MVP slice.
 
